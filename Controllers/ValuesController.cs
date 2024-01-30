@@ -52,7 +52,6 @@ namespace pbms_be.Controllers
             //    }
             //}
             //return ip;
-            // has change get public ip
 
             var ip = new WebClient().DownloadString("http://icanhazip.com");
             return ip;
