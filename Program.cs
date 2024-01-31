@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using pbms_be.Configurations;
 using pbms_be.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,8 @@ builder.Services.AddSwaggerGen(
         Title = "pbms_be",
         Version = "v1"
     }));
+builder.Services.AddAutoMapper(typeof(MapperConfig));
+
 // add db context using postgresql
 builder.Services.AddDbContext<PbmsDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionString")));
@@ -29,7 +32,6 @@ var app = builder.Build();
 //    app.UseSwaggerUI();
 //}
 
-// add swagget gen  to pipeline 
 app.UseCors(options => options.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
 
 app.UseSwagger();

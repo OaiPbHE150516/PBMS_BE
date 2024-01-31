@@ -13,57 +13,39 @@ namespace pbms_be.DataAccess
             _context = context;
         }
 
-        public bool IsAccountExist(string uniqueID)
+        public bool IsAccountExist(string AccountID)
         {
-            var result = _context.Account.FromSqlRaw("SELECT * FROM account WHERE unique_id = @p0", uniqueID).FirstOrDefault();
-            if (result == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            var result = GetAccount(AccountID);
+            return result != null;
         }
 
-        public Account GetAccount(string uniqueID)
+        public Account? GetAccount(string AccountID)
         {
-            var result = _context.Account.FromSqlRaw("SELECT * FROM account WHERE unique_id = @p0", uniqueID).FirstOrDefault();
+            var result = _context.Account.Where(a => a.AccountID == AccountID).FirstOrDefault();
             return result;
         }
 
-        // add new account to database
-        public Account CreateAccount(Account account)
+        public Account? CreateAccount(Account account)
         {
-            // check if account exist in database
-            var result = IsAccountExist(account.UniqueID);
-            if (result == false)
+            if (!IsAccountExist(account.AccountID))
             {
                 _context.Account.Add(account);
                 _context.SaveChanges();
-                return account;
+                return GetAccount(account.AccountID);
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
-        // update account in database
         public Account? UpdateAccount(Account account)
         {
-            // check if account exist in database
-            var result = IsAccountExist(account.UniqueID);
-            if (result == true)
+            if (!IsAccountExist(account.AccountID))
             {
                 _context.Account.Update(account);
                 _context.SaveChanges();
-                return account;
+                return GetAccount(account.AccountID);
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
+
     }
 }

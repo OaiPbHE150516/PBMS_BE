@@ -18,10 +18,7 @@ public class Account
     //    );
 
     [Column("account_id")]
-    public int AccountID { get; set; }
-
-    [Column("unique_id")]
-    public string UniqueID { get; set; }
+    public string AccountID { get; set; }
 
     [Column("client_id")]
     public string ClientID { get; set; }
@@ -35,7 +32,12 @@ public class Account
     [Column("picture_url")]
     public string PictureURL { get; set; }
 
-    [Column("encoded_jwt")]
-    public string EnCodedJWT { get; set; }
+    //role id
+    [Column("role_id")]
+    public int RoleID { get; set; }
+
+    // create_time
+    [Column("create_time")]
+    public DateTime CreateTime { get; set; }
 }
 
