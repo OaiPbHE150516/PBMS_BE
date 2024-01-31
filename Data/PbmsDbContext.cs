@@ -10,7 +10,6 @@ namespace pbms_be.Data
         public DbSet<Sample> Sample { get; set; }
         public DbSet<Auth.Account> Account { get; set; }
         public DbSet<Auth.Role> Role { get; set; }
-        public DbSet<Auth.User> User { get; set; }
 
 
         public PbmsDbContext(DbContextOptions options, IConfiguration configuration) : base(options)
