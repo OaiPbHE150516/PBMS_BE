@@ -7,12 +7,11 @@ namespace pbms_be.Data
     {
         private readonly IConfiguration _configuration;
 
-        public DbSet<Sample> Sample { get; set; }
         public DbSet<Auth.Account> Account { get; set; }
         public DbSet<Auth.Role> Role { get; set; }
-        public DbSet<Wallet.Currency> Currency { get; set; }
-        public DbSet<Wallet.Wallet> Wallet { get; set; }
-        public DbSet<Status.VisionStatus> VisionStatus { get; set; }
+        public DbSet<WalletF.Currency> Currency { get; set; }
+        public DbSet<WalletF.Wallet> Wallet { get; set; }
+        public DbSet<Status.ActiveState> ActiveState { get; set; }
 
         public PbmsDbContext(DbContextOptions options, IConfiguration configuration) : base(options)
         {

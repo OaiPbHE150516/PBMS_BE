@@ -1,7 +1,7 @@
 ﻿using pbms_be.Data.Status;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace pbms_be.Data.Wallet;
+namespace pbms_be.Data.WalletF;
 [Table("currency_type", Schema = "public")]
 public class Currency
 {
@@ -18,9 +18,9 @@ public class Currency
     [Column("currency_symbol")]
     public string Symbol { get; set; } = String.Empty;
 
-    [Column("vision_status_id")]
-    public int VisionStatusID { get; set; }
+    [Column("as_id")]
+    public int ActiveStateID { get; set; }
+    public virtual ActiveState ActiveState { get; set; } = null!;
 
-    public virtual VisionStatus VisionStatus { get; set; } = null!;
 }
 

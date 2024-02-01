@@ -1,7 +1,8 @@
 ﻿using pbms_be.Data.Status;
+using pbms_be.Data.WalletF;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace pbms_be.Data.Wallet;
+namespace pbms_be.Data.WalletF;
 [Table("wallet", Schema = "public")]
 
 public class Wallet
@@ -22,11 +23,8 @@ public class Wallet
     public int CurrencyID { get; set; }
     public virtual Currency Currency { get; set; } = null!;
 
-    [Column("vision_status_id")]
-    public int VisionStatusID { get; set; }
-    public virtual VisionStatus VisionStatus { get; set; } = null!;
-
-    [Column("create_time")]
-    public DateTime CreateTime { get; set; }
+    [Column("as_id")]
+    public int ActiveStateID { get; set; }
+    public virtual ActiveState ActiveState { get; set; } = null!;
 }
 

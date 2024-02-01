@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using pbms_be.Data;
-using pbms_be.Data.Wallet;
+using pbms_be.Data.WalletF;
 using pbms_be.DataAccess;
+using pbms_be.DTOs;
 
 namespace pbms_be.Controllers
 {
@@ -20,7 +21,7 @@ namespace pbms_be.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("get-by-account-id/{accountID}")]
+        [HttpGet("get/account/{accountID}")]
         public IActionResult GetWallets(string accountID)
         {
             WalletDA walletDA = new WalletDA(_context);
@@ -28,7 +29,7 @@ namespace pbms_be.Controllers
             return Ok(result);
         }
 
-        [HttpGet("get-by-id/{walletID}/{accountID}")]
+        [HttpGet("get/id/{walletID}/{accountID}")]
         public IActionResult GetWallet(int walletID, string accountID)
         {
             WalletDA walletDA = new WalletDA(_context);
@@ -37,11 +38,12 @@ namespace pbms_be.Controllers
         }
 
         [HttpPost("create")]
-        public IActionResult CreateWallet([FromBody] Wallet wallet)
+        public IActionResult CreateWallet([FromBody] WalletCreateDTO wallet)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             WalletDA walletDA = new WalletDA(_context);
-            var result = walletDA.CreateWallet(wallet);
+            var walletEntity = _mapper.Map<Wallet>(wallet);
+            var result = walletDA.CreateWallet(walletEntity);
             if (result == null) return BadRequest();
             return Ok(result);
         }

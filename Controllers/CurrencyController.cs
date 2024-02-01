@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using pbms_be.Data;
-using pbms_be.Data.Wallet;
+using pbms_be.Data.WalletF;
 using pbms_be.DataAccess;
 
 namespace pbms_be.Controllers
@@ -27,7 +27,7 @@ namespace pbms_be.Controllers
             return Ok(result);
         }
 
-        [HttpGet("get-by-name/{name}")]
+        [HttpGet("get/name/{name}")]
         public IActionResult GetCurrencyByName(string name)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -36,7 +36,7 @@ namespace pbms_be.Controllers
             return Ok(result);
         }
 
-        [HttpGet("get-by-id/{id}")]
+        [HttpGet("get/id/{id}")]
         public IActionResult GetCurrency(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

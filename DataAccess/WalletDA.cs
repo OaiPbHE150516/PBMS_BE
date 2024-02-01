@@ -1,5 +1,6 @@
-﻿using pbms_be.Data;
-using pbms_be.Data.Wallet;
+﻿using Microsoft.EntityFrameworkCore;
+using pbms_be.Data;
+using pbms_be.Data.WalletF;
 
 namespace pbms_be.DataAccess
 {
@@ -14,14 +15,22 @@ namespace pbms_be.DataAccess
         // get wallet by wallet id and account id
         public Wallet? GetWallet(int WalletID, string AccountID)
         {
-            var result = _context.Wallet.Where(w => w.WalletID == WalletID && w.AccountID == AccountID).FirstOrDefault();
+            var result = _context.Wallet
+                .Where(w => w.WalletID == WalletID && w.AccountID == AccountID)
+                .Include(w => w.Currency)
+                .Include(w => w.ActiveState)
+                .FirstOrDefault();
             return result;
         }
 
         // get all wallets of an account by account id
         public List<Wallet> GetWallets(string AccountID)
         {
-            var result = _context.Wallet.Where(w => w.AccountID == AccountID).ToList();
+            var result = _context.Wallet
+                .Where(w => w.AccountID == AccountID)
+                .Include(w => w.Currency)
+                .Include(w => w.ActiveState)
+                .ToList();
             return result;
         }
 
@@ -35,21 +44,35 @@ namespace pbms_be.DataAccess
         // get a wallet by account id and wallet id
         public Wallet? GetWalletByName(string AccountID, string WalletName)
         {
-            var result = _context.Wallet.Where(w => w.AccountID == AccountID && w.Name == WalletName).FirstOrDefault();
+            var result = _context.Wallet
+                .Where(w => w.AccountID == AccountID && w.Name.Contains(WalletName))
+                .Include(w => w.Currency)
+                .Include(w => w.ActiveState)
+                .FirstOrDefault();
             return result;
         }
 
         // get wallet by wallet id
         public Wallet? GetWallet(int WalletID)
         {
-            var result = _context.Wallet.Where(w => w.WalletID == WalletID).FirstOrDefault();
+            // get wallet by wallet id
+            var result = _context.Wallet
+                .Where(w => w.WalletID == WalletID)
+                .Include(w => w.Currency)
+                .Include(w => w.ActiveState)
+                .FirstOrDefault();
             return result;
         }
 
         // get wallet by status id and account id
         public List<Wallet> GetWalletsByStatusID(string AccountID, int VisionStatusID)
         {
-            var result = _context.Wallet.Where(w => w.AccountID == AccountID && w.VisionStatusID == VisionStatusID).ToList();
+            // get wallet by status id and account id
+            var result = _context.Wallet
+                .Where(w => w.AccountID == AccountID && w.ActiveStateID == VisionStatusID)
+                .Include(w => w.Currency)
+                .Include(w => w.ActiveState)
+                .ToList();
             return result;
         }
 
@@ -80,14 +103,14 @@ namespace pbms_be.DataAccess
         // change wallet status
         public Wallet? ChangeWalletStatus(int WalletID, int VisionStatusID)
         {
-            var wallet = GetWallet(WalletID);
-            if (wallet != null)
-            {
-                wallet.VisionStatusID = VisionStatusID;
-                _context.Wallet.Update(wallet);
-                _context.SaveChanges();
-                return GetWallet(WalletID);
-            }
+            //var wallet = GetWallet(WalletID);
+            //if (wallet != null)
+            //{
+            //    wallet.VisionStatusID = VisionStatusID;
+            //    _context.Wallet.Update(wallet);
+            //    _context.SaveChanges();
+            //    return GetWallet(WalletID);
+            //}
             return null;
         }
     }

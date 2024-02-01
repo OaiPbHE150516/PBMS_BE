@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using pbms_be.Data;
-using pbms_be.Data.Wallet;
+using pbms_be.Data.Status;
+using pbms_be.Data.WalletF;
+using System.Linq;
 
 namespace pbms_be.DataAccess
 {
@@ -14,39 +16,7 @@ namespace pbms_be.DataAccess
 
         public List<Currency> GetCurrencies()
         {
-            //var result = _context.Currency.ToList();
-            //return result;
-
-            // get all currencies and join with vision status table
-            //var result = _context.Currency.Join(_context.VisionStatus,
-            //                                currency => currency.VisionStatusID,
-            //                                visionStatus => visionStatus.VisionStatusID,
-            //                                (currency, visionStatus) => new Currency
-            //                                {
-            //                                    CurrencyID = currency.CurrencyID,
-            //                                    Name = currency.Name,
-            //                                    Symbol = currency.Symbol,
-            //                                    VisionStatusID = currency.VisionStatusID,
-            //                                    VisionStatus = visionStatus
-            //                                }).ToList();
-            //return result;
-
-            // get currency_id, currency_name, currency_country, currency_symbol, vision_status_name from currency_type and vision_status
-            //var result = _context.Currency.Join(_context.VisionStatus,
-            //                                               currency => currency.VisionStatusID,
-            //                                                                                          visionStatus => visionStatus.VisionStatusID,
-            //                                                                                                                                     (currency, visionStatus) => new Currency
-            //                                                                                                                                     {
-            //                                    CurrencyID = currency.CurrencyID,
-            //                                    Name = currency.Name,
-            //                                    Country = currency.Country,
-            //                                    Symbol = currency.Symbol,
-            //                                    VisionStatusID = currency.VisionStatusID,
-            //                                    VisionStatus = visionStatus
-            //                                }).ToList();
-            //return result;
-            var sql = "SELECT currency_id, currency_name, currency_country, currency_symbol, vision_status_id, vision_status_name FROM currency_type left join vision_status on currency_type.vision_status_id = vision_status.vision_status_id;";
-            var result = _context.Currency.FromSqlRaw(sql).ToList();
+            var result = _context.Currency.Include(c => c.ActiveState).ToList();
             return result;
         }
 
