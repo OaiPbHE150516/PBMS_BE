@@ -7,16 +7,6 @@ namespace pbms_be.Data.Auth;
 
 public class Account
 {
-    //     CREATE TABLE Account (
-    //      AccountID serial PRIMARY KEY,
-    //      UniqueID VARCHAR( 100 ) UNIQUE NOT NULL,
-    //      ClientID VARCHAR( 100 ) UNIQUE NOT NULL,
-    //      EmailAddress VARCHAR( 100 ) UNIQUE NOT NULL,
-    //      AccountName VARCHAR( 100 ) UNIQUE NOT NULL,
-    //      PictureURL VARCHAR( 500 ) UNIQUE NOT NULL,
-    //      EnCodedJWT_IDtoken VARCHAR( 1000 ) UNIQUE NOT NULL
-    //    );
-
     [Column("account_id")]
     public string AccountID { get; set; }
 

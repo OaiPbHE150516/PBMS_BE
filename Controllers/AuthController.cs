@@ -30,31 +30,57 @@ namespace pbms_be.Controllers
         [HttpPost("postJWT")]
         public IActionResult PostJWT([FromBody] string jwt)
         {
-            // decode jwt by using System.IdentityModel.Tokens.Jwt
-            var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadJwtToken(jwt);
-            var sub = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_UNIQUEID).Value;
-            // check if account exist in database
-            AuthDA authDA = new AuthDA(_context);
-            var result = authDA.IsAccountExist(sub);
-            if (result == false)
+            try
             {
-                // create new account
-                Account account = new Account();
-                account.AccountID = sub;
-                account.ClientID = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_ID).Value;
-                account.AccountName = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_NAME).Value;
-                account.EmailAddress = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_EMAIL).Value;
-                account.RoleID = ConstantConfig.USER_ROLE_ID;
-                account.PictureURL = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_PICTURE).Value;
-                account.CreateTime = DateTime.UtcNow;
-                var resultAccount = authDA.CreateAccount(account);
-                return Ok(resultAccount);
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.ReadJwtToken(jwt);
+                var sub = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_UNIQUEID).Value;
+                AuthDA authDA = new AuthDA(_context);
+                if (!authDA.IsAccountExist(sub))
+                {
+                    Account account = new Account();
+                    account.AccountID = sub;
+                    account.ClientID = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_ID).Value;
+                    account.AccountName = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_NAME).Value;
+                    account.EmailAddress = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_EMAIL).Value;
+                    account.RoleID = ConstantConfig.USER_ROLE_ID;
+                    account.PictureURL = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_PICTURE).Value;
+                    account.CreateTime = DateTime.UtcNow;
+                    var resultAccount = authDA.CreateAccount(account);
+                    return Ok(resultAccount);
+                }
+                else
+                {
+                    Account? account = authDA.GetAccount(sub);
+                    return Ok(account);
+                }
+            } catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
-            else
+        }
+
+        // POST: api/<AuthController>
+        // update account info
+        [HttpPost("update")]
+        public IActionResult Update([FromBody] AccountUpdateDTO account)
+        {
+            try
             {
-                 Account? account = authDA.GetAccount(sub);
-                return Ok(account);
+                AuthDA authDA = new AuthDA(_context);
+                if (authDA.IsAccountExist(account.AccountID))
+                {
+                    var accountEntity = _mapper.Map<Account>(account);
+                    var resultAccount = authDA.UpdateAccount(accountEntity);
+                    return Ok(resultAccount);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            } catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
         }
     }
