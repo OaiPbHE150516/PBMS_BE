@@ -27,8 +27,8 @@ namespace pbms_be.Controllers
         }
 
         // POST JWT: api/<AuthController>
-        [HttpPost("postJWT")]
-        public IActionResult PostJWT([FromBody] string jwt)
+        [HttpPost("signin")]
+        public IActionResult SigninByJWT([FromBody] string jwt)
         {
             try
             {
