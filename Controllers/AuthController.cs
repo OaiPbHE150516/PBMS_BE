@@ -17,8 +17,7 @@ namespace pbms_be.Controllers
     public class AuthController : ControllerBase
     {
         private readonly PbmsDbContext _context;
-        // mapper
-        private readonly IMapper _mapper;
+        private readonly IMapper? _mapper;
 
         public AuthController(PbmsDbContext context, IMapper? mapper)
         {
@@ -62,7 +61,7 @@ namespace pbms_be.Controllers
 
         // POST: api/<AuthController>
         // update account info
-        [HttpPost("update")]
+        [HttpPut("update")]
         public IActionResult Update([FromBody] AccountUpdateDTO account)
         {
             try

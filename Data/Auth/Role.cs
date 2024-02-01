@@ -9,7 +9,7 @@ public class Role
     public int RoleID { get; set; }
 
     [Column("role_name")]
-    public string RoleName { get; set; }
+    public string RoleName { get; set; } = String.Empty;
 
 }
 
