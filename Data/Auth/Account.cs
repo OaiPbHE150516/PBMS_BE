@@ -7,30 +7,20 @@ namespace pbms_be.Data.Auth;
 
 public class Account
 {
-    //     CREATE TABLE Account (
-    //      AccountID serial PRIMARY KEY,
-    //      UniqueID VARCHAR( 100 ) UNIQUE NOT NULL,
-    //      ClientID VARCHAR( 100 ) UNIQUE NOT NULL,
-    //      EmailAddress VARCHAR( 100 ) UNIQUE NOT NULL,
-    //      AccountName VARCHAR( 100 ) UNIQUE NOT NULL,
-    //      PictureURL VARCHAR( 500 ) UNIQUE NOT NULL,
-    //      EnCodedJWT_IDtoken VARCHAR( 1000 ) UNIQUE NOT NULL
-    //    );
-
     [Column("account_id")]
-    public string AccountID { get; set; }
+    public string AccountID { get; set; } = String.Empty;
 
     [Column("client_id")]
-    public string ClientID { get; set; }
+    public string ClientID { get; set; } = String.Empty;
 
     [Column("email_address")]
-    public string EmailAddress { get; set; }
+    public string EmailAddress { get; set; } = String.Empty;
 
     [Column("account_name")]
-    public string AccountName { get; set; }
+    public string AccountName { get; set; } = String.Empty;
 
     [Column("picture_url")]
-    public string PictureURL { get; set; }
+    public string PictureURL { get; set; } = String.Empty;
 
     //role id
     [Column("role_id")]
