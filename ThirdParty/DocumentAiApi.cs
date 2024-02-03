@@ -43,82 +43,82 @@ namespace pbms_be.ThirdParty
         {
             //try
             //{
-                var entities = document.Entities;
-                Invoice invoice = new Invoice();
-                // loop through entities
-                foreach (var entity in entities)
+            var entities = document.Entities;
+            Invoice invoice = new Invoice();
+            // loop through entities
+            foreach (var entity in entities)
+            {
+                if (entity.Properties.Count > 0)
                 {
-                    if (entity.Properties.Count > 0)
-                    {
-                        invoice.ProductInInvoices.Add(GetProductInInvoice(entity.Properties));
-                        continue;
-                    }
-                    var type = entity.Type;
-                    switch (entity.Type)
-                    {
-                        case ConstantConfig.CURRENCY:
-                            //invoice.CurrencyID = entity.MentionText;
-                            invoice.CurrencyID = 2;
-                            break;
-                        case ConstantConfig.INVOICE_ID:
-                            // convert to int
-                            invoice.InvoiceID = Convert.ToInt32(entity.MentionText);
-                            break;
-                        case ConstantConfig.INVOICE_DATE:
-                            //var invoicedate = ConvertStringToDate(entity.MentionText);
-                            // use TryConvertStringToDate to check if the date is valid
-                            if (TryConvertStringToDate(entity.MentionText, out DateTime result))
-                            {
-                                invoice.InvoiceDate = result;
-                            }
-                            break;
-                        case ConstantConfig.INVOICE_DISCOUNT:
-                            invoice.Discount = (long)Convert.ToDouble(entity.MentionText);
-                            break;
-                        case ConstantConfig.INVOICE_NOTE:
-                            invoice.Note = entity.MentionText;
-                            break;
-                        case ConstantConfig.NET_AMOUNT:
-                            invoice.NetAmount = (long)Convert.ToDouble(entity.MentionText);
-                            break;
-                        case ConstantConfig.PAYMENT_TERMS:
-                            invoice.PaymentTerms = entity.MentionText;
-                            break;
-                        case ConstantConfig.SHIP_TO_ADDRESS:
-                            invoice.ReceiverAddress = entity.MentionText;
-                            break;
-                        case ConstantConfig.SHIP_TO_NAME:
-                            invoice.ReceiverName = entity.MentionText;
-                            break;
-                        case ConstantConfig.SUPPLIER_ADDRESS:
-                            invoice.SupplierAddress = entity.MentionText;
-                            break;
-                        case ConstantConfig.SUPPLIER_EMAIL:
-                            invoice.SupplierEmail = entity.MentionText;
-                            break;
-                        case ConstantConfig.SUPPLIER_NAME:
-                            invoice.SupplierName = entity.MentionText;
-                            break;
-                        case ConstantConfig.SUPPLIER_PHONE:
-                            invoice.SupplierPhone = entity.MentionText;
-                            break;
-                        //case ConstantConfig.SUPPLIER_WEBSITE:
-                        //    invoice.SupplierWebsite = entity.MentionText;
-                        //    break;
-                        case ConstantConfig.TOTAL_AMOUNT:
-                            invoice.TotalAmount = (long)Convert.ToDouble(entity.MentionText);
-                            break;
-                        case ConstantConfig.TOTAL_TAX_AMOUNT:
-                            invoice.TaxAmount = (long)Convert.ToDouble(entity.MentionText);
-                            break;
-                    }
-                    // end of switch case
+                    invoice.ProductInInvoices.Add(GetProductInInvoice(entity.Properties));
+                    continue;
                 }
-                // end of loop
-                //invoice.InvoiceImageURL = "url";
-                //invoice.InvoiceRawDatalog = entities.ToString();
-                //invoice.ActiveStateID = 1;
-                return invoice;
+                var type = entity.Type;
+                switch (entity.Type)
+                {
+                    case ConstantConfig.CURRENCY:
+                        //invoice.CurrencyID = entity.MentionText;
+                        invoice.CurrencyID = 2;
+                        break;
+                    case ConstantConfig.INVOICE_ID:
+                        // convert to int
+                        invoice.InvoiceID = Convert.ToInt32(entity.MentionText);
+                        break;
+                    case ConstantConfig.INVOICE_DATE:
+                        //var invoicedate = ConvertStringToDate(entity.MentionText);
+                        // use TryConvertStringToDate to check if the date is valid
+                        if (TryConvertStringToDate(entity.MentionText, out DateTime result))
+                        {
+                            invoice.InvoiceDate = result;
+                        }
+                        break;
+                    case ConstantConfig.INVOICE_DISCOUNT:
+                        invoice.Discount = (long)Convert.ToDouble(entity.MentionText);
+                        break;
+                    case ConstantConfig.INVOICE_NOTE:
+                        invoice.Note = entity.MentionText;
+                        break;
+                    case ConstantConfig.NET_AMOUNT:
+                        invoice.NetAmount = (long)Convert.ToDouble(entity.MentionText);
+                        break;
+                    case ConstantConfig.PAYMENT_TERMS:
+                        invoice.PaymentTerms = entity.MentionText;
+                        break;
+                    case ConstantConfig.SHIP_TO_ADDRESS:
+                        invoice.ReceiverAddress = entity.MentionText;
+                        break;
+                    case ConstantConfig.SHIP_TO_NAME:
+                        invoice.ReceiverName = entity.MentionText;
+                        break;
+                    case ConstantConfig.SUPPLIER_ADDRESS:
+                        invoice.SupplierAddress = entity.MentionText;
+                        break;
+                    case ConstantConfig.SUPPLIER_EMAIL:
+                        invoice.SupplierEmail = entity.MentionText;
+                        break;
+                    case ConstantConfig.SUPPLIER_NAME:
+                        invoice.SupplierName = entity.MentionText;
+                        break;
+                    case ConstantConfig.SUPPLIER_PHONE:
+                        invoice.SupplierPhone = entity.MentionText;
+                        break;
+                    //case ConstantConfig.SUPPLIER_WEBSITE:
+                    //    invoice.SupplierWebsite = entity.MentionText;
+                    //    break;
+                    case ConstantConfig.TOTAL_AMOUNT:
+                        invoice.TotalAmount = (long)Convert.ToDouble(entity.MentionText);
+                        break;
+                    case ConstantConfig.TOTAL_TAX_AMOUNT:
+                        invoice.TaxAmount = (long)Convert.ToDouble(entity.MentionText);
+                        break;
+                }
+                // end of switch case
+            }
+            // end of loop
+            //invoice.InvoiceImageURL = "url";
+            //invoice.InvoiceRawDatalog = entities.ToString();
+            //invoice.ActiveStateID = 1;
+            return invoice;
             //}
             //catch (Exception e)
             //{
@@ -138,6 +138,7 @@ namespace pbms_be.ThirdParty
                         break;
                     case ConstantConfig.LINE_ITEM_QUANTITY:
                         productInInvoice.Quanity = Convert.ToInt32(property.MentionText);
+                        Console.WriteLine(ConstantConfig.LINE_ITEM_QUANTITY + ": " + property.MentionText);
                         break;
                     case ConstantConfig.LINE_ITEM_UNIT_PRICE:
                         productInInvoice.UnitPrice = (long)Convert.ToDouble(property.MentionText);
