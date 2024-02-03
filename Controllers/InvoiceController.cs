@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -74,61 +75,32 @@ namespace pbms_be.Controllers
         [HttpPost("upload")]
         public IActionResult UploadFile(IFormFile file, CancellationToken cancellationtoken)
         {
-            //var result = await WriteFile(file);
-            //return Ok(result);
-            // return badrequest if file is null or not of type in the list
             if (file == null) return BadRequest("File is null or not of type pdf");
-            if (file.ContentType != ConstantConfig.MINE_TYPE_PDF 
+            if (file.ContentType != ConstantConfig.MINE_TYPE_PDF
                 && file.ContentType != ConstantConfig.MINE_TYPE_JPEG
                 && file.ContentType != ConstantConfig.MINE_TYPE_JPG
-                && file.ContentType != ConstantConfig.MINE_TYPE_PNG) 
+                && file.ContentType != ConstantConfig.MINE_TYPE_PNG)
                 return BadRequest("File is null or not of type pdf, jpg or png");
             var result = DocumentAiApi.ProcessDocument(file);
+            GCP_BucketDA.UploadFile(file);
             return Ok(result.Text);
         }
-        //private async Task<string> WriteFile(IFormFile file)
+
+        //[HttpGet]
+        //[Route("DownloadFile")]
+        //public async Task<IActionResult> DownloadFile(string filename)
         //{
-        //    string filename = "";
-        //    try
+        //    var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files", filename);
+
+        //    var provider = new FileExtensionContentTypeProvider();
+        //    if (!provider.TryGetContentType(filepath, out var contenttype))
         //    {
-        //        var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
-        //        filename = DateTime.Now.Ticks.ToString() + extension;
-
-        //        var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
-
-        //        if (!Directory.Exists(filepath))
-        //        {
-        //            Directory.CreateDirectory(filepath);
-        //        }
-
-        //        var exactpath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files", filename);
-        //        using (var stream = new FileStream(exactpath, FileMode.Create))
-        //        {
-        //            await file.CopyToAsync(stream);
-        //        }
+        //        contenttype = "application/octet-stream";
         //    }
-        //    catch (Exception ex)
-        //    {
-        //    }
-        //    return filename;
+
+        //    var bytes = await System.IO.File.ReadAllBytesAsync(filepath);
+        //    return File(bytes, contenttype, Path.GetFileName(filepath));
         //}
-
-
-        [HttpGet]
-        [Route("DownloadFile")]
-        public async Task<IActionResult> DownloadFile(string filename)
-        {
-            var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files", filename);
-
-            var provider = new FileExtensionContentTypeProvider();
-            if (!provider.TryGetContentType(filepath, out var contenttype))
-            {
-                contenttype = "application/octet-stream";
-            }
-
-            var bytes = await System.IO.File.ReadAllBytesAsync(filepath);
-            return File(bytes, contenttype, Path.GetFileName(filepath));
-        }
     }
 
 }
