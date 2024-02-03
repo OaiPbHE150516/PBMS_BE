@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using pbms_be.Configurations;
 using pbms_be.Data;
+using pbms_be.Data.Invo;
 using pbms_be.Data.Material;
 using pbms_be.DataAccess;
 using pbms_be.ThirdParty;
@@ -83,7 +84,9 @@ namespace pbms_be.Controllers
                 return BadRequest("File is null or not of type pdf, jpg or png");
             var result = DocumentAiApi.ProcessDocument(file);
             var imageURL = GCP_BucketDA.UploadFile(file);
-            return Ok(result.Text);
+            Invoice invoice = DocumentAiApi.GetInvoiceFromDocument(result);
+            invoice.InvoiceImageURL = imageURL;
+            return Ok(invoice);
         }
 
         //[HttpGet]
