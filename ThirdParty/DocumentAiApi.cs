@@ -115,9 +115,9 @@ namespace pbms_be.ThirdParty
                     // end of switch case
                 }
                 // end of loop
-                invoice.InvoiceImageURL = "url";
-                invoice.InvoiceRawDatalog = entities.ToString();
-                invoice.ActiveStateID = 1;
+                //invoice.InvoiceImageURL = "url";
+                //invoice.InvoiceRawDatalog = entities.ToString();
+                //invoice.ActiveStateID = 1;
                 return invoice;
             }
             catch (Exception e)
