@@ -82,8 +82,7 @@ namespace pbms_be.Controllers
                 && file.ContentType != ConstantConfig.MINE_TYPE_PNG)
                 return BadRequest("File is null or not of type pdf, jpg or png");
             var result = DocumentAiApi.ProcessDocument(file);
-            GCP_BucketDA.UploadFile(file);
-            //return Ok();
+            var imageURL = GCP_BucketDA.UploadFile(file);
             return Ok(result.Text);
         }
 
