@@ -30,5 +30,7 @@
         public static string MINE_TYPE_PNG = "image/png";
         public static string MINE_TYPE_JPG = "image/jpg";
 
+        public static string BUCKET_NAME = "user_invoice";
+
     }
 }

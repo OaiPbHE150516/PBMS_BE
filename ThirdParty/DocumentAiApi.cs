@@ -45,8 +45,6 @@ namespace pbms_be.ThirdParty
 
         public static Document ProcessDocument(IFormFile file)
         {
-           
-
             // create client
             var client = new DocumentProcessorServiceClientBuilder
             {
