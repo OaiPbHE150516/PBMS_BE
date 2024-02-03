@@ -137,7 +137,7 @@ namespace pbms_be.ThirdParty
                         productInInvoice.ProductName = property.MentionText;
                         break;
                     case ConstantConfig.LINE_ITEM_QUANTITY:
-                        productInInvoice.Quanity = Convert.ToInt32(property.MentionText);
+                        //productInInvoice.Quanity = Convert.ToInt32(property.MentionText);
                         Console.WriteLine(ConstantConfig.LINE_ITEM_QUANTITY + ": " + property.MentionText);
                         break;
                     case ConstantConfig.LINE_ITEM_UNIT_PRICE:
