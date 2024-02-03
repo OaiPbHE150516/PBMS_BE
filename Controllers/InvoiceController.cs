@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using pbms_be.Data;
 using pbms_be.Data.Material;
 using pbms_be.DataAccess;
+using pbms_be.ThirdParty;
 using System.Net.Http.Headers;
 
 namespace pbms_be.Controllers
@@ -70,38 +71,40 @@ namespace pbms_be.Controllers
         //}
 
         [HttpPost("upload")]
-        public async Task<IActionResult> UploadFile(IFormFile file, CancellationToken cancellationtoken)
+        public IActionResult UploadFile(IFormFile file, CancellationToken cancellationtoken)
         {
-            var result = await WriteFile(file);
-            return Ok(result);
+            //var result = await WriteFile(file);
+            //return Ok(result);
+
+            var result = DocumentAiApi.ProcessDocument(file);
+            return Ok(result.Text);
         }
-        private async Task<string> WriteFile(IFormFile file)
-        {
-            string filename = "";
-            try
-            {
-                var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
-                filename = DateTime.Now.Ticks.ToString() + extension;
+        //private async Task<string> WriteFile(IFormFile file)
+        //{
+        //    string filename = "";
+        //    try
+        //    {
+        //        var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
+        //        filename = DateTime.Now.Ticks.ToString() + extension;
 
-                var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
+        //        var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
 
-                if (!Directory.Exists(filepath))
-                {
-                    Directory.CreateDirectory(filepath);
-                }
+        //        if (!Directory.Exists(filepath))
+        //        {
+        //            Directory.CreateDirectory(filepath);
+        //        }
 
-                var exactpath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files", filename);
-                using (var stream = new FileStream(exactpath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-            }
-            catch (Exception ex)
-            {
-            }
-            return filename;
-        }
-
+        //        var exactpath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files", filename);
+        //        using (var stream = new FileStream(exactpath, FileMode.Create))
+        //        {
+        //            await file.CopyToAsync(stream);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //    }
+        //    return filename;
+        //}
 
 
         [HttpGet]
