@@ -73,13 +73,13 @@ namespace pbms_be.ThirdParty
                             }
                             break;
                         case ConstantConfig.INVOICE_DISCOUNT:
-                            invoice.Discount = long.Parse(entity.MentionText);
+                            invoice.Discount = (long)Convert.ToDouble(entity.MentionText);
                             break;
                         case ConstantConfig.INVOICE_NOTE:
                             invoice.Note = entity.MentionText;
                             break;
                         case ConstantConfig.NET_AMOUNT:
-                            invoice.NetAmount = long.Parse(entity.MentionText);
+                            invoice.NetAmount = (long)Convert.ToDouble(entity.MentionText);
                             break;
                         case ConstantConfig.PAYMENT_TERMS:
                             invoice.PaymentTerms = entity.MentionText;
@@ -106,10 +106,10 @@ namespace pbms_be.ThirdParty
                         //    invoice.SupplierWebsite = entity.MentionText;
                         //    break;
                         case ConstantConfig.TOTAL_AMOUNT:
-                            invoice.TotalAmount = long.Parse(entity.MentionText);
+                            invoice.TotalAmount = (long)Convert.ToDouble(entity.MentionText);
                             break;
                         case ConstantConfig.TOTAL_TAX_AMOUNT:
-                            invoice.TaxAmount = long.Parse(entity.MentionText);
+                            invoice.TaxAmount = (long)Convert.ToDouble(entity.MentionText);
                             break;
                     }
                     // end of switch case
@@ -140,10 +140,10 @@ namespace pbms_be.ThirdParty
                         productInInvoice.Quanity = int.Parse(property.MentionText);
                         break;
                     case ConstantConfig.LINE_ITEM_UNIT_PRICE:
-                        productInInvoice.UnitPrice = long.Parse(property.MentionText);
+                        productInInvoice.UnitPrice = (long)Convert.ToDouble(property.MentionText);
                         break;
                     case ConstantConfig.LINE_ITEM_AMOUNT:
-                        productInInvoice.TotalAmount = long.Parse(property.MentionText);
+                        productInInvoice.TotalAmount = (long)Convert.ToDouble(property.MentionText);
                         break;
                 }
             }
