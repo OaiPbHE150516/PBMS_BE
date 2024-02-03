@@ -19,5 +19,14 @@
         public static string TOKEN_CLIENT_ID = "aud";
         public static string TOKEN_CLIENT_EMAIL = "email";
         public static string TOKEN_CLIENT_PICTURE = "picture";
+
+        // processor config
+        // projectid, location, processorid, mineType_PDF, mineType_JPEG
+        public static string PROJECT_ID = "lexical-aileron-410114";
+        public static string LOCATION = "us";
+        public static string PROCESSOR_ID = "6036d75c63c4564";
+        public static string MINE_TYPE_PDF = "application/pdf";
+        public static string MINE_TYPE_JPEG = "image/jpeg";
+
     }
 }

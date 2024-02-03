@@ -9,9 +9,17 @@ namespace pbms_be.Data
 
         public DbSet<Auth.Account> Account { get; set; }
         public DbSet<Auth.Role> Role { get; set; }
+
         public DbSet<WalletF.Currency> Currency { get; set; }
         public DbSet<WalletF.Wallet> Wallet { get; set; }
+
         public DbSet<Status.ActiveState> ActiveState { get; set; }
+
+        public DbSet<Filter.Category> Category { get; set; }
+
+        public DbSet<Trans.Transaction> Transaction { get; set; }
+
+        public DbSet<Invo.Invoice> Invoice { get; set; }
 
         public PbmsDbContext(DbContextOptions options, IConfiguration configuration) : base(options)
         {
