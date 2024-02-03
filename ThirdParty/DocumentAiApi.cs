@@ -55,8 +55,7 @@ namespace pbms_be.ThirdParty
             var content = file.OpenReadStream();
             var rawDocument = new RawDocument
             {
-                Content = ByteString.FromStream(content),
-                MimeType = ConstantConfig.MINE_TYPE_JPEG
+                Content = ByteString.FromStream(content)
             };
 
             // Initialize request argument(s)
