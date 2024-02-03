@@ -41,8 +41,8 @@ namespace pbms_be.ThirdParty
         // get text from document
         public static Invoice GetInvoiceFromDocument(Document document)
         {
-            try
-            {
+            //try
+            //{
                 var entities = document.Entities;
                 Invoice invoice = new Invoice();
                 // loop through entities
@@ -119,11 +119,11 @@ namespace pbms_be.ThirdParty
                 //invoice.InvoiceRawDatalog = entities.ToString();
                 //invoice.ActiveStateID = 1;
                 return invoice;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
+            //}
+            //catch (Exception e)
+            //{
+            //    throw new Exception(e.Message);
+            //}
         }
 
         private static ProductInInvoice GetProductInInvoice(RepeatedField<Document.Types.Entity> properties)
