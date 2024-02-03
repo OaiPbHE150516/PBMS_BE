@@ -45,6 +45,8 @@ namespace pbms_be.ThirdParty
 
         public static Document ProcessDocument(IFormFile file)
         {
+           
+
             // create client
             var client = new DocumentProcessorServiceClientBuilder
             {
@@ -55,7 +57,8 @@ namespace pbms_be.ThirdParty
             var content = file.OpenReadStream();
             var rawDocument = new RawDocument
             {
-                Content = ByteString.FromStream(content)
+                Content = ByteString.FromStream(content),
+                MimeType = file.ContentType
             };
 
             // Initialize request argument(s)

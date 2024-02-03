@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Material;
 using pbms_be.DataAccess;
@@ -75,7 +76,13 @@ namespace pbms_be.Controllers
         {
             //var result = await WriteFile(file);
             //return Ok(result);
-
+            // return badrequest if file is null or not of type in the list
+            if (file == null) return BadRequest("File is null or not of type pdf");
+            if (file.ContentType != ConstantConfig.MINE_TYPE_PDF 
+                && file.ContentType != ConstantConfig.MINE_TYPE_JPEG
+                && file.ContentType != ConstantConfig.MINE_TYPE_JPG
+                && file.ContentType != ConstantConfig.MINE_TYPE_PNG) 
+                return BadRequest("File is null or not of type pdf, jpg or png");
             var result = DocumentAiApi.ProcessDocument(file);
             return Ok(result.Text);
         }
