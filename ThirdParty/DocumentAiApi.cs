@@ -62,7 +62,8 @@ namespace pbms_be.ThirdParty
                         break;
                     case ConstantConfig.INVOICE_ID:
                         // convert to int
-                        invoice.InvoiceID = (int)Convert.ToInt32(entity.MentionText);
+                        //invoice.InvoiceID = Convert.ToInt32(entity.MentionText);
+                        Console.WriteLine(ConstantConfig.INVOICE_ID + ": " + entity.MentionText);
                         break;
                     case ConstantConfig.INVOICE_DATE:
                         //var invoicedate = ConvertStringToDate(entity.MentionText);
