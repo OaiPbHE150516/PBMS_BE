@@ -27,6 +27,8 @@
         public static string PROCESSOR_ID = "6036d75c63c4564";
         public static string MINE_TYPE_PDF = "application/pdf";
         public static string MINE_TYPE_JPEG = "image/jpeg";
+        public static string MINE_TYPE_PNG = "image/png";
+        public static string MINE_TYPE_JPG = "image/jpg";
 
     }
 }
