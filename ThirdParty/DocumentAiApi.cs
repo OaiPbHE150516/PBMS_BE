@@ -62,25 +62,40 @@ namespace pbms_be.ThirdParty
                         break;
                     case ConstantConfig.INVOICE_ID:
                         // convert to int
-                        //invoice.InvoiceID = Convert.ToInt32(entity.MentionText);
-                        Console.WriteLine(ConstantConfig.INVOICE_ID + ": " + entity.MentionText);
+                        invoice.IDOfInvoice = entity.MentionText;
                         break;
                     case ConstantConfig.INVOICE_DATE:
                         //var invoicedate = ConvertStringToDate(entity.MentionText);
                         // use TryConvertStringToDate to check if the date is valid
-                        if (TryConvertStringToDate(entity.MentionText, out DateTime result))
+                        if (TryConvertStringToDate(entity.MentionText, out DateTime resultInvoiceDate))
                         {
-                            invoice.InvoiceDate = result;
+                            invoice.InvoiceDate = resultInvoiceDate;
                         }
                         break;
                     case ConstantConfig.INVOICE_DISCOUNT:
-                        invoice.Discount = (long)Convert.ToDouble(entity.MentionText);
+                        //invoice.Discount = (long)Convert.ToDouble(entity.MentionText);
+                        if (TryConvertStringToLong(entity.MentionText, out long resultDiscount))
+                        {
+                            invoice.Discount = resultDiscount;
+                        }
+                        else
+                        {
+                            invoice.Discount = -1;
+                        }
                         break;
                     case ConstantConfig.INVOICE_NOTE:
                         invoice.Note = entity.MentionText;
                         break;
                     case ConstantConfig.NET_AMOUNT:
-                        invoice.NetAmount = (long)Convert.ToDouble(entity.MentionText);
+                        //invoice.NetAmount = (long)Convert.ToDouble(entity.MentionText);
+                        if (TryConvertStringToLong(entity.MentionText, out long resultNetAmount))
+                        {
+                            invoice.NetAmount = resultNetAmount;
+                        }
+                        else
+                        {
+                            invoice.NetAmount = ConstantConfig.NEGATIVE_VALUE;
+                        }
                         break;
                     case ConstantConfig.PAYMENT_TERMS:
                         invoice.PaymentTerms = entity.MentionText;
@@ -107,18 +122,32 @@ namespace pbms_be.ThirdParty
                     //    invoice.SupplierWebsite = entity.MentionText;
                     //    break;
                     case ConstantConfig.TOTAL_AMOUNT:
-                        invoice.TotalAmount = (long)Convert.ToDouble(entity.MentionText);
+                        if (TryConvertStringToLong(entity.MentionText, out long resultTotalAmount))
+                        {
+                            invoice.TotalAmount = resultTotalAmount;
+                        }
+                        else
+                        {
+                            invoice.TotalAmount = ConstantConfig.NEGATIVE_VALUE;
+                        }
                         break;
                     case ConstantConfig.TOTAL_TAX_AMOUNT:
-                        invoice.TaxAmount = (long)Convert.ToDouble(entity.MentionText);
+                        if (TryConvertStringToLong(entity.MentionText, out long resultTaxAmount))
+                        {
+                            invoice.TaxAmount = resultTaxAmount;
+                        }
+                        else
+                        {
+                            invoice.TaxAmount = ConstantConfig.NEGATIVE_VALUE;
+                        }
                         break;
                 }
                 // end of switch case
             }
             // end of loop
-            //invoice.InvoiceImageURL = "url";
-            //invoice.InvoiceRawDatalog = entities.ToString();
-            //invoice.ActiveStateID = 1;
+            invoice.InvoiceImageURL = "url";
+            invoice.InvoiceRawDatalog = entities.ToString();
+            invoice.ActiveStateID = ConstantConfig.DEFAULT_ACTIVE_STATE_VALUE;
             return invoice;
             //}
             //catch (Exception e)
@@ -142,10 +171,24 @@ namespace pbms_be.ThirdParty
                         Console.WriteLine(ConstantConfig.LINE_ITEM_QUANTITY + ": " + property.MentionText);
                         break;
                     case ConstantConfig.LINE_ITEM_UNIT_PRICE:
-                        productInInvoice.UnitPrice = (long)Convert.ToDouble(property.MentionText);
+                        if (TryConvertStringToLong(property.MentionText, out long resultUnitPrice))
+                        {
+                            productInInvoice.UnitPrice = resultUnitPrice;
+                        }
+                        else
+                        {
+                            productInInvoice.UnitPrice = ConstantConfig.NEGATIVE_VALUE;
+                        }
                         break;
                     case ConstantConfig.LINE_ITEM_AMOUNT:
-                        productInInvoice.TotalAmount = (long)Convert.ToDouble(property.MentionText);
+                        if (TryConvertStringToLong(property.MentionText, out long resultTotalAmount))
+                        {
+                            productInInvoice.TotalAmount = resultTotalAmount;
+                        }
+                        else
+                        {
+                            productInInvoice.TotalAmount = ConstantConfig.NEGATIVE_VALUE;
+                        }
                         break;
                 }
             }
@@ -176,9 +219,25 @@ namespace pbms_be.ThirdParty
             catch (Exception e)
             {
                 result = DateTime.Now;
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
 
+        // try to convert string to long, return bool
+        public static bool TryConvertStringToLong(string number, out long result)
+        {
+            try
+            {
+                result = (long)Convert.ToDouble(number);
+                return true;
+            }
+            catch (Exception e)
+            {
+                result = ConstantConfig.NEGATIVE_VALUE;
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
     }
 }

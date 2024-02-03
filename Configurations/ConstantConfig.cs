@@ -63,6 +63,10 @@
         public const string LINE_ITEM_UNIT_PRICE = "line_item/unit_price";
         public const string LINE_ITEM_AMOUNT = "line_item/amount";
 
+        // Value
+        public const long NEGATIVE_VALUE = -1;
+        public const int DEFAULT_ACTIVE_STATE_VALUE = 1;
+
 
 
     }
