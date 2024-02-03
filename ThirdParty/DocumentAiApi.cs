@@ -62,7 +62,7 @@ namespace pbms_be.ThirdParty
                             break;
                         case ConstantConfig.INVOICE_ID:
                             // convert to int
-                            invoice.InvoiceID = int.Parse(entity.MentionText);
+                            invoice.InvoiceID = Convert.ToInt32(entity.MentionText);
                             break;
                         case ConstantConfig.INVOICE_DATE:
                             //var invoicedate = ConvertStringToDate(entity.MentionText);
@@ -137,7 +137,7 @@ namespace pbms_be.ThirdParty
                         productInInvoice.ProductName = property.MentionText;
                         break;
                     case ConstantConfig.LINE_ITEM_QUANTITY:
-                        productInInvoice.Quanity = int.Parse(property.MentionText);
+                        productInInvoice.Quanity = Convert.ToInt32(property.MentionText);
                         break;
                     case ConstantConfig.LINE_ITEM_UNIT_PRICE:
                         productInInvoice.UnitPrice = (long)Convert.ToDouble(property.MentionText);
