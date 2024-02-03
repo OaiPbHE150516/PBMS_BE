@@ -9,8 +9,9 @@ namespace pbms_be.DataAccess
         public static void UploadFile(IFormFile file)
         {
             // get GoogleCredential  from environment variable GOOGLE_APPLICATION_CREDENTIALS link to json file
-            GoogleCredential credential = GoogleCredential.GetApplicationDefault();
-            var storage = StorageClient.Create(credential);
+            //var linkcredential = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+            //var credential = GoogleCredential.FromFile(linkcredential);
+            var storage = StorageClient.Create();
             var fileUpload = file.OpenReadStream();
             // file name = file name + date time now timestamp
             var fileName = file.FileName + DateTime.Now.ToString("yyyyMMddHHmmss");
