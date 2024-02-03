@@ -67,7 +67,7 @@ public class Invoice
     public string IDOfInvoice { get; set; } = String.Empty;
 
     [Column("invoice_date")]
-    public DateTime InvoiceDate { get; set; }
+    public DateTime InvoiceDate { get; set; } = DateTime.Now;
 
     [Column("invoice_type")]
     public string InvoiceType { get; set; } = String.Empty;
@@ -103,5 +103,7 @@ public class Invoice
     [Column("as_id")]
     public int ActiveStateID { get; set; }
     public virtual ActiveState ActiveState { get; set; } = null!;
+
+    public virtual List<ProductInInvoice> ProductInInvoices { get; set; } = new List<ProductInInvoice>();
 
 }

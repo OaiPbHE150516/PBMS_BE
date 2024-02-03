@@ -8,6 +8,7 @@ namespace pbms_be.DataAccess
     {
         public static string UploadFile(IFormFile file)
         {
+            // https://github.com/dotnet/runtime/issues/94794 to fix permission issue
             //var linkcredential = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
             //var credential = GoogleCredential.FromFile(linkcredential);
             var storage = StorageClient.Create();
