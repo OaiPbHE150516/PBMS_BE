@@ -94,9 +94,6 @@ public class Invoice
     [Column("invoice_image_url")]
     public string InvoiceImageURL { get; set; } = String.Empty;
 
-    [Column("invoice_raw_datalog")]
-    public string InvoiceRawDatalog { get; set; } = String.Empty;
-
     [Column("note")]
     public string Note { get; set; } = String.Empty;
 
@@ -106,4 +103,6 @@ public class Invoice
 
     public virtual List<ProductInInvoice> ProductInInvoices { get; set; } = new List<ProductInInvoice>();
 
+    [Column("invoice_raw_datalog")]
+    public string InvoiceRawDatalog { get; set; } = String.Empty;
 }
