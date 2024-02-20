@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace pbms_be.Data.Auth;
 [Table("role", Schema = "public")]
@@ -6,6 +7,7 @@ namespace pbms_be.Data.Auth;
 public class Role
 {
     [Column("role_id")]
+    [Key]
     public int RoleID { get; set; }
 
     [Column("role_name")]

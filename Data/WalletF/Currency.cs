@@ -1,4 +1,5 @@
 ﻿using pbms_be.Data.Status;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace pbms_be.Data.WalletF;
@@ -7,6 +8,7 @@ public class Currency
 {
     // currency_id, currency_name, currency_country, currency_symbol
     [Column("currency_id")]
+    [Key]
     public int CurrencyID { get; set; }
 
     [Column("currency_name")]

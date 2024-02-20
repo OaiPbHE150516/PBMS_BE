@@ -47,5 +47,15 @@ namespace pbms_be.DataAccess
             return null;
         }
 
+        // get account by email
+        // use to get account by email when 
+        // - invite user to join collaboration fund
+        // - 
+        public Account? GetAccountByEmail(string Email)
+        {
+            var result = _context.Account.Where(a => a.EmailAddress.Contains(Email)).FirstOrDefault();
+            return result;
+        }
+
     }
 }
