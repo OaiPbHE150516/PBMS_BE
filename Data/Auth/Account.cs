@@ -1,4 +1,5 @@
 ﻿using Microsoft.Identity.Client;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net.Mail;
 
@@ -8,6 +9,7 @@ namespace pbms_be.Data.Auth;
 public class Account
 {
     [Column("account_id")]
+    [Key]
     public string AccountID { get; set; } = String.Empty;
 
     [Column("client_id")]

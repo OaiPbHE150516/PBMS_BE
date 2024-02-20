@@ -21,6 +21,8 @@ namespace pbms_be.Data
 
         public DbSet<Invo.Invoice> Invoice { get; set; }
 
+        //public DbSet<Invo.ProductInInvoice> ProductInInvoice { get; set; }
+
         public PbmsDbContext(DbContextOptions options, IConfiguration configuration) : base(options)
         {
             _configuration = configuration;

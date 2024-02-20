@@ -1,4 +1,5 @@
 ﻿using pbms_be.Data.Status;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
@@ -23,6 +24,7 @@ public class ProductInInvoice
     //);
 
     [Column("product_id")]
+    [Key]
     public int ProductID { get; set; }
 
     [Column("invoice_id")]
