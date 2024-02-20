@@ -18,5 +18,15 @@ namespace pbms_be.DataAccess
             storage.UploadObject(ConstantConfig.BUCKET_NAME, fileName, null, fileUpload);
             return fileName;
         }
+
+        public static string UploadFile(IFormFile file, string prefix, string suffix)
+        {
+            var storage = StorageClient.Create();
+            var fileUpload = file.OpenReadStream();
+            // file name = file name + date time now timestamp
+            var fileName = prefix + "_" + file.FileName + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + suffix;
+            storage.UploadObject(ConstantConfig.BUCKET_NAME, fileName, null, fileUpload);
+            return fileName;
+        }
     }
 }
