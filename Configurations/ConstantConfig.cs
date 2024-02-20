@@ -9,9 +9,9 @@
         public const string USER_ROLE_NAME = "user";
 
         // Vision status
-        public const string VISION_STATUS_HIDDEN = "hidden";
-        public const string VISION_STATUS_VISIBLE = "visible";
-        public const string VISION_STATUS_DELETED = "deleted";
+        //public const string VISION_STATUS_HIDDEN = "hidden";
+        //public const string VISION_STATUS_VISIBLE = "visible";
+        //public const string VISION_STATUS_DELETED = "deleted";
 
         // Account information
         public const string TOKEN_NAME = "name";
@@ -33,6 +33,41 @@
         // Bucket config
         public const string BUCKET_NAME = "user_invoice";
 
+        // Value
+        public const long NEGATIVE_VALUE = -1;
+        public const int DEFAULT_ACTIVE_STATE_VALUE = 1;
+
+    }
+
+    public class Message
+    {
+        public const string ACCOUNT_ID_REQUIRED = "AccountID is required";
+        public const string INVOICE_ID_REQUIRED = "InvoiceID is required";
+        public const string FILE_IS_NULL = "File is null or not of type pdf";
+        public const string FILE_IS_NOT_PDF_JPG_PNG = "File is null or not of type pdf, jpg or png";
+
+        // Collab fund
+        public const string COLLAB_FUND_ALREADY_EXIST = "Collab fund already exist";
+        public const string COLLAB_FUND_ID_REQUIRED = "CollabFundID is required";
+        public const string COLLAB_FUND_NOT_EXIST = "Collab fund not exist";
+        // collab fund duplicate
+        public const string COLLAB_FUND_DUPLICATE = "Collab fund duplicate";
+
+
+
+        // Mapper
+        public const string MAPPER_IS_NULL = "Mapper is null";
+    }
+
+    public class ActiveStateConst
+    {
+        public const int ACTIVE = 1;
+        public const int INACTIVE = 2;
+        public const int DELETED = 3;
+    }
+
+    public class InvoiceConfig
+    {
         // Invoice config
         // invoice_date, invoice_id, currency
         public const string INVOICE_DATE = "invoice_date";
@@ -62,12 +97,5 @@
         public const string LINE_ITEM_UNIT = "line_item/unit";
         public const string LINE_ITEM_UNIT_PRICE = "line_item/unit_price";
         public const string LINE_ITEM_AMOUNT = "line_item/amount";
-
-        // Value
-        public const long NEGATIVE_VALUE = -1;
-        public const int DEFAULT_ACTIVE_STATE_VALUE = 1;
-
-
-
     }
 }

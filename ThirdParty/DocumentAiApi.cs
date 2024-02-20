@@ -56,15 +56,15 @@ namespace pbms_be.ThirdParty
                 var type = entity.Type;
                 switch (entity.Type)
                 {
-                    case ConstantConfig.CURRENCY:
+                    case InvoiceConfig.CURRENCY:
                         //invoice.CurrencyID = entity.MentionText;
                         invoice.CurrencyID = 2;
                         break;
-                    case ConstantConfig.INVOICE_ID:
+                    case InvoiceConfig.INVOICE_ID:
                         // convert to int
                         invoice.IDOfInvoice = entity.MentionText;
                         break;
-                    case ConstantConfig.INVOICE_DATE:
+                    case InvoiceConfig.INVOICE_DATE:
                         //var invoicedate = ConvertStringToDate(entity.MentionText);
                         // use TryConvertStringToDate to check if the date is valid
                         if (TryConvertStringToDate(entity.MentionText, out DateTime resultInvoiceDate))
@@ -72,7 +72,7 @@ namespace pbms_be.ThirdParty
                             invoice.InvoiceDate = resultInvoiceDate;
                         }
                         break;
-                    case ConstantConfig.INVOICE_DISCOUNT:
+                    case InvoiceConfig.INVOICE_DISCOUNT:
                         //invoice.Discount = (long)Convert.ToDouble(entity.MentionText);
                         if (TryConvertStringToLong(entity.MentionText, out long resultDiscount))
                         {
@@ -83,10 +83,10 @@ namespace pbms_be.ThirdParty
                             invoice.Discount = -1;
                         }
                         break;
-                    case ConstantConfig.INVOICE_NOTE:
+                    case InvoiceConfig.INVOICE_NOTE:
                         invoice.Note = entity.MentionText;
                         break;
-                    case ConstantConfig.NET_AMOUNT:
+                    case InvoiceConfig.NET_AMOUNT:
                         //invoice.NetAmount = (long)Convert.ToDouble(entity.MentionText);
                         if (TryConvertStringToLong(entity.MentionText, out long resultNetAmount))
                         {
@@ -97,31 +97,31 @@ namespace pbms_be.ThirdParty
                             invoice.NetAmount = ConstantConfig.NEGATIVE_VALUE;
                         }
                         break;
-                    case ConstantConfig.PAYMENT_TERMS:
+                    case InvoiceConfig.PAYMENT_TERMS:
                         invoice.PaymentTerms = entity.MentionText;
                         break;
-                    case ConstantConfig.SHIP_TO_ADDRESS:
+                    case InvoiceConfig.SHIP_TO_ADDRESS:
                         invoice.ReceiverAddress = entity.MentionText;
                         break;
-                    case ConstantConfig.SHIP_TO_NAME:
+                    case InvoiceConfig.SHIP_TO_NAME:
                         invoice.ReceiverName = entity.MentionText;
                         break;
-                    case ConstantConfig.SUPPLIER_ADDRESS:
+                    case InvoiceConfig.SUPPLIER_ADDRESS:
                         invoice.SupplierAddress = entity.MentionText;
                         break;
-                    case ConstantConfig.SUPPLIER_EMAIL:
+                    case InvoiceConfig.SUPPLIER_EMAIL:
                         invoice.SupplierEmail = entity.MentionText;
                         break;
-                    case ConstantConfig.SUPPLIER_NAME:
+                    case InvoiceConfig.SUPPLIER_NAME:
                         invoice.SupplierName = entity.MentionText;
                         break;
-                    case ConstantConfig.SUPPLIER_PHONE:
+                    case InvoiceConfig.SUPPLIER_PHONE:
                         invoice.SupplierPhone = entity.MentionText;
                         break;
                     //case ConstantConfig.SUPPLIER_WEBSITE:
                     //    invoice.SupplierWebsite = entity.MentionText;
                     //    break;
-                    case ConstantConfig.TOTAL_AMOUNT:
+                    case InvoiceConfig.TOTAL_AMOUNT:
                         if (TryConvertStringToLong(entity.MentionText, out long resultTotalAmount))
                         {
                             invoice.TotalAmount = resultTotalAmount;
@@ -131,7 +131,7 @@ namespace pbms_be.ThirdParty
                             invoice.TotalAmount = ConstantConfig.NEGATIVE_VALUE;
                         }
                         break;
-                    case ConstantConfig.TOTAL_TAX_AMOUNT:
+                    case InvoiceConfig.TOTAL_TAX_AMOUNT:
                         if (TryConvertStringToLong(entity.MentionText, out long resultTaxAmount))
                         {
                             invoice.TaxAmount = resultTaxAmount;
@@ -163,14 +163,14 @@ namespace pbms_be.ThirdParty
             {
                 switch (property.Type)
                 {
-                    case ConstantConfig.LINE_ITEM_DESCRIPTION:
+                    case InvoiceConfig.LINE_ITEM_DESCRIPTION:
                         productInInvoice.ProductName = property.MentionText;
                         break;
-                    case ConstantConfig.LINE_ITEM_QUANTITY:
+                    case InvoiceConfig.LINE_ITEM_QUANTITY:
                         //productInInvoice.Quanity = Convert.ToInt32(property.MentionText);
-                        Console.WriteLine(ConstantConfig.LINE_ITEM_QUANTITY + ": " + property.MentionText);
+                        Console.WriteLine(InvoiceConfig.LINE_ITEM_QUANTITY + ": " + property.MentionText);
                         break;
-                    case ConstantConfig.LINE_ITEM_UNIT_PRICE:
+                    case InvoiceConfig.LINE_ITEM_UNIT_PRICE:
                         if (TryConvertStringToLong(property.MentionText, out long resultUnitPrice))
                         {
                             productInInvoice.UnitPrice = resultUnitPrice;
@@ -180,7 +180,7 @@ namespace pbms_be.ThirdParty
                             productInInvoice.UnitPrice = ConstantConfig.NEGATIVE_VALUE;
                         }
                         break;
-                    case ConstantConfig.LINE_ITEM_AMOUNT:
+                    case InvoiceConfig.LINE_ITEM_AMOUNT:
                         if (TryConvertStringToLong(property.MentionText, out long resultTotalAmount))
                         {
                             productInInvoice.TotalAmount = resultTotalAmount;

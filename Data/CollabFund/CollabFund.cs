@@ -14,6 +14,7 @@ public class CollabFund
         cf_description VARCHAR ( 5000 ) NOT NULL,
         image_url VARCHAR ( 500 ) NOT NULL,
         total_amount BIGINT NOT NULL,
+        createtime timestamp not null default current_timestamp,
         as_id INT NOT NULL DEFAULT 1,
         FOREIGN KEY (as_id) REFERENCES active_state (as_id)
         );
@@ -33,6 +34,9 @@ public class CollabFund
 
     [Column("total_amount")]
     public long TotalAmount { get; set; }
+
+    [Column("createtime")]
+    public DateTime CreateTime { get; set; } = DateTime.UtcNow;
 
     [Column("as_id")]
     public int ActiveStateID { get; set; }
