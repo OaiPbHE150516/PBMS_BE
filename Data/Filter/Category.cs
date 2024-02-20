@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Identity.Client;
 using pbms_be.Data.Status;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
@@ -20,6 +21,7 @@ public class Category
     //    FOREIGN KEY(as_id) REFERENCES active_state(as_id)
     //);
     [Column("category_id")]
+    [Key]
     public int CategoryID { get; set; }
 
     [Column("account_id")]

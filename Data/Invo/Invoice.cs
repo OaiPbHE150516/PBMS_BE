@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using pbms_be.Data.Status;
 using pbms_be.Data.WalletF;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
@@ -37,6 +38,7 @@ public class Invoice
     //FOREIGN KEY(as_id) REFERENCES active_state(as_id)
     //);
     [Column("invoice_id")]
+    [Key]
     public int InvoiceID { get; set; }
 
     [Column("transaction_id")]

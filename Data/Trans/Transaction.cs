@@ -3,6 +3,7 @@ using Microsoft.Identity.Client;
 using pbms_be.Data.Filter;
 using pbms_be.Data.Status;
 using pbms_be.Data.WalletF;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
@@ -30,6 +31,7 @@ public class Transaction
     //); 
 
     [Column("transaction_id")]
+    [Key]
     public int TransactionID { get; set; }
 
     [Column("account_id")]

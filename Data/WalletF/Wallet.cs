@@ -2,6 +2,7 @@
 using Microsoft.Identity.Client;
 using pbms_be.Data.Status;
 using pbms_be.Data.WalletF;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
@@ -23,6 +24,7 @@ public class Wallet
     //    FOREIGN KEY(as_id) REFERENCES active_state(as_id)
     //);
     [Column("wallet_id")]
+    [Key]
     public int WalletID { get; set; }
 
     [Column("account_id")]
