@@ -24,9 +24,16 @@ namespace pbms_be.Data
 
         public DbSet<Invo.ProductInInvoice> ProductInInvoice { get; set; }
 
+        // start of collab fund
         public DbSet<CollabFund.CollabFund> CollabFund { get; set; }
 
         public DbSet<CollabFund.AccountCollab> AccountCollab { get; set; }
+
+        public DbSet<CollabFund.CollabFundActivity> CollabFundActivity { get; set; }
+
+        public DbSet<CollabFund.CollabFundActTransaction> CollabFundActTransaction { get; set; }
+
+        // end of collab fund
 
         public PbmsDbContext(DbContextOptions options, IConfiguration configuration) : base(options)
         {

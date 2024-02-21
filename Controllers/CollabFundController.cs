@@ -115,5 +115,26 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        // get detail collab fund by collab fund id and account id
+        [HttpGet("get/detail/id/{collabFundID}/account/{accountID}")]
+        public IActionResult GetDetailCollabFund(int collabFundID, string accountID)
+        {
+            try
+            {
+                if (collabFundID <= 0) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                CollabFundDA collabFundDA = new CollabFundDA(_context);
+                CollabFund collabfund = new CollabFund();
+                bool isExist = false;
+                collabFundDA.GetDetailCollabFund(collabFundID, accountID, out isExist, out collabfund);
+                if (!isExist) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
+                return Ok(collabfund);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }
