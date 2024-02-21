@@ -8,7 +8,7 @@ namespace pbms_be.Data.CollabFund;
 public class CollabFund
 {
     /*
-     *  CREATE TABLE collabfund (
+     CREATE TABLE collabfund (
         collabfund_id serial PRIMARY KEY,
         cf_name VARCHAR ( 100 ) NOT NULL,
         cf_description VARCHAR ( 5000 ) NOT NULL,
@@ -17,7 +17,7 @@ public class CollabFund
         createtime timestamp not null default current_timestamp,
         as_id INT NOT NULL DEFAULT 1,
         FOREIGN KEY (as_id) REFERENCES active_state (as_id)
-        );
+      );
      */
     [Column("collabfund_id")]
     [Key]
@@ -41,4 +41,6 @@ public class CollabFund
     [Column("as_id")]
     public int ActiveStateID { get; set; }
     public virtual ActiveState ActiveState { get; set; } = null!;
+
+    public virtual ICollection<CollabFundActivity> CollabFundActivities { get; set; } = null!;
 }
