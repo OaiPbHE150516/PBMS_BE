@@ -36,6 +36,8 @@
         // Value
         public const long NEGATIVE_VALUE = -1;
         public const int DEFAULT_ACTIVE_STATE_VALUE = 1;
+        // Dùng trong trường hợp không có transaction id
+        public const int DEFAULT_NULL_TRANSACTION_ID = 1;
 
     }
 
@@ -46,12 +48,20 @@
         public const string FILE_IS_NULL = "File is null or not of type pdf";
         public const string FILE_IS_NOT_PDF_JPG_PNG = "File is null or not of type pdf, jpg or png";
 
+
         // Collab fund
         public const string COLLAB_FUND_ALREADY_EXIST = "Collab fund already exist";
         public const string COLLAB_FUND_ID_REQUIRED = "CollabFundID is required";
         public const string COLLAB_FUND_NOT_EXIST = "Collab fund not exist";
-        // collab fund duplicate
         public const string COLLAB_FUND_DUPLICATE = "Collab fund duplicate";
+        public const string COLLAB_FUND_ACTIVITY_DUPLICATE = "Collab fund activity duplicate";
+        public const string ACCOUNT_IS_NOT_FUNDHOLDER = "Account is not fundholder";
+        public const string ACCOUNT_NOT_FOUND = "Account not found";
+        public const string ACCOUNT_IS_NOT_MEMBER = "Account is not member";
+        public const string ACCOUNT_ALREADY_IS_MEMBER = "Account is member";
+        public const string ACCOUNT_ALREADY_IS_FUNDHOLDER = "Account is fundholder";
+        public const string ACCOUNT_IS_NOT_IN_COLLAB_FUND = "Account is not in collab fund";
+        public const string ACCOUNT_ALREADY_INVITED = "Account is already invited";
 
 
 
@@ -63,7 +73,9 @@
     {
         public const int ACTIVE = 1;
         public const int INACTIVE = 2;
-        public const int DELETED = 3;
+        public const int PENDING = 3;
+        public const int SUSPENDED = 4;
+        public const int DELETED = 5;
     }
 
     public class InvoiceConfig

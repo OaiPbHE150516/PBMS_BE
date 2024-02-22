@@ -23,15 +23,21 @@ namespace pbms_be.DataAccess
             return result;
         }
 
-        public Transaction? GetTransaction(int TransactionID)
+        public Transaction GetTransaction(int TransactionID)
         {
-            var result = _context.Transaction
+            try
+            {
+                var result = _context.Transaction
                 .Where(t => t.TransactionID == TransactionID)
                 .Include(t => t.ActiveState)
                 .Include(t => t.Category)
                 .Include(t => t.Wallet)
                 .FirstOrDefault();
-            return result;
+                return result;
+            } catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         public List<Transaction> GetTransactionsByCategory(int CategoryID)
