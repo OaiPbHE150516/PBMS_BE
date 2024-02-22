@@ -28,7 +28,7 @@ public class AccountCollab
     [Column("account_id")]
     public string AccountID { get; set; } = String.Empty;
 
-    [Column("isFundholder")]
+    [Column("isfundholder")]
     public bool IsFundholder { get; set; }
 
     [Column("as_id")]

@@ -42,5 +42,5 @@ public class CollabFund
     public int ActiveStateID { get; set; }
     public virtual ActiveState ActiveState { get; set; } = null!;
 
-    public virtual ICollection<CollabFundActivity> CollabFundActivities { get; set; } = null!;
+    public virtual List<CollabFundActivity> CollabFundActivities { get; set; } = null!;
 }
