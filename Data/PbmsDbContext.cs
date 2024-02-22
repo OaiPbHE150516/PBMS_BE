@@ -7,7 +7,32 @@ namespace pbms_be.Data
     {
         private readonly IConfiguration _configuration;
 
-        public DbSet<Sample> Sample { get; set; }
+        public DbSet<Auth.Account> Account { get; set; }
+        public DbSet<Auth.Role> Role { get; set; }
+
+        public DbSet<WalletF.Currency> Currency { get; set; }
+
+        public DbSet<WalletF.Wallet> Wallet { get; set; }
+
+        public DbSet<Status.ActiveState> ActiveState { get; set; }
+
+        public DbSet<Filter.Category> Category { get; set; }
+
+        public DbSet<Trans.Transaction> Transaction { get; set; }
+
+        public DbSet<Invo.Invoice> Invoice { get; set; }
+
+        public DbSet<Invo.ProductInInvoice> ProductInInvoice { get; set; }
+
+        // start of collab fund
+        public DbSet<CollabFund.CollabFund> CollabFund { get; set; }
+
+        public DbSet<CollabFund.AccountCollab> AccountCollab { get; set; }
+
+        public DbSet<CollabFund.CollabFundActivity> CollabFundActivity { get; set; }
+
+
+        // end of collab fund
 
         public PbmsDbContext(DbContextOptions options, IConfiguration configuration) : base(options)
         {

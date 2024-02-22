@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using pbms_be.Configurations;
 using pbms_be.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,12 +9,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(
+    options => options.SwaggerDoc("v1",
+    new()
+    {
+        Title = "pbms_be",
+        Version = "v1"
+    }));
+builder.Services.AddAutoMapper(typeof(MapperConfig));
 
 // add db context using postgresql
 builder.Services.AddDbContext<PbmsDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionString")));
-    
+
 
 var app = builder.Build();
 
@@ -23,6 +31,8 @@ var app = builder.Build();
 //    app.UseSwagger();
 //    app.UseSwaggerUI();
 //}
+
+app.UseCors(options => options.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
 
 app.UseSwagger();
 app.UseSwaggerUI();
