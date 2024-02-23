@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using pbms_be.Configurations;
 using pbms_be.Data;
+using pbms_be.Data.Auth;
 using pbms_be.Data.CollabFund;
 using pbms_be.DataAccess;
 using pbms_be.DTOs;
@@ -44,7 +45,7 @@ namespace pbms_be.Controllers
         }
 
         // get detail collab fund by collab fund id and account id
-        [HttpGet("get/detail/id/{collabFundID}/account/{accountID}")]
+        [HttpGet("get/detail/{collabFundID}/{accountID}")]
         public IActionResult GetDetailCollabFund(int collabFundID, string accountID)
         {
             try
@@ -64,7 +65,7 @@ namespace pbms_be.Controllers
         }
 
         // get all activity collab fund by collab fund id and account id
-        [HttpGet("get/activity/id/{collabFundID}/account/{accountID}")]
+        [HttpGet("get/activity/{collabFundID}/{accountID}")]
         public IActionResult GetAllActivityCollabFund(int collabFundID, string accountID)
         {
             try
@@ -81,7 +82,7 @@ namespace pbms_be.Controllers
         }
 
         // get all accounts ( as parties) of collab fund by collab fund id and account id
-        [HttpGet("get/member/id/{collabFundID}/account/{accountID}")]
+        [HttpGet("get/member/{collabFundID}/{accountID}")]
         public IActionResult GetAllMemberCollabFund(int collabFundID, string accountID)
         {
             try
@@ -89,6 +90,25 @@ namespace pbms_be.Controllers
                 if (collabFundID <= 0) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 var result = _collabFundDA.GetAllMemberCollabFund(collabFundID, accountID);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // get list account by contain email address and their state with collab fund
+        [HttpGet("get/account/{collabfundID}/{email}")]
+        public IActionResult GetAccountByEmail(int collabfundID, string email)
+        {
+            try
+            {
+                if (collabfundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(email)) return BadRequest(Message.EMAIL_ADDRESS_REQUIRED);
+                List<Account> accountEmail = _collabFundDA.GetAccountByEmail(email);
+                if (accountEmail is null) return BadRequest(Message.ACCOUNT_NOT_FOUND);
+                var result = _collabFundDA.GetAccountByEmailAndCollabFundID(collabfundID, accountEmail);
                 return Ok(result);
             }
             catch (System.Exception e)
@@ -164,14 +184,13 @@ namespace pbms_be.Controllers
         }
 
         // add member to collab fund by collab fund id and account id, only fundholder can add member
-        [HttpPost("add/member")]
-        public IActionResult AddMemberCollabFund([FromBody] MemberCollabFundDTO addMemberCollabFundDTO)
+        [HttpPost("invite")]
+        public IActionResult InviteMemberCollabFund([FromBody] MemberCollabFundDTO addMemberCollabFundDTO)
         {
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
-                CollabFundDA collabFundDA = new CollabFundDA(_context);
-                var result = collabFundDA.AddMemberCollabFund(addMemberCollabFundDTO);
+                var result = _collabFundDA.InviteMemberCollabFund(addMemberCollabFundDTO);
                 return Ok(result);
             }
             catch (System.Exception e)
@@ -179,6 +198,8 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        
 
         /*=======================           End of Post Methods          =======================*/
 
@@ -218,6 +239,23 @@ namespace pbms_be.Controllers
             }
         }
 
+        // accept invitation to join collab fund by collab fund id and account id
+        [HttpPut("accept")]
+        public IActionResult AcceptMemberCollabFund([FromBody] MemberCollabFundDTO acceptMemberCollabFundDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = _collabFundDA.AcceptMemberCollabFund(acceptMemberCollabFundDTO);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        
         /*=======================           End of Put Methods          =======================*/
 
 
@@ -239,6 +277,38 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
-        
+
+        // decline invitation to join collab fund by collab fund id and account id
+        [HttpDelete("decline")]
+        public IActionResult DeclineMemberCollabFund([FromBody] MemberCollabFundDTO declineMemberCollabFundDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = _collabFundDA.DeclineMemberCollabFund(declineMemberCollabFundDTO);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // delete invitation to join collab fund by collab fund id and account id, only fundholder can delete invitation
+        [HttpDelete("delete/invitation")]
+        public IActionResult DeleteInvitationCollabFund([FromBody] MemberCollabFundDTO deleteInvitationCollabFundDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = _collabFundDA.DeleteInvitationCollabFund(deleteInvitationCollabFundDTO);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
     }
 }

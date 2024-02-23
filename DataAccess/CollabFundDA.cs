@@ -3,6 +3,7 @@ using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Auth;
 using pbms_be.Data.CollabFund;
+using pbms_be.Data.Status;
 using pbms_be.Data.Trans;
 using pbms_be.DTOs;
 using System.Collections.Generic;
@@ -346,41 +347,41 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal List<Account> AddMemberCollabFund(MemberCollabFundDTO AddMemberDTO)
-        {
-            try
-            {
-                // 1. check if account is fundholder
-                var collabAccount = IsFundholderCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountFundholderID);
-                if (collabAccount) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+        //internal List<Account> AddMemberCollabFund(MemberCollabFundDTO AddMemberDTO)
+        //{
+        //    try
+        //    {
+        //        // 1. check if account is fundholder
+        //        var collabAccount = IsFundholderCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountFundholderID);
+        //        if (collabAccount) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
 
-                // 2. check if account is exist
-                var authDA = new AuthDA(_context);
-                var account = authDA.GetAccount(AddMemberDTO.AccountMemberID);
-                if (account is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+        //        // 2. check if account is exist
+        //        var authDA = new AuthDA(_context);
+        //        var account = authDA.GetAccount(AddMemberDTO.AccountMemberID);
+        //        if (account is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
 
-                //3. check if account is already a member
-                var isExist = IsAlreadyMemberCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountMemberID);
-                if (isExist) throw new Exception(Message.ACCOUNT_ALREADY_IS_MEMBER);
+        //        //3. check if account is already a member
+        //        var isExist = IsAlreadyMemberCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountMemberID);
+        //        if (isExist) throw new Exception(Message.ACCOUNT_ALREADY_IS_MEMBER);
 
-                // 4. add account as member
-                var accountCollab = new AccountCollab
-                {
-                    AccountID = AddMemberDTO.AccountMemberID,
-                    CollabFundID = AddMemberDTO.CollabFundID,
-                    IsFundholder = false,
-                    ActiveStateID = ActiveStateConst.ACTIVE
-                };
-                _context.AccountCollab.Add(accountCollab);
-                _context.SaveChanges();
-                // 5. return all member
-                return GetAllMemberCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountFundholderID);
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
+        //        // 4. add account as member
+        //        var accountCollab = new AccountCollab
+        //        {
+        //            AccountID = AddMemberDTO.AccountMemberID,
+        //            CollabFundID = AddMemberDTO.CollabFundID,
+        //            IsFundholder = false,
+        //            ActiveStateID = ActiveStateConst.ACTIVE
+        //        };
+        //        _context.AccountCollab.Add(accountCollab);
+        //        _context.SaveChanges();
+        //        // 5. return all member
+        //        return GetAllMemberCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountFundholderID);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception(e.Message);
+        //    }
+        //}
 
         private bool IsAlreadyMemberCollabFund(int collabFundID, string accountMemberID)
         {
@@ -473,12 +474,163 @@ namespace pbms_be.DataAccess
                     .FirstOrDefault();
                 if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
                 accountCollab.ActiveStateID = ActiveStateConst.INACTIVE;
+                accountCollab.LastTime = DateTime.UtcNow;
                 _context.SaveChanges();
 
                 // 4. return all member
                 return GetAllMemberCollabFund(deleteMemberCollabFundDTO.CollabFundID, deleteMemberCollabFundDTO.AccountFundholderID);
             }
             catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object AcceptMemberCollabFund(MemberCollabFundDTO acceptMemberCollabFundDTO)
+        {
+            try
+            {
+                // 1. check if account is fundholder
+                var isFundholder = IsFundholderCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountFundholderID);
+                if (!isFundholder) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+
+                // 2. check if account is already invited
+                var isInvited = IsAlreadyInvitedCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountMemberID);
+                if (!isInvited) throw new Exception(Message.ACCOUNT_WAS_NOT_INVITED);
+
+                // 3. accept account as member
+                var accountCollab = _context.AccountCollab
+                    .Where(ca => ca.CollabFundID == acceptMemberCollabFundDTO.CollabFundID
+                                       && ca.AccountID == acceptMemberCollabFundDTO.AccountMemberID)
+                    .FirstOrDefault();
+                if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                accountCollab.ActiveStateID = ActiveStateConst.ACTIVE;
+                accountCollab.LastTime = DateTime.UtcNow;
+                _context.SaveChanges();
+
+                // 4. return all member
+                return GetAllMemberCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountFundholderID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object DeclineMemberCollabFund(MemberCollabFundDTO declineMemberCollabFundDTO)
+        {
+            try
+            {
+                // 2. check if account is already invited
+                var isInvited = IsAlreadyInvitedCollabFund(declineMemberCollabFundDTO.CollabFundID, declineMemberCollabFundDTO.AccountMemberID);
+                if (!isInvited) throw new Exception(Message.ACCOUNT_WAS_NOT_INVITED);
+
+                // 3. decline account as member
+                var accountCollab = _context.AccountCollab
+                    .Where(ca => ca.CollabFundID == declineMemberCollabFundDTO.CollabFundID
+                                                          && ca.AccountID == declineMemberCollabFundDTO.AccountMemberID)
+                    .FirstOrDefault();
+                if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                accountCollab.ActiveStateID = ActiveStateConst.INACTIVE;
+                accountCollab.LastTime = DateTime.UtcNow;
+                _context.SaveChanges();
+
+                // 4. return all member
+                return GetAllMemberCollabFund(declineMemberCollabFundDTO.CollabFundID, declineMemberCollabFundDTO.AccountFundholderID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object DeleteInvitationCollabFund(MemberCollabFundDTO deleteInvitationCollabFundDTO)
+        {
+            try
+            {
+                // 1. check if account is fundholder
+                var isFundholder = IsFundholderCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountFundholderID);
+                if (!isFundholder) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+
+                // 2. check if account is already invited
+                var isInvited = IsAlreadyInvitedCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountMemberID);
+                if (!isInvited) throw new Exception(Message.ACCOUNT_WAS_NOT_INVITED);
+
+                // 3. delete account as member
+                var accountCollab = _context.AccountCollab
+                    .Where(ca => ca.CollabFundID == deleteInvitationCollabFundDTO.CollabFundID
+                                                                             && ca.AccountID == deleteInvitationCollabFundDTO.AccountMemberID)
+                    .FirstOrDefault();
+                if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                accountCollab.ActiveStateID = ActiveStateConst.INACTIVE;
+                accountCollab.LastTime = DateTime.UtcNow;
+                _context.SaveChanges();
+
+                // 4. return all member
+                return GetAllMemberCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountFundholderID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal List<Account> GetAccountByEmail(string email)
+        {
+            try
+            {
+                var result = _context.Account
+                    .Where(a => a.EmailAddress.Contains(email) || a.AccountName.Contains(email))
+                    .ToList();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal List<CollabFundAccountActiveStateDTO> GetAccountByEmailAndCollabFundID(int collabfundID, List<Account> accountEmail)
+        {
+            try
+            {
+                var result = new List<CollabFundAccountActiveStateDTO>();
+                foreach (var item in accountEmail)
+                {
+                    var accountCollab = _context.AccountCollab
+                        .Where(ca => ca.CollabFundID == collabfundID && ca.AccountID == item.AccountID)
+                        .Include(ca => ca.ActiveState)
+                        .FirstOrDefault();
+                    if (accountCollab != null)
+                    {
+                        var account = new CollabFundAccountActiveStateDTO
+                        {
+                            AccountID = item.AccountID,
+                            AccountName = item.AccountName,
+                            EmailAddress = item.EmailAddress,
+                            CFA_ActiveStateID = accountCollab.ActiveStateID,
+                            CFA_ActiveState = accountCollab.ActiveState
+                        };
+                        result.Add(account);
+                        continue;
+                    }
+                    // if not found, add account with active state is inactive ( can invite to join collab fund)
+                    var newaccount = new CollabFundAccountActiveStateDTO
+                    {
+                        AccountID = item.AccountID,
+                        AccountName = item.AccountName,
+                        EmailAddress = item.EmailAddress,
+                        CFA_ActiveStateID = ActiveStateConst.INACTIVE,
+                        CFA_ActiveState = new ActiveState
+                        {
+                            ActiveStateID = ActiveStateConst.INACTIVE,
+                            Name = ActiveStateConst.INACTIVE_NAME
+                        }
+                    };
+                    result.Add(newaccount);
+                }
+                return result;
+            } catch (Exception e)
             {
                 throw new Exception(e.Message);
             }

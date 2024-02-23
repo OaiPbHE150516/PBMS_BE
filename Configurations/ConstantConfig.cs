@@ -38,6 +38,10 @@
         public const int DEFAULT_ACTIVE_STATE_VALUE = 1;
         // Dùng trong trường hợp không có transaction id
         public const int DEFAULT_NULL_TRANSACTION_ID = 1;
+        // default primary key
+        public const int DEFAULT_PRIMARY_KEY = 1;
+        // default value for zero
+        public const int DEFAULT_ZERO_VALUE = 0;
 
     }
 
@@ -47,7 +51,8 @@
         public const string INVOICE_ID_REQUIRED = "InvoiceID is required";
         public const string FILE_IS_NULL = "File is null or not of type pdf";
         public const string FILE_IS_NOT_PDF_JPG_PNG = "File is null or not of type pdf, jpg or png";
-
+        // email address is required
+        public const string EMAIL_ADDRESS_REQUIRED = "Email address is required";
 
         // Collab fund
         public const string COLLAB_FUND_ALREADY_EXIST = "Collab fund already exist";
@@ -62,6 +67,9 @@
         public const string ACCOUNT_ALREADY_IS_FUNDHOLDER = "Account is fundholder";
         public const string ACCOUNT_IS_NOT_IN_COLLAB_FUND = "Account is not in collab fund";
         public const string ACCOUNT_ALREADY_INVITED = "Account is already invited";
+        public const string ACCOUNT_ALREADY_ACCEPTED = "Account is already accepted";
+        public const string ACCOUNT_ALREADY_REJECTED = "Account is already rejected";
+        public const string ACCOUNT_WAS_NOT_INVITED = "Account was not invited";
 
 
 
@@ -72,10 +80,15 @@
     public class ActiveStateConst
     {
         public const int ACTIVE = 1;
+        public const string ACTIVE_NAME = "active";
         public const int INACTIVE = 2;
+        public const string INACTIVE_NAME = "inactive";
         public const int PENDING = 3;
+        public const string PENDING_NAME = "pending";
         public const int SUSPENDED = 4;
+        public const string SUSPENDED_NAME = "suspended";
         public const int DELETED = 5;
+        public const string DELETED_NAME = "deleted";
     }
 
     public class InvoiceConfig

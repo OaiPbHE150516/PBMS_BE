@@ -12,6 +12,7 @@ public class AccountCollab
         account_id VARCHAR ( 100 ) NOT NULL,
         isFundholder BOOLEAN NOT NULL DEFAULT FALSE,
         as_id INT NOT NULL DEFAULT 1,
+        last_time timestamp not null default current_timestamp,
         FOREIGN KEY (collabfund_id) REFERENCES collabfund (collabfund_id),
         FOREIGN KEY (account_id) REFERENCES account (account_id),
         FOREIGN KEY (as_id) REFERENCES active_state (as_id)
@@ -34,4 +35,7 @@ public class AccountCollab
     [Column("as_id")]
     public int ActiveStateID { get; set; }
     public virtual ActiveState ActiveState { get; set; } = null!;
+
+    [Column("last_time")]
+    public DateTime LastTime { get; set; } = DateTime.UtcNow;
 }

@@ -1,4 +1,6 @@
-﻿using pbms_be.Data.Trans;
+﻿using pbms_be.Data.Auth;
+using pbms_be.Data.Status;
+using pbms_be.Data.Trans;
 
 namespace pbms_be.DTOs
 {
@@ -58,5 +60,11 @@ namespace pbms_be.DTOs
         public int CollabFundID { get; set; }
         public string AccountFundholderID { get; set; } = String.Empty;
         public string AccountMemberID { get; set; } = String.Empty;
+    }
+
+    public class CollabFundAccountActiveStateDTO : Account
+    {
+        public int CFA_ActiveStateID { get; set; }
+        public virtual ActiveState CFA_ActiveState { get; set; } = null!;
     }
 }
