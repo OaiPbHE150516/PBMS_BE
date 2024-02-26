@@ -50,7 +50,7 @@ namespace pbms_be.Controllers
         {
             try
             {
-                if (collabFundID <= 0) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 CollabFund collabfund = new CollabFund();
                 bool isExist = false;
@@ -70,7 +70,7 @@ namespace pbms_be.Controllers
         {
             try
             {
-                if (collabFundID <= 0) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 var result = _collabFundDA.GetAllActivityCollabFund(collabFundID, accountID);
                 return Ok(result);
@@ -87,7 +87,7 @@ namespace pbms_be.Controllers
         {
             try
             {
-                if (collabFundID <= 0) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 var result = _collabFundDA.GetAllMemberCollabFund(collabFundID, accountID);
                 return Ok(result);

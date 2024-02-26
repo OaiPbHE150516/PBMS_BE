@@ -41,7 +41,7 @@
         // default primary key
         public const int DEFAULT_PRIMARY_KEY = 1;
         // default value for zero
-        public const int DEFAULT_ZERO_VALUE = 0;
+        public const int DEFAULT_ZERO_VALUE  = 0;
 
     }
 
