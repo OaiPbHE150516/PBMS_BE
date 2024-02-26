@@ -31,6 +31,9 @@ namespace pbms_be.Data
 
         public DbSet<CollabFund.CollabFundActivity> CollabFundActivity { get; set; }
 
+        public DbSet<CollabFund.CF_DividingMoney> CF_DividingMoney { get; set; }
+
+        public DbSet<CollabFund.CF_DividingMoneyDetail> CF_DividingMoneyDetail { get; set; }
 
         // end of collab fund
 

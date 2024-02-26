@@ -52,6 +52,9 @@ namespace pbms_be.Controllers
             {
                 if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false)
+                    return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+
                 CollabFund collabfund = new CollabFund();
                 bool isExist = false;
                 _collabFundDA.GetDetailCollabFund(collabFundID, accountID, out isExist, out collabfund);
@@ -72,6 +75,8 @@ namespace pbms_be.Controllers
             {
                 if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) 
+                    return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 var result = _collabFundDA.GetAllActivityCollabFund(collabFundID, accountID);
                 return Ok(result);
             }
@@ -109,6 +114,26 @@ namespace pbms_be.Controllers
                 List<Account> accountEmail = _collabFundDA.GetAccountByEmail(email);
                 if (accountEmail is null) return BadRequest(Message.ACCOUNT_NOT_FOUND);
                 var result = _collabFundDA.GetAccountByEmailAndCollabFundID(collabfundID, accountEmail);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // get all invitation collab fund by collab fund id and account id
+
+        // get all dividing money and detail by collab fund id and account id
+        [HttpGet("get/dividing-money/{collabFundID}/{accountID}")]
+        public IActionResult GetAllDividingMoneyAndDetail(int collabFundID, string accountID)
+        {
+            try
+            {
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if(_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+                var result = _collabFundDA.GetAllDividingMoneyWithDetail(collabFundID, accountID);
                 return Ok(result);
             }
             catch (System.Exception e)
@@ -312,3 +337,23 @@ namespace pbms_be.Controllers
 
     }
 }
+
+/*
+ Note: 27/02
+I. Collab_Fund
+    1. Thêm 1 mothod get được tất cả thông tin của 1 collab fund
+    2. Thêm hàm để thực hiện hành động chia tiền
+    3. Thêm hàm để 1 người dùng lấy thông tin của ví người đích ( mã QR và banking infor) 
+        cùng với số tiền để chuyển
+    4. Thêm hàm để sau khi người dùng chuyển tiền xong, thì cập nhật lại isDone của 
+        cf_dividing_money_detail
+III. Transaction
+    1. Thêm hàm để chuyển tiền từ 1 người này sang người khác
+    2. Thêm hàm để lấy thông tin của 1 transaction
+III. Notification
+    1. Thêm hàm để chủ động gửi thông báo cho người dùng khi thỏa mãn điều kiện nào đó
+
+
+
+
+ */

@@ -630,10 +630,73 @@ namespace pbms_be.DataAccess
                     result.Add(newaccount);
                 }
                 return result;
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
+        }
+
+        internal object GetAllDividingMoneyWithDetail(int collabFundID, string accountID)
+        {
+            try
+            {
+                var dividingMoney = _context.CF_DividingMoney
+                    .Where(cfdm => cfdm.CollabFundID == collabFundID
+                                           && cfdm.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .Include(cfdm => cfdm.ActiveState)
+                    .ToList();
+
+                var dividingMoneyDetail = new List<CF_DividingMoneyDetail>();
+                var _authDA = new AuthDA(_context);
+                foreach (var item in dividingMoney)
+                {
+                    var detail = _context.CF_DividingMoneyDetail
+                                .Where(cfdmd => cfdmd.CF_DividingMoneyID == item.CF_DividingMoneyID)
+                                .ToList();
+                    foreach (var itemDetail in detail)
+                    {
+                        itemDetail.FromAccount = _authDA.GetAccount(itemDetail.FromAccountID);
+                        itemDetail.ToAccount = _authDA.GetAccount(itemDetail.ToAccountID);
+                        var time = ConvertTimeFromUtc(itemDetail.LastTime);
+                        itemDetail.LastTime = time;
+                    }
+                    dividingMoneyDetail.AddRange(detail);
+                }
+                return dividingMoney;
+                //return new { result, dividingMoney, dividingMoneyDetail };
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal bool IsAccountInCollabFund(string accountID, int collabFundID)
+        {
+            try
+            {
+                var result = _context.AccountCollab
+                    .Where(ca => ca.AccountID == accountID
+                                && ca.CollabFundID == collabFundID
+                                && ca.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .FirstOrDefault();
+                return result != null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        // a function to add system location utc time to input time
+        internal DateTime ConvertTimeFromUtc(DateTime time)
+        {
+            //return TimeZoneInfo.ConvertTimeFromUtc(time, TimeZoneInfo.Local);
+            //var timeZone = TimeZoneInfo.Local.GetUtcOffset(time).Hours;
+            //Console.WriteLine("timeZone: " + timeZone);
+            //return time.AddHours(timeZone);
+            return time.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
         }
     }
 }

@@ -19,10 +19,16 @@ namespace pbms_be.DataAccess
             return result != null;
         }
 
-        public Account? GetAccount(string AccountID)
+        public Account GetAccount(string AccountID)
         {
-            var result = _context.Account.Where(a => a.AccountID == AccountID).FirstOrDefault();
-            return result;
+            try
+            {
+                var result = _context.Account.Where(a => a.AccountID == AccountID).FirstOrDefault();
+                return result;
+            } catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         public Account? CreateAccount(Account account)
