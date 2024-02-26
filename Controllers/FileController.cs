@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace pbms_be.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/file")]
     [ApiController]
     public class FileController : ControllerBase
     {

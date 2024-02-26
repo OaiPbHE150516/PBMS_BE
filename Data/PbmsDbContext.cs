@@ -11,6 +11,7 @@ namespace pbms_be.Data
         public DbSet<Auth.Role> Role { get; set; }
 
         public DbSet<WalletF.Currency> Currency { get; set; }
+
         public DbSet<WalletF.Wallet> Wallet { get; set; }
 
         public DbSet<Status.ActiveState> ActiveState { get; set; }
@@ -21,7 +22,17 @@ namespace pbms_be.Data
 
         public DbSet<Invo.Invoice> Invoice { get; set; }
 
-        //public DbSet<Invo.ProductInInvoice> ProductInInvoice { get; set; }
+        public DbSet<Invo.ProductInInvoice> ProductInInvoice { get; set; }
+
+        // start of collab fund
+        public DbSet<CollabFund.CollabFund> CollabFund { get; set; }
+
+        public DbSet<CollabFund.AccountCollab> AccountCollab { get; set; }
+
+        public DbSet<CollabFund.CollabFundActivity> CollabFundActivity { get; set; }
+
+
+        // end of collab fund
 
         public PbmsDbContext(DbContextOptions options, IConfiguration configuration) : base(options)
         {

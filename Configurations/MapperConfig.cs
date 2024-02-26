@@ -11,6 +11,15 @@ namespace pbms_be.Configurations
 
             CreateMap<Data.WalletF.Wallet, DTOs.WalletDTO>().ReverseMap();
             CreateMap<Data.WalletF.Wallet, DTOs.WalletCreateDTO>().ReverseMap();
+        
+            //CollabFund
+            CreateMap<Data.CollabFund.CollabFund, DTOs.CreateCollabFundDTO>().ReverseMap();
+            CreateMap<Data.CollabFund.CollabFund, DTOs.UpdateCollabFundDTO>().ReverseMap();
+            CreateMap<Data.CollabFund.CollabFund, DTOs.ChangeCollabFundActiveStateDTO>().ReverseMap();
+
+            //CollabFundActivity
+            CreateMap<Data.CollabFund.CollabFundActivity, DTOs.CreateCfaNoTransactionDTO>().ReverseMap();
+
         }
     }
 }
