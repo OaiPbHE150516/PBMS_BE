@@ -28,6 +28,7 @@ namespace pbms_be.Controllers
 
         /*=======================           Get Methods          =======================*/
 
+        #region Get Methods
         // get all collab fund by account id
         [HttpGet("get/account/{accountID}")]
         public IActionResult GetCollabFunds(string accountID)
@@ -75,7 +76,7 @@ namespace pbms_be.Controllers
             {
                 if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
-                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) 
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false)
                     return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 var result = _collabFundDA.GetAllActivityCollabFund(collabFundID, accountID);
                 return Ok(result);
@@ -132,7 +133,7 @@ namespace pbms_be.Controllers
             {
                 if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
-                if(_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 var result = _collabFundDA.GetAllDividingMoneyWithDetail(collabFundID, accountID);
                 return Ok(result);
             }
@@ -142,12 +143,9 @@ namespace pbms_be.Controllers
             }
         }
 
+        #endregion Get Methods
 
-
-        /*=======================           End of Get Methods          =======================*/
-
-        /*=======================           Post Methods          =======================*/
-
+        #region Post Methods
         // create collab fund
         [HttpPost("create")]
         public IActionResult CreateCollabFund([FromBody] CreateCollabFundDTO collabFundDTO)
@@ -224,11 +222,9 @@ namespace pbms_be.Controllers
             }
         }
 
-        
+        #endregion Post Methods
 
-        /*=======================           End of Post Methods          =======================*/
-
-        /*=======================           Put Methods          =======================*/
+        #region Put Methods
 
         // update collab fund
         [HttpPut("update")]
@@ -280,12 +276,11 @@ namespace pbms_be.Controllers
             }
         }
 
-        
-        /*=======================           End of Put Methods          =======================*/
+        #endregion Put Methods
 
 
-        /*=======================           Delete Methods          =======================*/
 
+        #region Delete Methods
         // delete a member from collab fund by collab fund id and account id, only fundholder can delete member
         [HttpDelete("delete/member")]
         public IActionResult DeleteMemberCollabFund([FromBody] MemberCollabFundDTO deleteMemberCollabFundDTO)
@@ -334,6 +329,8 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        #endregion Delete Methods
 
     }
 }
