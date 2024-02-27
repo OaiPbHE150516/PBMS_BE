@@ -41,7 +41,7 @@ public class CF_DividingMoneyDetail
     public virtual Account ToAccount { get; set; } = null!;
 
     [Column("dividing_amount")]
-    public int DividingAmount { get; set; }
+    public long DividingAmount { get; set; }
 
     [Column("isdone")]
     public bool IsDone { get; set; } = false;

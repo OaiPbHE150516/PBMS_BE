@@ -35,6 +35,10 @@ namespace pbms_be.Data
 
         public DbSet<CollabFund.CF_DividingMoneyDetail> CF_DividingMoneyDetail { get; set; }
 
+
+        public DbSet<Custom.DivideMoneyInfo> DivideMoneyInfo { get; set; }
+
+
         // end of collab fund
 
         public PbmsDbContext(DbContextOptions options, IConfiguration configuration) : base(options)

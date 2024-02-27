@@ -143,6 +143,34 @@ namespace pbms_be.Controllers
             }
         }
 
+        // get divide money information by collab fund id and account id before divide money action
+        //[HttpGet("get/divide-money-info/{collabFundID}/{accountID}")]
+        //public IActionResult GetDivideMoneyInfo(int collabFundID, string accountID)
+        [HttpGet("get/divide-money-info/")]
+        public IActionResult GetDivideMoneyInfo()
+        {
+            int collabFundID = 5;
+            string accountID = "a1";
+            try
+            {
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+
+                var dividemoneyinfor = _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID);
+
+                if (dividemoneyinfor is null) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                // convert property in dividemoneyinfor to string
+                //var cf_dividing_moneyEntity = _mapper.Map<CF_DividingMoney_MV_DTO>(dividemoneyinfor);
+                return Ok(dividemoneyinfor);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         #endregion Get Methods
 
         #region Post Methods
@@ -278,8 +306,6 @@ namespace pbms_be.Controllers
 
         #endregion Put Methods
 
-
-
         #region Delete Methods
         // delete a member from collab fund by collab fund id and account id, only fundholder can delete member
         [HttpDelete("delete/member")]
@@ -337,12 +363,17 @@ namespace pbms_be.Controllers
 
 /*
  Note: 27/02
-I. Collab_Fund
-    1. Thêm 1 mothod get được tất cả thông tin của 1 collab fund
-    2. Thêm hàm để thực hiện hành động chia tiền
-    3. Thêm hàm để 1 người dùng lấy thông tin của ví người đích ( mã QR và banking infor) 
+I. Collab_Fund 
+    - Thêm 1 mothod get được tất cả thông tin của 1 collab fund
+    - OK: Thêm hàm để lấy tất cả số tiền đã chi ra của 
+        một người tham gia collab fund (kể từ lần chia cuối cùng) đến thời điểm hiện tại.
+        - trong thời gian chia tiền, nếu người dùng có thêm giao dịch thì để cho lần sau chia tiền.
+        - để
+    - Thêm hàm để xem thông tin chia tiền của 1 lần chia tiền trước khi thực hiện hành động chia tiền
+    - Thêm hàm để thực hiện hành động chia tiền. thêm popup để chọn người cần chia tiền ( thường là tất cả mọi người)
+    - Thêm hàm để 1 người dùng lấy thông tin của ví người đích ( mã QR và banking infor) 
         cùng với số tiền để chuyển
-    4. Thêm hàm để sau khi người dùng chuyển tiền xong, thì cập nhật lại isDone của 
+    - Thêm hàm để sau khi người dùng chuyển tiền xong, thì cập nhật lại isDone của 
         cf_dividing_money_detail
 III. Transaction
     1. Thêm hàm để chuyển tiền từ 1 người này sang người khác

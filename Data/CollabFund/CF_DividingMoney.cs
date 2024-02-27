@@ -34,16 +34,16 @@ public class CF_DividingMoney
     public int CollabFunActivityID { get; set; }
 
     [Column("total_amount")]
-    public int TotalAmount { get; set; }
+    public long TotalAmount { get; set; }
 
     [Column("number_of_party")]
-    public int NumberOfParty { get; set; }
+    public int NumberParticipant { get; set; }
 
     [Column("average_amount")]
-    public int AverageAmount { get; set; }
+    public long AverageAmount { get; set; }
 
     [Column("remain_amount")]
-    public int RemainAmount { get; set; }
+    public long RemainAmount { get; set; }
 
     [Column("as_id")]
     public int ActiveStateID { get; set; }

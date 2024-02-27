@@ -3,10 +3,12 @@ using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Auth;
 using pbms_be.Data.CollabFund;
+using pbms_be.Data.Custom;
 using pbms_be.Data.Status;
 using pbms_be.Data.Trans;
 using pbms_be.DTOs;
 using System.Collections.Generic;
+using static Google.Cloud.DocumentAI.V1.BatchProcessMetadata.Types;
 
 namespace pbms_be.DataAccess
 {
@@ -697,6 +699,181 @@ namespace pbms_be.DataAccess
             //Console.WriteLine("timeZone: " + timeZone);
             //return time.AddHours(timeZone);
             return time.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
+        }
+
+        //internal object GetAllAmountContributed(int collabFundID, string accountID)
+        //{
+        //    try
+        //    {
+        //        var result = GetDivideMoneyInfo(collabFundID, accountID).Find(p => p.AccountID == accountID);
+        //        return result;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception(e.Message);
+        //    }
+        //}
+
+        internal object GetDivideMoneyInfo(int collabFundID, string accountID)
+        {
+            try
+            {
+                var divideMoneyInfor = GetDivideMoneyCollabFund(collabFundID);
+                var totalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                var numberParticipant = divideMoneyInfor.Count;
+                // cast totalAmount to int, chỗ này phải xử lý đề tiền chẵn.
+                var totalAmountInt = (int)totalAmount;
+                int averageAmount = totalAmountInt / numberParticipant;
+                var remainAmount = totalAmount - averageAmount * numberParticipant;
+                var cf_dividingmoney = new CF_DividingMoney
+                {
+                    CollabFundID = collabFundID,
+                    TotalAmount = totalAmount,
+                    NumberParticipant = numberParticipant,
+                    AverageAmount = averageAmount,
+                    RemainAmount = remainAmount
+                };
+
+                var listDetail = new List<DivideMoneyExecute>();
+                foreach (var item in divideMoneyInfor)
+                {
+                    var dividingAmount = item.TotalAmount - averageAmount;
+                    switch (dividingAmount)
+                    {
+                        case 0:
+                            var detail0 = new DivideMoneyExecute
+                            {
+                                FromAccountID = item.AccountID,
+                                ToAccountID = item.AccountID,
+                                ActualAmount = dividingAmount,
+                                State = 0
+                            };
+                            break;
+                        case > 0:
+                            var detail1 = new DivideMoneyExecute
+                            {
+                                ToAccountID = item.AccountID,
+                                ActualAmount = dividingAmount,
+                                State = 1
+                            };
+                            listDetail.Add(detail1);
+                            break;
+                        case < 0:
+                            var detail2 = new DivideMoneyExecute
+                            {
+                                FromAccountID = item.AccountID,
+                                ActualAmount = dividingAmount,
+                                State = -1
+                            };
+                            listDetail.Add(detail2);
+                            break;
+                    }
+                }
+                // sort listDetail by ActualAmount
+                listDetail.Sort((x, y) => x.ActualAmount.CompareTo(y.ActualAmount));
+
+                //var listDetail2 = new List<DivideMoneyExecute>();
+                var listDetail3 = new List<DivideMoneyExecute>();
+                bool shouldLoop = true;
+                while (true)
+                {
+                    var listDetail2 = new List<DivideMoneyExecute>(listDetail);
+                    // remove all item with actualAmount = 0
+                    listDetail2.RemoveAll(p => p.ActualAmount == 0);
+                    foreach (var item in listDetail2)
+                    {
+                        var toAccount = listDetail2.Find(p => p.ActualAmount > 0 && p.FromAccountID == null);
+                        if (toAccount != null)
+                        {
+                            item.ToAccountID = toAccount.ToAccountID;
+                            var actual = Math.Abs(item.ActualAmount) - toAccount.ActualAmount;
+                            item.ActualAmount = actual;
+                            if (actual > 0)
+                            {
+                                continue;
+                            }
+                            else break;
+                        }
+
+                    }
+                }
+
+                //if (item.State < 0)
+                //{
+                //    while (item.RemainAmount > 0)
+                //    {
+                //        // find the first account with state = 1, fromAccountID = null, then set fromAccountID = item.ToAccountID
+                //        var toAccount = listDetail.Find(p => p.State == 1 && p.FromAccountID == null);
+                //        if (toAccount != null)
+                //        {
+                //            item.ToAccountID = toAccount.ToAccountID;
+                //            item.State = 0;
+                //            var actual = Math.Abs(item.ActualAmount) - toAccount.ActualAmount;
+                //            item.ActualAmount = actual;
+                //            if (actual > 0)
+                //            {
+                //                continue;
+                //            }
+                //            else break;
+                //        }
+                //    }
+                //    listDetail2.Add(item);
+                //}
+
+                //return new { cf_dividingmoney, listDetail, listDetail2 };
+                //return cf_dividingmoney;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal List<DivideMoneyInfo> GetDivideMoneyCollabFund(int collabFundID)
+        {
+            try
+            {
+                /* câu query lấy ra tất cả thông tin về số tiền đã đóng góp của mỗi thành viên trong collab fund
+                 * điều kiện: 
+                 * - kể từ lần chia tiền cuối cùng (isBeforeDivide = true) hoặc từ đầu nếu ko có lần chia tiền đầu tiên
+                 * - id của các activity ghi lại transaction phải lớn hơn id của lần chia tiền cuối cùng
+                 * 
+                     WITH FirstTrue AS (
+                         SELECT account_id, collab_fun_activity_id, MIN(collab_fun_activity_id) as min_id
+                         FROM collab_fun_activity
+                         WHERE isBeforeDivide = true
+                         GROUP BY account_id, collab_fun_activity_id
+                     )
+                     SELECT cf.account_id, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(COUNT(t.transaction_id), 0) as transaction_count
+                     FROM collab_fun_activity as cf
+                     LEFT JOIN transaction as t ON cf.transaction_id = t.transaction_id
+                     LEFT JOIN FirstTrue as ft ON cf.account_id = ft.account_id
+                     WHERE cf.collabfund_id = 2
+                         AND cf.isBeforeDivide = false
+                         AND (cf.collab_fun_activity_id > ft.min_id OR ft.min_id IS NULL)
+                     GROUP BY cf.account_id;
+                 */
+                var rawQuery = $"WITH FirstTrue AS (" +
+                    $"SELECT account_id, collab_fun_activity_id, MIN(collab_fun_activity_id) as min_id " +
+                    $"FROM collab_fun_activity " +
+                    $"WHERE isBeforeDivide = true " +
+                    $"GROUP BY account_id, collab_fun_activity_id " +
+                    $") " +
+                    $"SELECT cf.account_id, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(COUNT(t.transaction_id), 0) as transaction_count " +
+                    $"FROM collab_fun_activity as cf " +
+                    $"LEFT JOIN transaction as t ON cf.transaction_id = t.transaction_id " +
+                    $"LEFT JOIN FirstTrue as ft ON cf.account_id = ft.account_id " +
+                    $"WHERE cf.collabfund_id = {collabFundID} " +
+                    $"AND cf.isBeforeDivide = false " +
+                    $"AND (cf.collab_fun_activity_id > ft.min_id OR ft.min_id IS NULL) " +
+                    $"GROUP BY cf.account_id;";
+                var result = _context.DivideMoneyInfo.FromSqlRaw(rawQuery).ToList();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
     }
 }

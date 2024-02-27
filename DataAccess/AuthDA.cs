@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Auth;
 namespace pbms_be.DataAccess
@@ -63,5 +64,16 @@ namespace pbms_be.DataAccess
             return result;
         }
 
+        internal object GetAllAccount()
+        {
+            try
+            {
+                var result = _context.Account.Where(a => a.RoleID == ConstantConfig.USER_ROLE_ID).ToList();
+                return result;
+            } catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }

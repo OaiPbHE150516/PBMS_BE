@@ -12,23 +12,25 @@ namespace pbms_be.Data.Trans;
 
 public class Transaction
 {
-    //CREATE TABLE transaction(
-    //transaction_id serial PRIMARY KEY,
-    //account_id VARCHAR ( 100 ) NOT NULL,
-    //wallet_id INT NOT NULL,
-    //    category_id INT NOT NULL,
-    //    total_amount BIGINT NOT NULL,
-    //    note VARCHAR( 5000 ) NOT NULL,
-    //    transaction_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    //    from_person VARCHAR( 100 ),
-    //    to_person VARCHAR( 100 ),
-    //    image_url VARCHAR( 500 ),
-    //    as_id INT NOT NULL DEFAULT 1,
-    //    FOREIGN KEY(account_id) REFERENCES account(account_id),
-    //    FOREIGN KEY(wallet_id) REFERENCES wallet(wallet_id),
-    //    FOREIGN KEY(category_id) REFERENCES category(category_id),
-    //    FOREIGN KEY(as_id) REFERENCES active_state(as_id)
-    //); 
+    /*
+         CREATE TABLE transaction (
+            transaction_id serial PRIMARY KEY,
+            account_id VARCHAR ( 100 ) NOT NULL,
+            wallet_id INT NOT NULL,
+            category_id INT NOT NULL,
+            total_amount BIGINT NOT NULL,
+            note VARCHAR ( 5000 ) DEFAULT '',
+            transaction_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            from_person VARCHAR ( 100 ) DEFAULT '',
+            to_person VARCHAR ( 100 ) DEFAULT '',
+            image_url VARCHAR ( 500 ) DEFAULT '',
+            as_id INT NOT NULL DEFAULT 1,
+            FOREIGN KEY (account_id) REFERENCES account (account_id),
+            FOREIGN KEY (wallet_id) REFERENCES wallet (wallet_id),
+            FOREIGN KEY (category_id) REFERENCES category (category_id),
+            FOREIGN KEY (as_id) REFERENCES active_state (as_id)
+        ); 
+     */
 
     [Column("transaction_id")]
     [Key]
