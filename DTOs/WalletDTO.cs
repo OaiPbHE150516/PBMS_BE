@@ -13,4 +13,9 @@
         public int CurrencyID { get; set; }
         public int ActiveStateID { get; set; }
     }
+
+    public class Wallet_VM_DTO
+    {
+        public string Name { get; set; } = String.Empty;
+    }
 }

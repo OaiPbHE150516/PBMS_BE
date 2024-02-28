@@ -1,4 +1,5 @@
-﻿using pbms_be.Data.Status;
+﻿using pbms_be.Data.Auth;
+using pbms_be.Data.Status;
 using pbms_be.Data.Trans;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -17,6 +18,7 @@ public class CollabFundActivity
             transaction_id int NOT NULL DEFAULT 1,
             create_time timestamp not null default current_timestamp,
             as_id INT NOT NULL DEFAULT 1,
+            isbeforedivide BOOLEAN NOT NULL DEFAULT FALSE,
             FOREIGN KEY (collabfund_id) REFERENCES collabfund (collabfund_id),
             FOREIGN KEY (account_id) REFERENCES account (account_id),
             FOREIGN KEY (transaction_id) REFERENCES transaction (transaction_id),
@@ -34,6 +36,8 @@ public class CollabFundActivity
     [Column("account_id")]
     public string AccountID { get; set; } = String.Empty;
 
+    public virtual Account Account { get; set; } = null!;
+
     [Column("note")]
     public string Note { get; set; } = String.Empty;
 
@@ -50,4 +54,7 @@ public class CollabFundActivity
     [Column("as_id")]
     public int ActiveStateID { get; set; }
     public virtual ActiveState ActiveState { get; set; } = null!;
+
+    //[Column("isbeforedivide")]
+    //public bool IsBeforeDivide { get; set; } = false;
 }

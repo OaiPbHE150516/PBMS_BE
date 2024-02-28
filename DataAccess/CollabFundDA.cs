@@ -3,10 +3,13 @@ using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Auth;
 using pbms_be.Data.CollabFund;
+using pbms_be.Data.Custom;
 using pbms_be.Data.Status;
 using pbms_be.Data.Trans;
 using pbms_be.DTOs;
+using pbms_be.Library;
 using System.Collections.Generic;
+using static Google.Cloud.DocumentAI.V1.BatchProcessMetadata.Types;
 
 namespace pbms_be.DataAccess
 {
@@ -187,6 +190,7 @@ namespace pbms_be.DataAccess
                                     && cfa.CollabFundID == collabFundID
                                     && cfa.ActiveStateID == ActiveStateConst.ACTIVE)
                     .Include(cfa => cfa.ActiveState)
+                    .Include(cfa => cfa.Account)
                     .ToList();
 
                 var transDA = new TransactionDA(_context);
@@ -196,7 +200,11 @@ namespace pbms_be.DataAccess
                     if (item.TransactionID > ConstantConfig.DEFAULT_NULL_TRANSACTION_ID)
                     {
                         item.Transaction = transDA.GetTransaction(item.TransactionID);
+                    } else
+                    {
+                        item.TransactionID = ConstantConfig.DEFAULT_ZERO_VALUE;
                     }
+
                 }
                 return result;
             }
@@ -630,7 +638,308 @@ namespace pbms_be.DataAccess
                     result.Add(newaccount);
                 }
                 return result;
-            } catch (Exception e)
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetAllDividingMoneyWithDetail(int collabFundID, string accountID)
+        {
+            try
+            {
+                var dividingMoney = _context.CF_DividingMoney
+                    .Where(cfdm => cfdm.CollabFundID == collabFundID
+                                           && cfdm.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .Include(cfdm => cfdm.ActiveState)
+                    .ToList();
+
+                var dividingMoneyDetail = new List<CF_DividingMoneyDetail>();
+                var _authDA = new AuthDA(_context);
+                foreach (var item in dividingMoney)
+                {
+                    var detail = _context.CF_DividingMoneyDetail
+                                .Where(cfdmd => cfdmd.CF_DividingMoneyID == item.CF_DividingMoneyID)
+                                .ToList();
+                    foreach (var itemDetail in detail)
+                    {
+                        itemDetail.FromAccount = _authDA.GetAccount(itemDetail.FromAccountID);
+                        itemDetail.ToAccount = _authDA.GetAccount(itemDetail.ToAccountID);
+                        var time = ConvertTimeFromUtc(itemDetail.LastTime);
+                        itemDetail.LastTime = time;
+                    }
+                    dividingMoneyDetail.AddRange(detail);
+                }
+                return dividingMoney;
+                //return new { result, dividingMoney, dividingMoneyDetail };
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal bool IsAccountInCollabFund(string accountID, int collabFundID)
+        {
+            try
+            {
+                var result = _context.AccountCollab
+                    .Where(ca => ca.AccountID == accountID
+                                && ca.CollabFundID == collabFundID
+                                && ca.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .FirstOrDefault();
+                return result != null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        // a function to add system location utc time to input time
+        internal DateTime ConvertTimeFromUtc(DateTime time)
+        {
+            //return TimeZoneInfo.ConvertTimeFromUtc(time, TimeZoneInfo.Local);
+            //var timeZone = TimeZoneInfo.Local.GetUtcOffset(time).Hours;
+            //Console.WriteLine("timeZone: " + timeZone);
+            //return time.AddHours(timeZone);
+            return time.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
+        }
+
+        //internal object GetAllAmountContributed(int collabFundID, string accountID)
+        //{
+        //    try
+        //    {
+        //        var result = GetDivideMoneyInfo(collabFundID, accountID).Find(p => p.AccountID == accountID);
+        //        return result;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception(e.Message);
+        //    }
+        //}
+
+        internal object GetDivideMoneyInfo(int collabFundID, string accountID)
+        {
+            try
+            {
+                var divideMoneyInfor = GetDivideMoneyCollabFund(collabFundID);
+                var totalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                var numberParticipant = divideMoneyInfor.Count;
+                var averageAmount = (totalAmount / ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR / numberParticipant) * ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR;
+                var remainAmount = totalAmount - averageAmount * numberParticipant;
+                var cf_dividingmoney = new CF_DividingMoney
+                {
+                    CollabFundID = collabFundID,
+                    TotalAmount = totalAmount,
+                    NumberParticipant = numberParticipant,
+                    AverageAmount = averageAmount,
+                    RemainAmount = remainAmount
+                };
+
+                var listDetail = CalculateTheAdditionalAmount(divideMoneyInfor, averageAmount);
+                var listDetailResult = DivideMoney(listDetail);
+                var listDividingMoneyDetail = CalculateTheDividingMoneyDetail(divideMoneyInfor, listDetailResult);
+                return new { cf_dividingmoney, listDividingMoneyDetail };
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        private object CalculateTheDividingMoneyDetail(List<DivideMoneyInfo> divideMoneyInfor, List<DivideMoneyExecute> listDetailResult)
+        {
+            var authDA = new AuthDA(_context);
+            var listDividingMoneyDetail = new List<CF_DividingMoneyDetail>();
+            foreach (var item in listDetailResult)
+            {
+                var dmInfor = divideMoneyInfor.Find(p => p.AccountID == item.FromAccountID);
+                if (dmInfor is null) continue;
+                var detail = new CF_DividingMoneyDetail
+                {
+                    FromAccountTotalAmount = dmInfor.TotalAmount,
+                    FromAccountTransactionCount = dmInfor.TransactionCount,
+                    FromAccountID = item.FromAccountID,
+                    FromAccount = authDA.GetAccount(item.FromAccountID),
+                    ToAccountID = item.ToAccountID,
+                    ToAccount = authDA.GetAccount(item.ToAccountID),
+                    DividingAmount = Math.Abs(item.ActualAmount),
+                    LastTime = LConvertVariable.ConvertUtcToLocalTime(DateTime.UtcNow)
+                };
+                listDividingMoneyDetail.Add(detail);
+            }
+            return listDividingMoneyDetail;
+        }
+
+        private List<DivideMoneyExecute> CalculateTheAdditionalAmount(List<DivideMoneyInfo> listinfor,long averageAmount)
+        {
+            var listDetail = new List<DivideMoneyExecute>();
+            foreach (var item in listinfor)
+            {
+                var dividingAmount = item.TotalAmount - averageAmount;
+                switch (dividingAmount)
+                {
+                    case 0:
+                        var detail0 = new DivideMoneyExecute
+                        {
+                            FromAccountID = item.AccountID,
+                            ToAccountID = item.AccountID,
+                            ActualAmount = dividingAmount,
+                        };
+                        break;
+                    case > 0:
+                        var detail1 = new DivideMoneyExecute
+                        {
+                            ToAccountID = item.AccountID,
+                            ActualAmount = dividingAmount,
+                        };
+                        listDetail.Add(detail1);
+                        break;
+                    case < 0:
+                        var detail2 = new DivideMoneyExecute
+                        {
+                            FromAccountID = item.AccountID,
+                            ActualAmount = dividingAmount,
+                        };
+                        listDetail.Add(detail2);
+                        break;
+                }
+            }
+            listDetail.Sort((x, y) => x.ActualAmount.CompareTo(y.ActualAmount));
+            return listDetail;
+        }
+
+        private List<DivideMoneyExecute> DivideMoney(List<DivideMoneyExecute> listDetail)
+        {
+            var listDetailResult = new List<DivideMoneyExecute>();
+            bool isContinue = true;
+            int breakcount = 0;
+            while (isContinue)
+            {
+                breakcount++;
+                var listDetail2 = new List<DivideMoneyExecute>(listDetail);
+                listDetail2.RemoveAll(p => p.ActualAmount == 0);
+                foreach (var item in listDetail2)
+                {
+                    if (item.ActualAmount < 0)
+                    {
+                        var toAccount = listDetail2.Find(p => p.ActualAmount > 0 && p.FromAccountID == "");
+                        if (toAccount != null)
+                        {
+                            item.ToAccountID = toAccount.ToAccountID;
+                            var actual = Math.Abs(toAccount.ActualAmount) - Math.Abs(item.ActualAmount);
+                            if (actual < 0)
+                            {
+                                // case from > to => from = from - to, to = 0
+                                var itemResult0 = new DivideMoneyExecute
+                                {
+                                    FromAccountID = item.FromAccountID,
+                                    ToAccountID = item.ToAccountID,
+                                    ActualAmount = toAccount.ActualAmount,
+                                };
+                                listDetailResult.Add(itemResult0);
+
+                                toAccount.ActualAmount = 0;
+                                item.ActualAmount = actual;
+                                item.ToAccountID = toAccount.ToAccountID;
+                            }
+                            else if (actual > 0)
+                            {
+                                // case from < to => from = 0, to = to - from
+
+                                var itemResult1 = new DivideMoneyExecute
+                                {
+                                    FromAccountID = item.FromAccountID,
+                                    ToAccountID = item.ToAccountID,
+                                    ActualAmount = item.ActualAmount,
+                                };
+                                listDetailResult.Add(itemResult1);
+
+                                toAccount.ActualAmount = actual;
+                                item.ActualAmount = 0;
+                                item.ToAccountID = toAccount.ToAccountID;
+                            }
+                            else if (actual == 0)
+                            {
+                                // case from = to => from = 0, to = 0
+
+                                var itemResult2 = new DivideMoneyExecute
+                                {
+                                    FromAccountID = item.FromAccountID,
+                                    ToAccountID = item.ToAccountID,
+                                    ActualAmount = item.ActualAmount,
+                                };
+                                listDetailResult.Add(itemResult2);
+
+                                toAccount.ActualAmount = 0;
+                                item.ActualAmount = 0;
+                                item.ToAccountID = toAccount.ToAccountID;
+                            }
+                        }
+                    }
+                    else continue;
+                }
+                // nếu listDetail2 chỉ còn 1 phần tử thì thoát khỏi vòng lặp while
+                if (listDetail2.Count == 1)
+                {
+                    listDetail2[0].FromAccountID = listDetail2[0].ToAccountID;
+                    listDetailResult.Add(listDetail2[0]);
+                    isContinue = false;
+                    break;
+                }
+                if (breakcount > 1000) // tránh trường hợp vòng lặp vô hạn nếu có lỗi
+                {
+                    isContinue = false;
+                    break;
+                }
+            }
+            return listDetailResult;
+        }
+
+        internal List<DivideMoneyInfo> GetDivideMoneyCollabFund(int collabFundID)
+        {
+            try
+            {
+                /* câu query lấy ra tất cả thông tin về số tiền đã đóng góp của mỗi thành viên trong collab fund
+                 * điều kiện: 
+                 * - kể từ lần chia tiền cuối cùng (isBeforeDivide = true) hoặc từ đầu nếu ko có lần chia tiền đầu tiên
+                 * - id của các activity ghi lại transaction phải lớn hơn id của lần chia tiền cuối cùng
+                 * 
+                     WITH FirstTrue AS (
+                         SELECT account_id, collab_fun_activity_id, MIN(collab_fun_activity_id) as min_id
+                         FROM collab_fun_activity
+                         WHERE isBeforeDivide = true
+                         GROUP BY account_id, collab_fun_activity_id
+                     )
+                     SELECT cf.account_id, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(COUNT(t.transaction_id), 0) as transaction_count
+                     FROM collab_fun_activity as cf
+                     LEFT JOIN transaction as t ON cf.transaction_id = t.transaction_id
+                     LEFT JOIN FirstTrue as ft ON cf.account_id = ft.account_id
+                     WHERE cf.collabfund_id = 2
+                         AND cf.isBeforeDivide = false
+                         AND (cf.collab_fun_activity_id > ft.min_id OR ft.min_id IS NULL)
+                     GROUP BY cf.account_id;
+                 */
+                var rawQuery = $"WITH FirstTrue AS (" +
+                    $"SELECT account_id, collab_fun_activity_id, MIN(collab_fun_activity_id) as min_id " +
+                    $"FROM collab_fun_activity " +
+                    $"WHERE isBeforeDivide = true " +
+                    $"GROUP BY account_id, collab_fun_activity_id " +
+                    $") " +
+                    $"SELECT cf.account_id, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(COUNT(t.transaction_id), 0) as transaction_count " +
+                    $"FROM collab_fun_activity as cf " +
+                    $"LEFT JOIN transaction as t ON cf.transaction_id = t.transaction_id " +
+                    $"LEFT JOIN FirstTrue as ft ON cf.account_id = ft.account_id " +
+                    $"WHERE cf.collabfund_id = {collabFundID} " +
+                    $"AND cf.isBeforeDivide = false " +
+                    $"AND (cf.collab_fun_activity_id > ft.min_id OR ft.min_id IS NULL) " +
+                    $"GROUP BY cf.account_id;";
+                var result = _context.DivideMoneyInfo.FromSqlRaw(rawQuery).ToList();
+                return result;
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
