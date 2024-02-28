@@ -1,4 +1,5 @@
-﻿using pbms_be.Data.Status;
+﻿using pbms_be.Data.Auth;
+using pbms_be.Data.Status;
 using pbms_be.Data.Trans;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -34,6 +35,8 @@ public class CollabFundActivity
 
     [Column("account_id")]
     public string AccountID { get; set; } = String.Empty;
+
+    public virtual Account Account { get; set; } = null!;
 
     [Column("note")]
     public string Note { get; set; } = String.Empty;

@@ -190,6 +190,7 @@ namespace pbms_be.DataAccess
                                     && cfa.CollabFundID == collabFundID
                                     && cfa.ActiveStateID == ActiveStateConst.ACTIVE)
                     .Include(cfa => cfa.ActiveState)
+                    .Include(cfa => cfa.Account)
                     .ToList();
 
                 var transDA = new TransactionDA(_context);
@@ -199,7 +200,11 @@ namespace pbms_be.DataAccess
                     if (item.TransactionID > ConstantConfig.DEFAULT_NULL_TRANSACTION_ID)
                     {
                         item.Transaction = transDA.GetTransaction(item.TransactionID);
+                    } else
+                    {
+                        item.TransactionID = ConstantConfig.DEFAULT_ZERO_VALUE;
                     }
+
                 }
                 return result;
             }

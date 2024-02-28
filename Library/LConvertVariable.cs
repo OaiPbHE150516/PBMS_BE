@@ -36,5 +36,18 @@ namespace pbms_be.Library
         {
             return utcTime.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
         }
+
+        public static string ConvertToMoneyFormat(long number)
+        {
+            var result = number.ToString("N0");
+            result = result.Replace(",", ".") + " đ";
+            return result;
+        }
+
+        // convert datetime to string like "HH:mm, dd/MM/yyyy"
+        public static string ConvertDateTimeToString(DateTime time)
+        {
+            return time.ToString(ConstantConfig.DEFAULT_DATETIME_FORMAT);
+        }
     }
 }

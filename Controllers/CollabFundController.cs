@@ -79,7 +79,9 @@ namespace pbms_be.Controllers
                 if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false)
                     return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 var result = _collabFundDA.GetAllActivityCollabFund(collabFundID, accountID);
-                return Ok(result);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var resultEntity = _mapper.Map<List<CollabFundActivity_MV_DTO>>(result);
+                return Ok(resultEntity);
             }
             catch (System.Exception e)
             {

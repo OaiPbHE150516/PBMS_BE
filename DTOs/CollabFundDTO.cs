@@ -78,6 +78,7 @@ namespace pbms_be.DTOs
         public virtual List<CF_DividingMoneyDetail_MV_DTO> CF_DividingMoneyDetails { get; set; } = null!;
     }
 
+    // CF_DividingMoneyDetail_MV_DTO to response to client and convert long number to string, money format
     public class CF_DividingMoneyDetail_MV_DTO
     {
         public int CF_DividingMoneyDetailID { get; set; }
@@ -87,6 +88,22 @@ namespace pbms_be.DTOs
         public string DividingAmount { get; set; } = String.Empty;
         public bool IsDone { get; set; }
         public string LastTime { get; set; } = String.Empty;
+        public string MinusTimeNowString { get; set; } = String.Empty;
+    }
+
+    // CollabFundActivity_MV_DTO to response to client and convert long number to string, money format
+    public class CollabFundActivity_MV_DTO
+    {
+        public int CollabFundActivityID { get; set; }
+        public int CollabFundID { get; set; }
+        public string AccountID { get; set; } = String.Empty;
+        public virtual Account_VM_DTO Account { get; set; } = null!;
+        public string Note { get; set; } = String.Empty;
+        public string Filename { get; set; } = String.Empty;
+        public int TransactionID { get; set; }
+        public virtual Transaction_VM_DTO Transaction { get; set; } = null!;
+        public DateTime CreateTime { get; set; } = DateTime.UtcNow;
+        public string CreateTimeString { get; set; } = String.Empty;
         public string MinusTimeNowString { get; set; } = String.Empty;
     }
 }
