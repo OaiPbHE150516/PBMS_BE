@@ -31,10 +31,10 @@ public class Category
     public int ParentCategoryID { get; set; }
 
     [Column("category_name_vn")]
-    public string CategoryNameVN { get; set; } = String.Empty;
+    public string NameVN { get; set; } = String.Empty;
 
     [Column("category_name_en")]
-    public string CategoryNameEN { get; set; } = String.Empty;
+    public string NameEN { get; set; } = String.Empty;
 
     [Column("as_id")]
     public int ActiveStateID { get; set; }
