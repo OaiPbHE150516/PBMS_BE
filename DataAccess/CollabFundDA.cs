@@ -427,7 +427,7 @@ namespace pbms_be.DataAccess
         }
 
         // check if account is fundholder
-        private bool IsFundholderCollabFund(int collabFundID, string accountID)
+        internal bool IsFundholderCollabFund(int collabFundID, string accountID)
         {
             try
             {
@@ -720,7 +720,7 @@ namespace pbms_be.DataAccess
         //    }
         //}
 
-        internal object GetDivideMoneyInfo(int collabFundID, string accountID)
+        internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result)
         {
             try
             {
@@ -741,7 +741,8 @@ namespace pbms_be.DataAccess
                 var listDetail = CalculateTheAdditionalAmount(divideMoneyInfor, averageAmount);
                 var listDetailResult = DivideMoney(listDetail);
                 var listDividingMoneyDetail = CalculateTheDividingMoneyDetail(divideMoneyInfor, listDetailResult);
-                return new { cf_dividingmoney, listDividingMoneyDetail };
+                cfdividingmoney_result = cf_dividingmoney;
+                cfdm_detail_result = listDividingMoneyDetail;
             }
             catch (Exception e)
             {
@@ -749,7 +750,68 @@ namespace pbms_be.DataAccess
             }
         }
 
-        private object CalculateTheDividingMoneyDetail(List<DivideMoneyInfo> divideMoneyInfor, List<DivideMoneyExecute> listDetailResult)
+        internal object DivideMoneyCollabFund(CollabAccountDTO collabAccountDTO)
+        {
+            try
+            {
+                var dividingmoney = new CF_DividingMoney();
+                var dividingmoneydetail = new List<CF_DividingMoneyDetail>();
+                GetDivideMoneyInfo(collabAccountDTO.CollabFundID, collabAccountDTO.AccountID, out dividingmoney, out dividingmoneydetail);
+
+                var cf_activity = new CollabFundActivity
+                {
+                    CollabFundID = collabAccountDTO.CollabFundID,
+                    AccountID = collabAccountDTO.AccountID,
+                    Note = "Test chia tiền",
+                    TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID,
+                    ActiveStateID = ActiveStateConst.ACTIVE,
+                };
+
+                _context.CollabFundActivity.Add(cf_activity);
+                _context.SaveChanges();
+                var cfa_id = cf_activity.CollabFundActivityID;
+
+                var cf_dividingmoney = new CF_DividingMoney
+                {
+                    CollabFundID = dividingmoney.CollabFundID,
+                    CollabFunActivityID = cfa_id,
+                    TotalAmount = dividingmoney.TotalAmount,
+                    NumberParticipant = dividingmoney.NumberParticipant,
+                    AverageAmount = dividingmoney.AverageAmount,
+                    RemainAmount = dividingmoney.RemainAmount,
+                    ActiveStateID = ActiveStateConst.ACTIVE
+                };
+
+                _context.CF_DividingMoney.Add(cf_dividingmoney);
+                _context.SaveChanges();
+                var cfdm_id = cf_dividingmoney.CF_DividingMoneyID;
+
+                var list_cfdm_detail = new List<CF_DividingMoneyDetail>();
+                foreach (var item in dividingmoneydetail)
+                {
+                    var cfdm_detail = new CF_DividingMoneyDetail
+                    {
+                        CF_DividingMoneyID = cfdm_id,
+                        FromAccountID = item.FromAccountID,
+                        FromAccountTotalAmount = item.FromAccountTotalAmount,
+                        FromAccountTransactionCount = item.FromAccountTransactionCount,
+                        ToAccountID = item.ToAccountID,
+                        DividingAmount = item.DividingAmount,
+                        LastTime = LConvertVariable.ConvertUtcToLocalTime(DateTime.UtcNow)
+                    };
+                    list_cfdm_detail.Add(cfdm_detail);
+                }
+                _context.CF_DividingMoneyDetail.AddRange(list_cfdm_detail);
+                _context.SaveChanges();
+                return new { cf_dividingmoney, list_cfdm_detail };
+
+            } catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        private List<CF_DividingMoneyDetail> CalculateTheDividingMoneyDetail(List<DivideMoneyInfo> divideMoneyInfor, List<DivideMoneyExecute> listDetailResult)
         {
             var authDA = new AuthDA(_context);
             var listDividingMoneyDetail = new List<CF_DividingMoneyDetail>();
@@ -938,6 +1000,40 @@ namespace pbms_be.DataAccess
                     $"GROUP BY cf.account_id;";
                 var result = _context.DivideMoneyInfo.FromSqlRaw(rawQuery).ToList();
                 return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object DeleteCFActivity()
+        {
+            try
+            {
+               // delete activity has newest id
+               var activity = _context.CollabFundActivity
+                    .OrderByDescending(cfa => cfa.CollabFundActivityID)
+                    .FirstOrDefault();
+                if (activity is null) throw new Exception(Message.COLLAB_FUND_ACTIVITY_NOT_FOUND);
+
+                var cfdm = _context.CF_DividingMoney
+                    .Where(cfdm => cfdm.CollabFunActivityID == activity.CollabFundActivityID)
+                    .FirstOrDefault();
+                if (cfdm is null) throw new Exception(Message.COLLAB_FUND_ACTIVITY_NOT_FOUND);
+
+                var listdetail = _context.CF_DividingMoneyDetail
+                    .Where(cfdmd => cfdmd.CF_DividingMoneyID == cfdm.CF_DividingMoneyID)
+                    .ToList();
+                _context.CF_DividingMoneyDetail.RemoveRange(listdetail);
+                _context.SaveChanges();
+
+                _context.CF_DividingMoney.Remove(cfdm);
+                _context.SaveChanges();
+
+                _context.CollabFundActivity.Remove(activity);
+                _context.SaveChanges();
+                return null;
             }
             catch (Exception e)
             {

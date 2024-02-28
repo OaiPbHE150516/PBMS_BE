@@ -27,5 +27,14 @@ namespace pbms_be.Controllers
             var accounts = authDA.GetAllAccount();
             return Ok(accounts);
         }
+
+        // delete cf_activity has note = "Test chia tiền"
+        [HttpDelete("deleteCFActivity")]
+        public IActionResult DeleteCFActivity()
+        {
+            var collabFundDA = new CollabFundDA(_context);
+            var result = collabFundDA.DeleteCFActivity();
+            return Ok(result);
+        }
     }
 }

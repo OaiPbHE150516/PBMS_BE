@@ -103,6 +103,9 @@
 
         // Mapper
         public const string MAPPER_IS_NULL = "Mapper is null";
+
+        // Activity 
+        public const string COLLAB_FUND_ACTIVITY_NOT_FOUND = "Collab fund activity not found";
     }
 
     public class ActiveStateConst
