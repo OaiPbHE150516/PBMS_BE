@@ -61,6 +61,9 @@
         // default date format
         public const string DEFAULT_DATE_FORMAT = "dd/MM/yyyy";
 
+        // default VND thousand separator dong format
+        public const int DEFAULT_VND_THOUSAND_SEPARATOR = 1000;
+
     }
 
     // Message to response to client

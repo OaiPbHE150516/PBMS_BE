@@ -14,10 +14,12 @@ public class CF_DividingMoneyDetail
         CREATE TABLE cf_dividing_money_detail (
             cf_dividing_money_detail_id serial PRIMARY KEY,
             cf_dividing_money_id INT NOT NULL,
+            from_account_total_amount BIGINT NOT NULL,
+            from_account_transaction_count INT NOT NULL,
             from_account_id VARCHAR ( 100 ) NOT NULL,
             to_account_id VARCHAR ( 100 ) NOT NULL,
-            dividing_amount INT NOT NULL,
-            isDone BOOLEAN NOT NULL DEFAULT FALSE,
+            dividing_amount BIGINT NOT NULL,
+            isdone BOOLEAN NOT NULL DEFAULT FALSE,
             last_time timestamp not null default current_timestamp,
             FOREIGN KEY (cf_dividing_money_id) REFERENCES cf_dividing_money (cf_dividing_money_id)
         );
@@ -29,6 +31,12 @@ public class CF_DividingMoneyDetail
 
     [Column("cf_dividing_money_id")]
     public int CF_DividingMoneyID { get; set; }
+
+    [Column("from_account_total_amount")]
+    public long FromAccountTotalAmount { get; set; }
+
+    [Column("from_account_transaction_count")]
+    public int FromAccountTransactionCount { get; set; }
 
     [Column("from_account_id")]
     public string FromAccountID { get; set; } = String.Empty;

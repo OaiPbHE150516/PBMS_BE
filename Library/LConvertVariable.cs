@@ -30,5 +30,11 @@ namespace pbms_be.Library
                 minusTimeNowString = minusTime.Days / ConstantConfig.MIN_MONTHS_AGO + Message.VN_MONTHS_AGO;
             return minusTimeNowString;
         }
+
+        // convert utc time to local time
+        public static DateTime ConvertUtcToLocalTime(DateTime utcTime)
+        {
+            return utcTime.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
+        }
     }
 }

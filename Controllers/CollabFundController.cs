@@ -125,23 +125,23 @@ namespace pbms_be.Controllers
 
         // get all invitation collab fund by collab fund id and account id
 
-        // get all dividing money and detail by collab fund id and account id
-        [HttpGet("get/dividing-money/{collabFundID}/{accountID}")]
-        public IActionResult GetAllDividingMoneyAndDetail(int collabFundID, string accountID)
-        {
-            try
-            {
-                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
-                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
-                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
-                var result = _collabFundDA.GetAllDividingMoneyWithDetail(collabFundID, accountID);
-                return Ok(result);
-            }
-            catch (System.Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+        //// get all dividing money and detail by collab fund id and account id
+        //[HttpGet("get/dividing-money/{collabFundID}/{accountID}")]
+        //public IActionResult GetAllDividingMoneyAndDetail(int collabFundID, string accountID)
+        //{
+        //    try
+        //    {
+        //        if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+        //        if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+        //        if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+        //        var result = _collabFundDA.GetAllDividingMoneyWithDetail(collabFundID, accountID);
+        //        return Ok(result);
+        //    }
+        //    catch (System.Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
         // get divide money information by collab fund id and account id before divide money action
         //[HttpGet("get/divide-money-info/{collabFundID}/{accountID}")]
@@ -149,8 +149,8 @@ namespace pbms_be.Controllers
         [HttpGet("get/divide-money-info/")]
         public IActionResult GetDivideMoneyInfo()
         {
-            int collabFundID = 5;
-            string accountID = "a1";
+            int collabFundID = 2;
+            string accountID = "117911566377016615313";
             try
             {
                 if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
@@ -368,7 +368,7 @@ I. Collab_Fund
     - OK: Thêm hàm để lấy tất cả số tiền đã chi ra của 
         một người tham gia collab fund (kể từ lần chia cuối cùng) đến thời điểm hiện tại.
         - trong thời gian chia tiền, nếu người dùng có thêm giao dịch thì để cho lần sau chia tiền.
-        - để
+    - Nếu đã thực hiện thao tác chia tiền rồi thì người dùng không thể update giao dịch ( thông qua hoạt động) đã xảy ra trước khi chia tiền
     - Thêm hàm để xem thông tin chia tiền của 1 lần chia tiền trước khi thực hiện hành động chia tiền
     - Thêm hàm để thực hiện hành động chia tiền. thêm popup để chọn người cần chia tiền ( thường là tất cả mọi người)
     - Thêm hàm để 1 người dùng lấy thông tin của ví người đích ( mã QR và banking infor) 
