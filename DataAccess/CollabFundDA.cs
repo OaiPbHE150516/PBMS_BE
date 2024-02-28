@@ -722,8 +722,8 @@ namespace pbms_be.DataAccess
                 var totalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
                 var numberParticipant = divideMoneyInfor.Count;
                 // cast totalAmount to int, chỗ này phải xử lý đề tiền chẵn.
-                var totalAmountInt = (int)totalAmount;
-                int averageAmount = totalAmountInt / numberParticipant;
+                var totalAmountInt = (int)totalAmount / 1000;
+                int averageAmount = (totalAmountInt / numberParticipant) * 1000;
                 var remainAmount = totalAmount - averageAmount * numberParticipant;
                 var cf_dividingmoney = new CF_DividingMoney
                 {
@@ -772,31 +772,98 @@ namespace pbms_be.DataAccess
                 // sort listDetail by ActualAmount
                 listDetail.Sort((x, y) => x.ActualAmount.CompareTo(y.ActualAmount));
 
-                //var listDetail2 = new List<DivideMoneyExecute>();
-                var listDetail3 = new List<DivideMoneyExecute>();
-                bool shouldLoop = true;
-                while (true)
+                Console.WriteLine("listDetail: " + listDetail.ToList());
+
+                var listDetailResult = new List<DivideMoneyExecute>();
+                bool isContinue = true;
+                int breakcount = 0;
+                while (isContinue)
                 {
-                    var listDetail2 = new List<DivideMoneyExecute>(listDetail);
+                    breakcount++;
+                    Console.WriteLine("breakcount: " + breakcount);
+                    var listDetail2 = new List<DivideMoneyExecute>();
+                    listDetail2.AddRange(listDetail);
                     // remove all item with actualAmount = 0
                     listDetail2.RemoveAll(p => p.ActualAmount == 0);
                     foreach (var item in listDetail2)
                     {
-                        var toAccount = listDetail2.Find(p => p.ActualAmount > 0 && p.FromAccountID == null);
-                        if (toAccount != null)
+                        if (item.ActualAmount < 0)
                         {
-                            item.ToAccountID = toAccount.ToAccountID;
-                            var actual = Math.Abs(item.ActualAmount) - toAccount.ActualAmount;
-                            item.ActualAmount = actual;
-                            if (actual > 0)
+                            var toAccount = listDetail2.Find(p => p.ActualAmount > 0 && p.FromAccountID == "");
+                            if (toAccount != null)
                             {
-                                continue;
-                            }
-                            else break;
-                        }
+                                item.ToAccountID = toAccount.ToAccountID;
+                                Console.WriteLine("toAccount: " + toAccount.ActualAmount + " item " + item.ActualAmount);
+                                var actual = Math.Abs(toAccount.ActualAmount) - Math.Abs(item.ActualAmount);
+                                if (actual < 0)
+                                {
+                                    // case from > to => from = from - to, to = 0
 
+                                    var itemResult0 = new DivideMoneyExecute
+                                    {
+                                        FromAccountID = item.FromAccountID,
+                                        ToAccountID = item.ToAccountID,
+                                        ActualAmount = toAccount.ActualAmount,
+                                        State = 0
+                                    };
+                                    listDetailResult.Add(itemResult0);
+
+                                    toAccount.ActualAmount = 0;
+                                    item.ActualAmount = actual;
+                                    item.ToAccountID = toAccount.ToAccountID;
+                                }
+                                else if(actual > 0)
+                                {
+                                    // case from < to => from = 0, to = to - from
+
+                                    var itemResult1 = new DivideMoneyExecute
+                                    {
+                                        FromAccountID = item.FromAccountID,
+                                        ToAccountID = item.ToAccountID,
+                                        ActualAmount = item.ActualAmount,
+                                        State = 0
+                                    };
+                                    listDetailResult.Add(itemResult1);
+
+                                    toAccount.ActualAmount = actual;
+                                    item.ActualAmount = 0;
+                                    item.ToAccountID = toAccount.ToAccountID;
+                                }
+                                else if (actual == 0)
+                                {
+                                    // case from = to => from = 0, to = 0
+
+                                    var itemResult2 = new DivideMoneyExecute
+                                    {
+                                        FromAccountID = item.FromAccountID,
+                                        ToAccountID = item.ToAccountID,
+                                        ActualAmount = item.ActualAmount,
+                                        State = 0
+                                    };
+                                    listDetailResult.Add(itemResult2);
+
+                                    toAccount.ActualAmount = 0;
+                                    item.ActualAmount = 0;
+                                    item.ToAccountID = toAccount.ToAccountID;
+                                }
+                            }
+                        }
+                        else continue;
+                    }
+                    // nếu listDetail2 chỉ còn 1 phần tử thì thoát khỏi vòng lặp while
+                    if (listDetail2.Count == 1)
+                    {
+                        listDetailResult.Add(listDetail2[0]);
+                        isContinue = false;
+                        break;
+                    }
+                    if (breakcount > 50)
+                    {
+                        isContinue = false;
+                        break;
                     }
                 }
+                return new { cf_dividingmoney, listDetail, listDetailResult };
 
                 //if (item.State < 0)
                 //{
@@ -819,8 +886,6 @@ namespace pbms_be.DataAccess
                 //    }
                 //    listDetail2.Add(item);
                 //}
-
-                //return new { cf_dividingmoney, listDetail, listDetail2 };
                 //return cf_dividingmoney;
             }
             catch (Exception e)
