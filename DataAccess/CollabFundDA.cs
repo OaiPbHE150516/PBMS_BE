@@ -3,9 +3,13 @@ using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Auth;
 using pbms_be.Data.CollabFund;
+using pbms_be.Data.Custom;
+using pbms_be.Data.Status;
 using pbms_be.Data.Trans;
 using pbms_be.DTOs;
+using pbms_be.Library;
 using System.Collections.Generic;
+using static Google.Cloud.DocumentAI.V1.BatchProcessMetadata.Types;
 
 namespace pbms_be.DataAccess
 {
@@ -186,6 +190,7 @@ namespace pbms_be.DataAccess
                                     && cfa.CollabFundID == collabFundID
                                     && cfa.ActiveStateID == ActiveStateConst.ACTIVE)
                     .Include(cfa => cfa.ActiveState)
+                    .Include(cfa => cfa.Account)
                     .ToList();
 
                 var transDA = new TransactionDA(_context);
@@ -195,7 +200,11 @@ namespace pbms_be.DataAccess
                     if (item.TransactionID > ConstantConfig.DEFAULT_NULL_TRANSACTION_ID)
                     {
                         item.Transaction = transDA.GetTransaction(item.TransactionID);
+                    } else
+                    {
+                        item.TransactionID = ConstantConfig.DEFAULT_ZERO_VALUE;
                     }
+
                 }
                 return result;
             }
@@ -346,41 +355,41 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal List<Account> AddMemberCollabFund(MemberCollabFundDTO AddMemberDTO)
-        {
-            try
-            {
-                // 1. check if account is fundholder
-                var collabAccount = IsFundholderCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountFundholderID);
-                if (collabAccount) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+        //internal List<Account> AddMemberCollabFund(MemberCollabFundDTO AddMemberDTO)
+        //{
+        //    try
+        //    {
+        //        // 1. check if account is fundholder
+        //        var collabAccount = IsFundholderCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountFundholderID);
+        //        if (collabAccount) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
 
-                // 2. check if account is exist
-                var authDA = new AuthDA(_context);
-                var account = authDA.GetAccount(AddMemberDTO.AccountMemberID);
-                if (account is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+        //        // 2. check if account is exist
+        //        var authDA = new AuthDA(_context);
+        //        var account = authDA.GetAccount(AddMemberDTO.AccountMemberID);
+        //        if (account is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
 
-                //3. check if account is already a member
-                var isExist = IsAlreadyMemberCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountMemberID);
-                if (isExist) throw new Exception(Message.ACCOUNT_ALREADY_IS_MEMBER);
+        //        //3. check if account is already a member
+        //        var isExist = IsAlreadyMemberCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountMemberID);
+        //        if (isExist) throw new Exception(Message.ACCOUNT_ALREADY_IS_MEMBER);
 
-                // 4. add account as member
-                var accountCollab = new AccountCollab
-                {
-                    AccountID = AddMemberDTO.AccountMemberID,
-                    CollabFundID = AddMemberDTO.CollabFundID,
-                    IsFundholder = false,
-                    ActiveStateID = ActiveStateConst.ACTIVE
-                };
-                _context.AccountCollab.Add(accountCollab);
-                _context.SaveChanges();
-                // 5. return all member
-                return GetAllMemberCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountFundholderID);
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
+        //        // 4. add account as member
+        //        var accountCollab = new AccountCollab
+        //        {
+        //            AccountID = AddMemberDTO.AccountMemberID,
+        //            CollabFundID = AddMemberDTO.CollabFundID,
+        //            IsFundholder = false,
+        //            ActiveStateID = ActiveStateConst.ACTIVE
+        //        };
+        //        _context.AccountCollab.Add(accountCollab);
+        //        _context.SaveChanges();
+        //        // 5. return all member
+        //        return GetAllMemberCollabFund(AddMemberDTO.CollabFundID, AddMemberDTO.AccountFundholderID);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception(e.Message);
+        //    }
+        //}
 
         private bool IsAlreadyMemberCollabFund(int collabFundID, string accountMemberID)
         {
@@ -418,7 +427,7 @@ namespace pbms_be.DataAccess
         }
 
         // check if account is fundholder
-        private bool IsFundholderCollabFund(int collabFundID, string accountID)
+        internal bool IsFundholderCollabFund(int collabFundID, string accountID)
         {
             try
             {
@@ -473,10 +482,558 @@ namespace pbms_be.DataAccess
                     .FirstOrDefault();
                 if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
                 accountCollab.ActiveStateID = ActiveStateConst.INACTIVE;
+                accountCollab.LastTime = DateTime.UtcNow;
                 _context.SaveChanges();
 
                 // 4. return all member
                 return GetAllMemberCollabFund(deleteMemberCollabFundDTO.CollabFundID, deleteMemberCollabFundDTO.AccountFundholderID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object AcceptMemberCollabFund(MemberCollabFundDTO acceptMemberCollabFundDTO)
+        {
+            try
+            {
+                // 1. check if account is fundholder
+                var isFundholder = IsFundholderCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountFundholderID);
+                if (!isFundholder) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+
+                // 2. check if account is already invited
+                var isInvited = IsAlreadyInvitedCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountMemberID);
+                if (!isInvited) throw new Exception(Message.ACCOUNT_WAS_NOT_INVITED);
+
+                // 3. accept account as member
+                var accountCollab = _context.AccountCollab
+                    .Where(ca => ca.CollabFundID == acceptMemberCollabFundDTO.CollabFundID
+                                       && ca.AccountID == acceptMemberCollabFundDTO.AccountMemberID)
+                    .FirstOrDefault();
+                if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                accountCollab.ActiveStateID = ActiveStateConst.ACTIVE;
+                accountCollab.LastTime = DateTime.UtcNow;
+                _context.SaveChanges();
+
+                // 4. return all member
+                return GetAllMemberCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountFundholderID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object DeclineMemberCollabFund(MemberCollabFundDTO declineMemberCollabFundDTO)
+        {
+            try
+            {
+                // 2. check if account is already invited
+                var isInvited = IsAlreadyInvitedCollabFund(declineMemberCollabFundDTO.CollabFundID, declineMemberCollabFundDTO.AccountMemberID);
+                if (!isInvited) throw new Exception(Message.ACCOUNT_WAS_NOT_INVITED);
+
+                // 3. decline account as member
+                var accountCollab = _context.AccountCollab
+                    .Where(ca => ca.CollabFundID == declineMemberCollabFundDTO.CollabFundID
+                                                          && ca.AccountID == declineMemberCollabFundDTO.AccountMemberID)
+                    .FirstOrDefault();
+                if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                accountCollab.ActiveStateID = ActiveStateConst.INACTIVE;
+                accountCollab.LastTime = DateTime.UtcNow;
+                _context.SaveChanges();
+
+                // 4. return all member
+                return GetAllMemberCollabFund(declineMemberCollabFundDTO.CollabFundID, declineMemberCollabFundDTO.AccountFundholderID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object DeleteInvitationCollabFund(MemberCollabFundDTO deleteInvitationCollabFundDTO)
+        {
+            try
+            {
+                // 1. check if account is fundholder
+                var isFundholder = IsFundholderCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountFundholderID);
+                if (!isFundholder) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+
+                // 2. check if account is already invited
+                var isInvited = IsAlreadyInvitedCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountMemberID);
+                if (!isInvited) throw new Exception(Message.ACCOUNT_WAS_NOT_INVITED);
+
+                // 3. delete account as member
+                var accountCollab = _context.AccountCollab
+                    .Where(ca => ca.CollabFundID == deleteInvitationCollabFundDTO.CollabFundID
+                                                                             && ca.AccountID == deleteInvitationCollabFundDTO.AccountMemberID)
+                    .FirstOrDefault();
+                if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                accountCollab.ActiveStateID = ActiveStateConst.INACTIVE;
+                accountCollab.LastTime = DateTime.UtcNow;
+                _context.SaveChanges();
+
+                // 4. return all member
+                return GetAllMemberCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountFundholderID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal List<Account> GetAccountByEmail(string email)
+        {
+            try
+            {
+                var result = _context.Account
+                    .Where(a => a.EmailAddress.Contains(email) || a.AccountName.Contains(email))
+                    .ToList();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal List<CollabFundAccountActiveStateDTO> GetAccountByEmailAndCollabFundID(int collabfundID, List<Account> accountEmail)
+        {
+            try
+            {
+                var result = new List<CollabFundAccountActiveStateDTO>();
+                foreach (var item in accountEmail)
+                {
+                    var accountCollab = _context.AccountCollab
+                        .Where(ca => ca.CollabFundID == collabfundID && ca.AccountID == item.AccountID)
+                        .Include(ca => ca.ActiveState)
+                        .FirstOrDefault();
+                    if (accountCollab != null)
+                    {
+                        var account = new CollabFundAccountActiveStateDTO
+                        {
+                            AccountID = item.AccountID,
+                            AccountName = item.AccountName,
+                            EmailAddress = item.EmailAddress,
+                            CFA_ActiveStateID = accountCollab.ActiveStateID,
+                            CFA_ActiveState = accountCollab.ActiveState
+                        };
+                        result.Add(account);
+                        continue;
+                    }
+                    // if not found, add account with active state is inactive ( can invite to join collab fund)
+                    var newaccount = new CollabFundAccountActiveStateDTO
+                    {
+                        AccountID = item.AccountID,
+                        AccountName = item.AccountName,
+                        EmailAddress = item.EmailAddress,
+                        CFA_ActiveStateID = ActiveStateConst.INACTIVE,
+                        CFA_ActiveState = new ActiveState
+                        {
+                            ActiveStateID = ActiveStateConst.INACTIVE,
+                            Name = ActiveStateConst.INACTIVE_NAME
+                        }
+                    };
+                    result.Add(newaccount);
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetAllDividingMoneyWithDetail(int collabFundID, string accountID)
+        {
+            try
+            {
+                var dividingMoney = _context.CF_DividingMoney
+                    .Where(cfdm => cfdm.CollabFundID == collabFundID
+                                           && cfdm.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .Include(cfdm => cfdm.ActiveState)
+                    .ToList();
+
+                var dividingMoneyDetail = new List<CF_DividingMoneyDetail>();
+                var _authDA = new AuthDA(_context);
+                foreach (var item in dividingMoney)
+                {
+                    var detail = _context.CF_DividingMoneyDetail
+                                .Where(cfdmd => cfdmd.CF_DividingMoneyID == item.CF_DividingMoneyID)
+                                .ToList();
+                    foreach (var itemDetail in detail)
+                    {
+                        itemDetail.FromAccount = _authDA.GetAccount(itemDetail.FromAccountID);
+                        itemDetail.ToAccount = _authDA.GetAccount(itemDetail.ToAccountID);
+                        var time = ConvertTimeFromUtc(itemDetail.LastTime);
+                        itemDetail.LastTime = time;
+                    }
+                    dividingMoneyDetail.AddRange(detail);
+                }
+                return dividingMoney;
+                //return new { result, dividingMoney, dividingMoneyDetail };
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal bool IsAccountInCollabFund(string accountID, int collabFundID)
+        {
+            try
+            {
+                var result = _context.AccountCollab
+                    .Where(ca => ca.AccountID == accountID
+                                && ca.CollabFundID == collabFundID
+                                && ca.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .FirstOrDefault();
+                return result != null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        // a function to add system location utc time to input time
+        internal DateTime ConvertTimeFromUtc(DateTime time)
+        {
+            //return TimeZoneInfo.ConvertTimeFromUtc(time, TimeZoneInfo.Local);
+            //var timeZone = TimeZoneInfo.Local.GetUtcOffset(time).Hours;
+            //Console.WriteLine("timeZone: " + timeZone);
+            //return time.AddHours(timeZone);
+            return time.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
+        }
+
+        //internal object GetAllAmountContributed(int collabFundID, string accountID)
+        //{
+        //    try
+        //    {
+        //        var result = GetDivideMoneyInfo(collabFundID, accountID).Find(p => p.AccountID == accountID);
+        //        return result;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception(e.Message);
+        //    }
+        //}
+
+        internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result)
+        {
+            try
+            {
+                var divideMoneyInfor = GetDivideMoneyCollabFund(collabFundID);
+                var totalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                var numberParticipant = divideMoneyInfor.Count;
+                var averageAmount = (totalAmount / ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR / numberParticipant) * ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR;
+                var remainAmount = totalAmount - averageAmount * numberParticipant;
+                var cf_dividingmoney = new CF_DividingMoney
+                {
+                    CollabFundID = collabFundID,
+                    TotalAmount = totalAmount,
+                    NumberParticipant = numberParticipant,
+                    AverageAmount = averageAmount,
+                    RemainAmount = remainAmount
+                };
+
+                var listDetail = CalculateTheAdditionalAmount(divideMoneyInfor, averageAmount);
+                var listDetailResult = DivideMoney(listDetail);
+                var listDividingMoneyDetail = CalculateTheDividingMoneyDetail(divideMoneyInfor, listDetailResult);
+                cfdividingmoney_result = cf_dividingmoney;
+                cfdm_detail_result = listDividingMoneyDetail;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object DivideMoneyCollabFund(CollabAccountDTO collabAccountDTO)
+        {
+            try
+            {
+                var dividingmoney = new CF_DividingMoney();
+                var dividingmoneydetail = new List<CF_DividingMoneyDetail>();
+                GetDivideMoneyInfo(collabAccountDTO.CollabFundID, collabAccountDTO.AccountID, out dividingmoney, out dividingmoneydetail);
+
+                var cf_activity = new CollabFundActivity
+                {
+                    CollabFundID = collabAccountDTO.CollabFundID,
+                    AccountID = collabAccountDTO.AccountID,
+                    Note = "Test chia tiền",
+                    TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID,
+                    ActiveStateID = ActiveStateConst.ACTIVE,
+                };
+
+                _context.CollabFundActivity.Add(cf_activity);
+                _context.SaveChanges();
+                var cfa_id = cf_activity.CollabFundActivityID;
+
+                var cf_dividingmoney = new CF_DividingMoney
+                {
+                    CollabFundID = dividingmoney.CollabFundID,
+                    CollabFunActivityID = cfa_id,
+                    TotalAmount = dividingmoney.TotalAmount,
+                    NumberParticipant = dividingmoney.NumberParticipant,
+                    AverageAmount = dividingmoney.AverageAmount,
+                    RemainAmount = dividingmoney.RemainAmount,
+                    ActiveStateID = ActiveStateConst.ACTIVE
+                };
+
+                _context.CF_DividingMoney.Add(cf_dividingmoney);
+                _context.SaveChanges();
+                var cfdm_id = cf_dividingmoney.CF_DividingMoneyID;
+
+                var list_cfdm_detail = new List<CF_DividingMoneyDetail>();
+                foreach (var item in dividingmoneydetail)
+                {
+                    var cfdm_detail = new CF_DividingMoneyDetail
+                    {
+                        CF_DividingMoneyID = cfdm_id,
+                        FromAccountID = item.FromAccountID,
+                        FromAccountTotalAmount = item.FromAccountTotalAmount,
+                        FromAccountTransactionCount = item.FromAccountTransactionCount,
+                        ToAccountID = item.ToAccountID,
+                        DividingAmount = item.DividingAmount,
+                        LastTime = LConvertVariable.ConvertUtcToLocalTime(DateTime.UtcNow)
+                    };
+                    list_cfdm_detail.Add(cfdm_detail);
+                }
+                _context.CF_DividingMoneyDetail.AddRange(list_cfdm_detail);
+                _context.SaveChanges();
+                return new { cf_dividingmoney, list_cfdm_detail };
+
+            } catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        private List<CF_DividingMoneyDetail> CalculateTheDividingMoneyDetail(List<DivideMoneyInfo> divideMoneyInfor, List<DivideMoneyExecute> listDetailResult)
+        {
+            var authDA = new AuthDA(_context);
+            var listDividingMoneyDetail = new List<CF_DividingMoneyDetail>();
+            foreach (var item in listDetailResult)
+            {
+                var dmInfor = divideMoneyInfor.Find(p => p.AccountID == item.FromAccountID);
+                if (dmInfor is null) continue;
+                var detail = new CF_DividingMoneyDetail
+                {
+                    FromAccountTotalAmount = dmInfor.TotalAmount,
+                    FromAccountTransactionCount = dmInfor.TransactionCount,
+                    FromAccountID = item.FromAccountID,
+                    FromAccount = authDA.GetAccount(item.FromAccountID),
+                    ToAccountID = item.ToAccountID,
+                    ToAccount = authDA.GetAccount(item.ToAccountID),
+                    DividingAmount = Math.Abs(item.ActualAmount),
+                    LastTime = LConvertVariable.ConvertUtcToLocalTime(DateTime.UtcNow)
+                };
+                listDividingMoneyDetail.Add(detail);
+            }
+            return listDividingMoneyDetail;
+        }
+
+        private List<DivideMoneyExecute> CalculateTheAdditionalAmount(List<DivideMoneyInfo> listinfor,long averageAmount)
+        {
+            var listDetail = new List<DivideMoneyExecute>();
+            foreach (var item in listinfor)
+            {
+                var dividingAmount = item.TotalAmount - averageAmount;
+                switch (dividingAmount)
+                {
+                    case 0:
+                        var detail0 = new DivideMoneyExecute
+                        {
+                            FromAccountID = item.AccountID,
+                            ToAccountID = item.AccountID,
+                            ActualAmount = dividingAmount,
+                        };
+                        break;
+                    case > 0:
+                        var detail1 = new DivideMoneyExecute
+                        {
+                            ToAccountID = item.AccountID,
+                            ActualAmount = dividingAmount,
+                        };
+                        listDetail.Add(detail1);
+                        break;
+                    case < 0:
+                        var detail2 = new DivideMoneyExecute
+                        {
+                            FromAccountID = item.AccountID,
+                            ActualAmount = dividingAmount,
+                        };
+                        listDetail.Add(detail2);
+                        break;
+                }
+            }
+            listDetail.Sort((x, y) => x.ActualAmount.CompareTo(y.ActualAmount));
+            return listDetail;
+        }
+
+        private List<DivideMoneyExecute> DivideMoney(List<DivideMoneyExecute> listDetail)
+        {
+            var listDetailResult = new List<DivideMoneyExecute>();
+            bool isContinue = true;
+            int breakcount = 0;
+            while (isContinue)
+            {
+                breakcount++;
+                var listDetail2 = new List<DivideMoneyExecute>(listDetail);
+                listDetail2.RemoveAll(p => p.ActualAmount == 0);
+                foreach (var item in listDetail2)
+                {
+                    if (item.ActualAmount < 0)
+                    {
+                        var toAccount = listDetail2.Find(p => p.ActualAmount > 0 && p.FromAccountID == "");
+                        if (toAccount != null)
+                        {
+                            item.ToAccountID = toAccount.ToAccountID;
+                            var actual = Math.Abs(toAccount.ActualAmount) - Math.Abs(item.ActualAmount);
+                            if (actual < 0)
+                            {
+                                // case from > to => from = from - to, to = 0
+                                var itemResult0 = new DivideMoneyExecute
+                                {
+                                    FromAccountID = item.FromAccountID,
+                                    ToAccountID = item.ToAccountID,
+                                    ActualAmount = toAccount.ActualAmount,
+                                };
+                                listDetailResult.Add(itemResult0);
+
+                                toAccount.ActualAmount = 0;
+                                item.ActualAmount = actual;
+                                item.ToAccountID = toAccount.ToAccountID;
+                            }
+                            else if (actual > 0)
+                            {
+                                // case from < to => from = 0, to = to - from
+
+                                var itemResult1 = new DivideMoneyExecute
+                                {
+                                    FromAccountID = item.FromAccountID,
+                                    ToAccountID = item.ToAccountID,
+                                    ActualAmount = item.ActualAmount,
+                                };
+                                listDetailResult.Add(itemResult1);
+
+                                toAccount.ActualAmount = actual;
+                                item.ActualAmount = 0;
+                                item.ToAccountID = toAccount.ToAccountID;
+                            }
+                            else if (actual == 0)
+                            {
+                                // case from = to => from = 0, to = 0
+
+                                var itemResult2 = new DivideMoneyExecute
+                                {
+                                    FromAccountID = item.FromAccountID,
+                                    ToAccountID = item.ToAccountID,
+                                    ActualAmount = item.ActualAmount,
+                                };
+                                listDetailResult.Add(itemResult2);
+
+                                toAccount.ActualAmount = 0;
+                                item.ActualAmount = 0;
+                                item.ToAccountID = toAccount.ToAccountID;
+                            }
+                        }
+                    }
+                    else continue;
+                }
+                // nếu listDetail2 chỉ còn 1 phần tử thì thoát khỏi vòng lặp while
+                if (listDetail2.Count == 1)
+                {
+                    listDetail2[0].FromAccountID = listDetail2[0].ToAccountID;
+                    listDetailResult.Add(listDetail2[0]);
+                    isContinue = false;
+                    break;
+                }
+                if (breakcount > 1000) // tránh trường hợp vòng lặp vô hạn nếu có lỗi
+                {
+                    isContinue = false;
+                    break;
+                }
+            }
+            return listDetailResult;
+        }
+
+        internal List<DivideMoneyInfo> GetDivideMoneyCollabFund(int collabFundID)
+        {
+            try
+            {
+                /* câu query lấy ra tất cả thông tin về số tiền đã đóng góp của mỗi thành viên trong collab fund
+                 * điều kiện: 
+                 * - kể từ lần chia tiền cuối cùng (isBeforeDivide = true) hoặc từ đầu nếu ko có lần chia tiền đầu tiên
+                 * - id của các activity ghi lại transaction phải lớn hơn id của lần chia tiền cuối cùng
+                 * 
+                     WITH FirstTrue AS (
+                         SELECT account_id, collab_fun_activity_id, MIN(collab_fun_activity_id) as min_id
+                         FROM collab_fun_activity
+                         WHERE isBeforeDivide = true
+                         GROUP BY account_id, collab_fun_activity_id
+                     )
+                     SELECT cf.account_id, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(COUNT(t.transaction_id), 0) as transaction_count
+                     FROM collab_fun_activity as cf
+                     LEFT JOIN transaction as t ON cf.transaction_id = t.transaction_id
+                     LEFT JOIN FirstTrue as ft ON cf.account_id = ft.account_id
+                     WHERE cf.collabfund_id = 2
+                         AND cf.isBeforeDivide = false
+                         AND (cf.collab_fun_activity_id > ft.min_id OR ft.min_id IS NULL)
+                     GROUP BY cf.account_id;
+                 */
+                var rawQuery = $"WITH FirstTrue AS (" +
+                    $"SELECT account_id, collab_fun_activity_id, MIN(collab_fun_activity_id) as min_id " +
+                    $"FROM collab_fun_activity " +
+                    $"WHERE isBeforeDivide = true " +
+                    $"GROUP BY account_id, collab_fun_activity_id " +
+                    $") " +
+                    $"SELECT cf.account_id, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(COUNT(t.transaction_id), 0) as transaction_count " +
+                    $"FROM collab_fun_activity as cf " +
+                    $"LEFT JOIN transaction as t ON cf.transaction_id = t.transaction_id " +
+                    $"LEFT JOIN FirstTrue as ft ON cf.account_id = ft.account_id " +
+                    $"WHERE cf.collabfund_id = {collabFundID} " +
+                    $"AND cf.isBeforeDivide = false " +
+                    $"AND (cf.collab_fun_activity_id > ft.min_id OR ft.min_id IS NULL) " +
+                    $"GROUP BY cf.account_id;";
+                var result = _context.DivideMoneyInfo.FromSqlRaw(rawQuery).ToList();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object DeleteCFActivity()
+        {
+            try
+            {
+               // delete activity has newest id
+               var activity = _context.CollabFundActivity
+                    .OrderByDescending(cfa => cfa.CollabFundActivityID)
+                    .FirstOrDefault();
+                if (activity is null) throw new Exception(Message.COLLAB_FUND_ACTIVITY_NOT_FOUND);
+
+                var cfdm = _context.CF_DividingMoney
+                    .Where(cfdm => cfdm.CollabFunActivityID == activity.CollabFundActivityID)
+                    .FirstOrDefault();
+                if (cfdm is null) throw new Exception(Message.COLLAB_FUND_ACTIVITY_NOT_FOUND);
+
+                var listdetail = _context.CF_DividingMoneyDetail
+                    .Where(cfdmd => cfdmd.CF_DividingMoneyID == cfdm.CF_DividingMoneyID)
+                    .ToList();
+                _context.CF_DividingMoneyDetail.RemoveRange(listdetail);
+                _context.SaveChanges();
+
+                _context.CF_DividingMoney.Remove(cfdm);
+                _context.SaveChanges();
+
+                _context.CollabFundActivity.Remove(activity);
+                _context.SaveChanges();
+                return null;
             }
             catch (Exception e)
             {

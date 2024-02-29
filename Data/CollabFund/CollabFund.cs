@@ -8,16 +8,16 @@ namespace pbms_be.Data.CollabFund;
 public class CollabFund
 {
     /*
-     CREATE TABLE collabfund (
-        collabfund_id serial PRIMARY KEY,
-        cf_name VARCHAR ( 100 ) NOT NULL,
-        cf_description VARCHAR ( 5000 ) NOT NULL,
-        image_url VARCHAR ( 500 ) NOT NULL,
-        total_amount BIGINT NOT NULL,
-        createtime timestamp not null default current_timestamp,
-        as_id INT NOT NULL DEFAULT 1,
-        FOREIGN KEY (as_id) REFERENCES active_state (as_id)
-      );
+        CREATE TABLE collabfund (
+            collabfund_id serial PRIMARY KEY,
+            cf_name VARCHAR ( 100 ) NOT NULL,
+            cf_description VARCHAR ( 5000 ) DEFAULT '',
+            image_url VARCHAR ( 500 ) DEFAULT '',
+            total_amount BIGINT NOT NULL,
+            createtime timestamp not null default current_timestamp,
+            as_id INT NOT NULL DEFAULT 1,
+            FOREIGN KEY (as_id) REFERENCES active_state (as_id)
+        );
      */
     [Column("collabfund_id")]
     [Key]
