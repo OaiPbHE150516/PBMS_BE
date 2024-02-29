@@ -16,8 +16,8 @@ namespace pbms_be.DataAccess
 
         public bool IsAccountExist(string AccountID)
         {
-            var result = GetAccount(AccountID);
-            return result != null;
+            var result = _context.Account.Any(a => a.AccountID == AccountID);
+            return result;
         }
 
         public Account GetAccount(string AccountID)

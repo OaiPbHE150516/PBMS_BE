@@ -5,6 +5,8 @@ using pbms_be.Data;
 using pbms_be.Data.CollabFund;
 using pbms_be.Data.WalletF;
 using pbms_be.DTOs;
+using pbms_be.Library;
+using System.Reflection.Metadata;
 
 namespace pbms_be.DataAccess
 {
@@ -19,23 +21,37 @@ namespace pbms_be.DataAccess
         // get wallet by wallet id and account id
         public Wallet? GetWallet(int WalletID, string AccountID)
         {
-            var result = _context.Wallet
-                .Where(w => w.WalletID == WalletID && w.AccountID == AccountID)
+            try
+            {
+                var result = _context.Wallet
+                .Where(w => w.WalletID == WalletID && w.AccountID == AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE)
                 .Include(w => w.Currency)
                 .Include(w => w.ActiveState)
                 .FirstOrDefault();
-            return result;
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         // get all wallets of an account by account id
         public List<Wallet> GetWallets(string AccountID)
         {
-            var result = _context.Wallet
-                .Where(w => w.AccountID == AccountID)
-                .Include(w => w.Currency)
-                .Include(w => w.ActiveState)
-                .ToList();
-            return result;
+            try
+            {
+                var result = _context.Wallet
+                            .Where(w => w.AccountID == AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE)
+                            .Include(w => w.Currency)
+                            .Include(w => w.ActiveState)
+                            .ToList();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         // check if a wallet exist by wallet name and account id
@@ -48,9 +64,8 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var result = _context.Wallet.Where(w => w.WalletID == WalletID && w.AccountID == AccountID)
-                .FirstOrDefault();
-                return result != null;
+                var result = _context.Wallet.Any(w => w.WalletID == WalletID && w.AccountID == AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE);
+                return result;
             }
             catch (Exception e)
             {
@@ -63,7 +78,7 @@ namespace pbms_be.DataAccess
         public Wallet? GetWalletByName(string AccountID, string WalletName)
         {
             var result = _context.Wallet
-                .Where(w => w.AccountID == AccountID && w.Name.Contains(WalletName))
+                .Where(w => w.AccountID == AccountID && w.Name.Contains(WalletName) && w.ActiveStateID == ActiveStateConst.ACTIVE)
                 .Include(w => w.Currency)
                 .Include(w => w.ActiveState)
                 .FirstOrDefault();
@@ -77,7 +92,7 @@ namespace pbms_be.DataAccess
             {
                 // get wallet by wallet id
                 var result = _context.Wallet
-                    .Where(w => w.WalletID == WalletID)
+                    .Where(w => w.WalletID == WalletID && w.ActiveStateID == ActiveStateConst.ACTIVE)
                     .Include(w => w.Currency)
                     .Include(w => w.ActiveState)
                     .FirstOrDefault();
@@ -122,17 +137,23 @@ namespace pbms_be.DataAccess
             {
                 if (IsWalletExist(wallet.AccountID, wallet.WalletID))
                 {
-                    var result = _context.Wallet.Where(w => w.WalletID == wallet.WalletID && w.AccountID == wallet.AccountID)
+                    var result = _context.Wallet.Where(w => w.WalletID == wallet.WalletID && w.AccountID == wallet.AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE)
                     .FirstOrDefault();
-                    if (result != null)
+                    if (result is not null)
                     {
                         result.Name = wallet.Name;
+                        result.Note = wallet.Note;
+                        result.IsBanking = wallet.IsBanking;
+                        result.QRCodeURL = wallet.QRCodeURL;
+                        result.BankName = wallet.BankName;
+                        result.BankAccount = wallet.BankAccount;
                         _context.SaveChanges();
                         return GetWallet(wallet.WalletID);
                     }
                 }
                 return null;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
@@ -154,7 +175,7 @@ namespace pbms_be.DataAccess
             return null;
         }
 
-        internal Wallet ChangeWalletActiveState(ChangeWalletActiveStateDTO changeActiveStateDTO)
+        internal Wallet? ChangeWalletActiveState(ChangeWalletActiveStateDTO changeActiveStateDTO)
         {
             try
             {
@@ -170,6 +191,68 @@ namespace pbms_be.DataAccess
             }
         }
 
+        internal object DeleteWallet(WalletDeleteDTO deleteDTO)
+        {
+            try
+            {
+                var wallet = GetWallet(deleteDTO.WalletID);
+                if (wallet == null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+                wallet.ActiveStateID = ActiveStateConst.DELETED;
+                _context.SaveChanges();
+                var returnlist = GetWallets(deleteDTO.AccountID);
+                return returnlist;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
 
+        internal object GetTotalAmount(string accountID)
+        {
+            try
+            {
+                // get total amount of all wallets have currency id = 2
+
+                var result = _context.Wallet
+                    .Where(w => w.AccountID == accountID 
+                    && w.CurrencyID == CurrencyConst.DEFAULT_CURRENCY_ID_VND
+                    && w.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .Sum(w => w.Balance);
+                var totalBalance = new WalletTotalBalance_VM_DTO
+                {
+                    TotalBalance = LConvertVariable.ConvertToMoneyFormat(result)
+                };
+                return totalBalance;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal List<Wallet> GetTotalAmountEachWallet(string accountID)
+        {
+            try
+            {
+                //var result = _context.Wallet
+                //    .Where(w => w.AccountID == accountID)
+                //    .Select(w => new
+                //    {
+                //        w.WalletID,
+                //        w.Name,
+                //        w.Balance
+                //    })
+                //    .ToList();
+                var result = _context.Wallet
+                            .Where(w => w.AccountID == accountID && w.ActiveStateID == ActiveStateConst.ACTIVE)
+                            .ToList();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }
