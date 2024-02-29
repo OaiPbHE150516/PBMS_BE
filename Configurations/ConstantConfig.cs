@@ -48,6 +48,8 @@
         public const string FILE_IS_NULL = "File is null or not of type pdf";
         public const string FILE_IS_NOT_PDF_JPG_PNG = "File is null or not of type pdf, jpg or png";
 
+        //Budget
+        public const string Budget_ALREADY_EXIST = "Budget already exist";
 
         // Collab fund
         public const string COLLAB_FUND_ALREADY_EXIST = "Collab fund already exist";
