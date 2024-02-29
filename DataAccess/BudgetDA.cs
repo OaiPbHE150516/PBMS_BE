@@ -21,9 +21,8 @@ namespace pbms_be.DataAccess
             try
             {
                 var result = _context.Budget
-                            .Where(x => x.BudgetID == budgetID)
-                            .Include(x => x.WalletID)
-                            .Include(x => x.BudgetCategoryID)
+                            .Where(x => x.BudgetID == budgetID && x.ActiveStateID == ActiveStateConst.ACTIVE) 
+                            .Include(x => x.ActiveState)
                             .FirstOrDefault();
                 return result;
             }
@@ -32,27 +31,28 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
-        internal Budget GetBudget(int budgetID, int categoryID)
-        {
-            try
-            {
-                var budgetCate = _context.BudgetCategory
-                                    .Where(x => x.CategoryID == categoryID)
-                                    .Select(x => x.BudgetCategoryID)
-                                    .ToList();
+        //internal Budget GetBudget(int budgetID, int categoryID)
+        //{
+        //    try
+        //    {
+        //        var budgetCate = _context.BudgetCategory
+        //                            .Where(x => x.CategoryID == categoryID && x.ActiveStateID == ActiveStateConst.ACTIVE)
+        //                            .Select(x => x.BudgetCategoryID)
+        //                            .ToList();
 
-                var result = _context.Budget
-                            .Where(x => budgetCate.Contains(x.BudgetID)
-                                    && x.BudgetID == budgetID )
-                            .Include(x => x.WalletID)
-                            .FirstOrDefault();
-                return result;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
+        //        var result = _context.Budget
+        //                    .Where(x => budgetCate.Contains(x.BudgetID)
+        //                            && x.BudgetID == budgetID
+        //                             && x.ActiveStateID == ActiveStateConst.ACTIVE)
+        //                    .Include(x => x.ActiveState)
+        //                    .FirstOrDefault();
+        //        return result;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception(e.Message);
+        //    }
+        //}
         //Get all budget
         internal List<Budget> GetBudget(string accountID, int budgetID)
         {
@@ -65,8 +65,9 @@ namespace pbms_be.DataAccess
 
                 var result = _context.Budget
                             .Where(x => budgetCate.Contains(x.BudgetID)
-                                        && x.AccountID == accountID)
-                            .Include(x => x.WalletID)
+                                        && x.AccountID == accountID
+                                         && x.ActiveStateID == ActiveStateConst.ACTIVE)
+                            .Include(x => x.ActiveState)
                             .ToList();
                 return result;
             }
@@ -85,6 +86,9 @@ namespace pbms_be.DataAccess
                 {
                     throw new Exception(Message.Budget_ALREADY_EXIST);
                 }
+                budget.BeginDate = DateTime.UtcNow;
+                budget.EndDate = DateTime.UtcNow;
+                budget.ActiveStateID = 1;
                 _context.Budget.Add(budget);
                 _context.SaveChanges();
                 return GetBudget(budget.BudgetID);
@@ -111,6 +115,11 @@ namespace pbms_be.DataAccess
                 return GetBudget(budget.BudgetID);
             }
             return null;
+        }
+
+        internal object GetBudgetDetail(string accountID, int budgetID)
+        {
+            throw new NotImplementedException();
         }
     }
 }

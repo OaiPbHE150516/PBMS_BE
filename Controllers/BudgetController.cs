@@ -27,9 +27,16 @@ namespace pbms_be.Controllers
         // get budget 
 
         [HttpGet("get/id/{budgetID}/{accountID}")]
-        public IActionResult GetWallets(string accountID, int budgetID)
+        public IActionResult GetBudget(string accountID, int budgetID)
         {
             var result =_budgetDA.GetBudget(accountID, budgetID);
+            return Ok(result);
+        }
+        [HttpGet("get/detail/{budgetID}/{accountID}")]
+        public IActionResult GetBudgetDetail(string accountID, int budgetID)
+        {
+            // check cacs điều kiện 
+            var result = _budgetDA.GetBudgetDetail(accountID, budgetID);
             return Ok(result);
         }
         // Create Budget
