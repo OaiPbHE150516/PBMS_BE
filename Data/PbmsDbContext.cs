@@ -14,6 +14,10 @@ namespace pbms_be.Data
 
         public DbSet<WalletF.Wallet> Wallet { get; set; }
 
+        public DbSet<Budget.Budget> Budget { get; set; }
+
+        public DbSet<Budget.BudgetCategory> BudgetCategory { get; set; }
+
         public DbSet<Status.ActiveState> ActiveState { get; set; }
 
         public DbSet<Filter.Category> Category { get; set; }
@@ -30,6 +34,13 @@ namespace pbms_be.Data
         public DbSet<CollabFund.AccountCollab> AccountCollab { get; set; }
 
         public DbSet<CollabFund.CollabFundActivity> CollabFundActivity { get; set; }
+
+        public DbSet<CollabFund.CF_DividingMoney> CF_DividingMoney { get; set; }
+
+        public DbSet<CollabFund.CF_DividingMoneyDetail> CF_DividingMoneyDetail { get; set; }
+
+
+        public DbSet<Custom.DivideMoneyInfo> DivideMoneyInfo { get; set; }
 
 
         // end of collab fund

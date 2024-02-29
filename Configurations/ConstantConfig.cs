@@ -43,14 +43,39 @@
         // default value for zero
         public const int DEFAULT_ZERO_VALUE  = 0;
 
+        // VN_TIMEZONE_UTC
+        public const int VN_TIMEZONE_UTC = 7;
+
+        // min minutes ago to know it just now
+        public const int MIN_MINUTES_AGO = 1;
+        // min hours ago to know it minutes ago
+        public const int MIN_HOURS_AGO = 60;
+        // min days ago to know it hours ago
+        public const int MIN_DAYS_AGO = 24;
+        // min months ago to know it days ago
+        public const int MIN_MONTHS_AGO = 30;
+
+        public const string DEFAULT_DATETIME_FORMAT = "HH:mm, dd/MM/yyyy";
+        // default time format
+        public const string DEFAULT_TIME_FORMAT = "HH:mm";
+        // default date format
+        public const string DEFAULT_DATE_FORMAT = "dd/MM/yyyy";
+
+        // default VND thousand separator dong format
+        public const int DEFAULT_VND_THOUSAND_SEPARATOR = 1000;
+
     }
 
+    // Message to response to client
     public class Message
     {
         public const string ACCOUNT_ID_REQUIRED = "AccountID is required";
         public const string INVOICE_ID_REQUIRED = "InvoiceID is required";
         public const string FILE_IS_NULL = "File is null or not of type pdf";
         public const string FILE_IS_NOT_PDF_JPG_PNG = "File is null or not of type pdf, jpg or png";
+      
+        //Budget
+        public const string Budget_ALREADY_EXIST = "Budget already exist";
         // email address is required
         public const string EMAIL_ADDRESS_REQUIRED = "Email address is required";
 
@@ -71,10 +96,19 @@
         public const string ACCOUNT_ALREADY_REJECTED = "Account is already rejected";
         public const string ACCOUNT_WAS_NOT_INVITED = "Account was not invited";
 
+        // just now
+        public const string VN_JUST_NOW = "vừa xong";
+        public const string VN_MINUTES_AGO = " phút trước";
+        public const string VN_HOURS_AGO = " giờ trước";
+        public const string VN_DAYS_AGO = " ngày trước";
+        public const string VN_MONTHS_AGO = " tháng trước";
 
 
         // Mapper
         public const string MAPPER_IS_NULL = "Mapper is null";
+
+        // Activity 
+        public const string COLLAB_FUND_ACTIVITY_NOT_FOUND = "Collab fund activity not found";
     }
 
     public class ActiveStateConst

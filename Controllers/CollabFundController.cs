@@ -28,6 +28,7 @@ namespace pbms_be.Controllers
 
         /*=======================           Get Methods          =======================*/
 
+        #region Get Methods
         // get all collab fund by account id
         [HttpGet("get/account/{accountID}")]
         public IActionResult GetCollabFunds(string accountID)
@@ -52,6 +53,9 @@ namespace pbms_be.Controllers
             {
                 if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false)
+                    return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+
                 CollabFund collabfund = new CollabFund();
                 bool isExist = false;
                 _collabFundDA.GetDetailCollabFund(collabFundID, accountID, out isExist, out collabfund);
@@ -72,8 +76,12 @@ namespace pbms_be.Controllers
             {
                 if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false)
+                    return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 var result = _collabFundDA.GetAllActivityCollabFund(collabFundID, accountID);
-                return Ok(result);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var resultEntity = _mapper.Map<List<CollabFundActivity_MV_DTO>>(result);
+                return Ok(resultEntity);
             }
             catch (System.Exception e)
             {
@@ -117,12 +125,59 @@ namespace pbms_be.Controllers
             }
         }
 
+        // get all invitation collab fund by collab fund id and account id
 
+        //// get all dividing money and detail by collab fund id and account id
+        //[HttpGet("get/dividing-money/{collabFundID}/{accountID}")]
+        //public IActionResult GetAllDividingMoneyAndDetail(int collabFundID, string accountID)
+        //{
+        //    try
+        //    {
+        //        if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+        //        if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+        //        if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+        //        var result = _collabFundDA.GetAllDividingMoneyWithDetail(collabFundID, accountID);
+        //        return Ok(result);
+        //    }
+        //    catch (System.Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
-        /*=======================           End of Get Methods          =======================*/
+        // get divide money information by collab fund id and account id before divide money action
+        //[HttpGet("get/divide-money-info/{collabFundID}/{accountID}")]
+        //public IActionResult GetDivideMoneyInfo(int collabFundID, string accountID)
+        [HttpGet("get/divide-money-info/")]
+        public IActionResult GetDivideMoneyInfo()
+        {
+            int collabFundID = 5;
+            string accountID = "a1";
+            try
+            {
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+                //out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result
+                var cfdividingmoney_result = new CF_DividingMoney();
+                var cfdm_detail_result = new List<CF_DividingMoneyDetail>();
+                _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID, out cfdividingmoney_result, out cfdm_detail_result);
 
-        /*=======================           Post Methods          =======================*/
+                if (cfdividingmoney_result is null || cfdm_detail_result is null) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                // convert property in dividemoneyinfor to string
+                //var cf_dividing_moneyEntity = _mapper.Map<CF_DividingMoney_MV_DTO>(dividemoneyinfor);
+                return Ok(new { cfdividingmoney_result, cfdm_detail_result });
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
+        #endregion Get Methods
+
+        #region Post Methods
         // create collab fund
         [HttpPost("create")]
         public IActionResult CreateCollabFund([FromBody] CreateCollabFundDTO collabFundDTO)
@@ -199,11 +254,28 @@ namespace pbms_be.Controllers
             }
         }
 
-        
+        // divide money of collab fund by collab fund id and account id, only fundholder can divide money
+        [HttpPost("divide-money")]
+        public IActionResult DivideMoneyCollabFund([FromBody] CollabAccountDTO collabAccountDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                // check is fundholder
+                if (!_collabFundDA.IsFundholderCollabFund(collabAccountDTO.CollabFundID, collabAccountDTO.AccountID))
+                    return BadRequest(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+                var result = _collabFundDA.DivideMoneyCollabFund(collabAccountDTO);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
-        /*=======================           End of Post Methods          =======================*/
+        #endregion Post Methods
 
-        /*=======================           Put Methods          =======================*/
+        #region Put Methods
 
         // update collab fund
         [HttpPut("update")]
@@ -255,12 +327,9 @@ namespace pbms_be.Controllers
             }
         }
 
-        
-        /*=======================           End of Put Methods          =======================*/
+        #endregion Put Methods
 
-
-        /*=======================           Delete Methods          =======================*/
-
+        #region Delete Methods
         // delete a member from collab fund by collab fund id and account id, only fundholder can delete member
         [HttpDelete("delete/member")]
         public IActionResult DeleteMemberCollabFund([FromBody] MemberCollabFundDTO deleteMemberCollabFundDTO)
@@ -310,5 +379,32 @@ namespace pbms_be.Controllers
             }
         }
 
+        #endregion Delete Methods
+
     }
 }
+
+/*
+ Note: 27/02
+I. Collab_Fund 
+    - Thêm 1 mothod get được tất cả thông tin của 1 collab fund
+    - OK: Thêm hàm để lấy tất cả số tiền đã chi ra của 
+        một người tham gia collab fund (kể từ lần chia cuối cùng) đến thời điểm hiện tại.
+        - trong thời gian chia tiền, nếu người dùng có thêm giao dịch thì để cho lần sau chia tiền.
+    - Nếu đã thực hiện thao tác chia tiền rồi thì người dùng không thể update giao dịch ( thông qua hoạt động) đã xảy ra trước khi chia tiền
+    - OK: Thêm hàm để xem thông tin chia tiền của 1 lần chia tiền trước khi thực hiện hành động chia tiền
+    - OK: Thêm hàm để thực hiện hành động chia tiền. (thêm popup để chọn người cần chia tiền ( thường là tất cả mọi người) ver 2)
+    - Thêm hàm để 1 người dùng lấy thông tin của ví người đích ( mã QR và banking infor) 
+        cùng với số tiền để chuyển
+    - Thêm hàm để sau khi người dùng chuyển tiền xong, thì cập nhật lại isDone của 
+        cf_dividing_money_detail
+III. Transaction
+    1. Thêm hàm để chuyển tiền từ 1 người này sang người khác
+    2. Thêm hàm để lấy thông tin của 1 transaction
+III. Notification
+    1. Thêm hàm để chủ động gửi thông báo cho người dùng khi thỏa mãn điều kiện nào đó
+
+
+
+
+ */
