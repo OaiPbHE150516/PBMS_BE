@@ -33,6 +33,7 @@ namespace pbms_be.DTOs
     public class ChangeCollabFundActiveStateDTO
     {
         public int CollabFundID { get; set; }
+        public string AccountID { get; set; } = String.Empty;
         public int ActiveStateID { get; set; }
     }
 
