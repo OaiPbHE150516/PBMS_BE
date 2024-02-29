@@ -21,7 +21,7 @@ namespace pbms_be.DataAccess
             _context = context;
         }
 
-        internal CollabFund CreateCollabFund(CollabFund collabFund)
+        internal CollabFund CreateCollabFund(CollabFund collabFund, string accountID)
         {
             try
             {
@@ -31,7 +31,17 @@ namespace pbms_be.DataAccess
                 }
                 _context.CollabFund.Add(collabFund);
                 _context.SaveChanges();
-                return GetCollabFund(collabFund.CollabFundID);
+                var result = GetCollabFund(collabFund.CollabFundID);
+                var collabAccount = new AccountCollab
+                {
+                    AccountID = accountID,
+                    CollabFundID = result.CollabFundID,
+                    IsFundholder = true,
+                    ActiveStateID = ActiveStateConst.ACTIVE
+                };
+                _context.AccountCollab.Add(collabAccount);
+                _context.SaveChanges();
+                return result;
             }
             catch (Exception e)
             {
