@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using pbms_be.Configurations;
 using pbms_be.Data;
+using pbms_be.Data.CollabFund;
 using pbms_be.Data.WalletF;
+using pbms_be.DTOs;
 
 namespace pbms_be.DataAccess
 {
@@ -40,6 +43,11 @@ namespace pbms_be.DataAccess
             var result = GetWalletByName(AccountID, WalletName);
             return result != null;
         }
+        public bool IsWalletExist(string AccountID, int WalletID)
+        {
+            var result = GetWallet(WalletID);
+            return result != null;
+        }
 
         // get a wallet by account id and wallet id
         public Wallet? GetWalletByName(string AccountID, string WalletName)
@@ -76,7 +84,7 @@ namespace pbms_be.DataAccess
             return result;
         }
 
-        // create a wallet
+
         public Wallet? CreateWallet(Wallet wallet)
         {
             if (!IsWalletExist(wallet.AccountID, wallet.Name))
@@ -88,10 +96,12 @@ namespace pbms_be.DataAccess
             return null;
         }
 
-        // update a wallet
+
+       // update a wallet
+       //check duplicate
         public Wallet? UpdateWallet(Wallet wallet)
         {
-            if (IsWalletExist(wallet.AccountID, wallet.Name))
+            if (IsWalletExist(wallet.AccountID, wallet.WalletID))
             {
                 _context.Wallet.Update(wallet);
                 _context.SaveChanges();
@@ -99,6 +109,8 @@ namespace pbms_be.DataAccess
             }
             return null;
         }
+
+
 
         // change wallet status
         public Wallet? ChangeWalletStatus(int WalletID, int VisionStatusID)
@@ -113,5 +125,23 @@ namespace pbms_be.DataAccess
             //}
             return null;
         }
+
+        internal Wallet ChangeWalletActiveState(ChangeWalletActiveStateDTO changeActiveStateDTO)
+        {
+            try
+            {
+                var wallet = GetWallet(changeActiveStateDTO.WalletID);
+                if (wallet == null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+                wallet.ActiveStateID = changeActiveStateDTO.ActiveStateID;
+                _context.SaveChanges();
+                 return GetWallet(wallet.WalletID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+
     }
 }
