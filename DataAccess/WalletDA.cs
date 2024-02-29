@@ -5,6 +5,7 @@ using pbms_be.Data;
 using pbms_be.Data.CollabFund;
 using pbms_be.Data.WalletF;
 using pbms_be.DTOs;
+using System.Reflection.Metadata;
 
 namespace pbms_be.DataAccess
 {
@@ -170,6 +171,20 @@ namespace pbms_be.DataAccess
             }
         }
 
-
+        internal object DeleteWallet(WalletDeleteDTO deleteDTO)
+        {
+            try
+            {
+                var wallet = GetWallet(deleteDTO.WalletID);
+                if (wallet == null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+                wallet.ActiveStateID = ActiveStateConst.DELETED;
+                _context.SaveChanges();
+                return GetWallet(wallet.WalletID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }

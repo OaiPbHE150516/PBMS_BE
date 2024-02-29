@@ -16,11 +16,13 @@ namespace pbms_be.Controllers
     {
         private readonly PbmsDbContext _context;
         private readonly IMapper? _mapper;
+        private WalletDA _walletDA;
 
         public WalletController(PbmsDbContext context, IMapper? mapper)
         {
             _context = context;
             _mapper = mapper;
+            _walletDA = new WalletDA(context);
         }
 
         [HttpGet("get/account/{accountID}")]
@@ -78,6 +80,26 @@ namespace pbms_be.Controllers
                 WalletDA walletDA = new WalletDA(_context);
                 var result = walletDA.ChangeWalletActiveState(changeActiveStateDTO);
                 return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpDelete("delete")]
+        public IActionResult DeleteWallet([FromBody] WalletDeleteDTO deleteDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (_walletDA.IsWalletExist(deleteDTO.AccountID, deleteDTO.WalletID))
+                return BadRequest("Not Found");
+                var result = _walletDA.DeleteWallet(deleteDTO);
+                return Ok(result);
+
+
+
             }
             catch (System.Exception e)
             {
