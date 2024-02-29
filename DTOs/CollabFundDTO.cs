@@ -106,4 +106,10 @@ namespace pbms_be.DTOs
         public string CreateTimeString { get; set; } = String.Empty;
         public string MinusTimeNowString { get; set; } = String.Empty;
     }
+
+    public class CollabAccountDTO
+    {
+        public int CollabFundID { get; set; }
+        public string AccountID { get; set; } = String.Empty;
+    }
 }

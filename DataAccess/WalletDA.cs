@@ -1,6 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
+using pbms_be.Configurations;
 using pbms_be.Data;
+using pbms_be.Data.CollabFund;
 using pbms_be.Data.WalletF;
+using pbms_be.DTOs;
+using System.Reflection.Metadata;
 
 namespace pbms_be.DataAccess
 {
@@ -40,6 +45,20 @@ namespace pbms_be.DataAccess
             var result = GetWalletByName(AccountID, WalletName);
             return result != null;
         }
+        public bool IsWalletExist(string AccountID, int WalletID)
+        {
+            try
+            {
+                var result = _context.Wallet.Where(w => w.WalletID == WalletID && w.AccountID == AccountID)
+                .FirstOrDefault();
+                return result != null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
+        }
 
         // get a wallet by account id and wallet id
         public Wallet? GetWalletByName(string AccountID, string WalletName)
@@ -55,13 +74,20 @@ namespace pbms_be.DataAccess
         // get wallet by wallet id
         public Wallet? GetWallet(int WalletID)
         {
-            // get wallet by wallet id
-            var result = _context.Wallet
-                .Where(w => w.WalletID == WalletID)
-                .Include(w => w.Currency)
-                .Include(w => w.ActiveState)
-                .FirstOrDefault();
-            return result;
+            try
+            {
+                // get wallet by wallet id
+                var result = _context.Wallet
+                    .Where(w => w.WalletID == WalletID)
+                    .Include(w => w.Currency)
+                    .Include(w => w.ActiveState)
+                    .FirstOrDefault();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         // get wallet by status id and account id
@@ -76,7 +102,7 @@ namespace pbms_be.DataAccess
             return result;
         }
 
-        // create a wallet
+
         public Wallet? CreateWallet(Wallet wallet)
         {
             if (!IsWalletExist(wallet.AccountID, wallet.Name))
@@ -88,17 +114,32 @@ namespace pbms_be.DataAccess
             return null;
         }
 
+
         // update a wallet
+        //check duplicate
         public Wallet? UpdateWallet(Wallet wallet)
         {
-            if (IsWalletExist(wallet.AccountID, wallet.Name))
+            try
             {
-                _context.Wallet.Update(wallet);
-                _context.SaveChanges();
-                return GetWallet(wallet.WalletID);
+                if (IsWalletExist(wallet.AccountID, wallet.WalletID))
+                {
+                    var result = _context.Wallet.Where(w => w.WalletID == wallet.WalletID && w.AccountID == wallet.AccountID)
+                    .FirstOrDefault();
+                    if (result != null)
+                    {
+                        result.Name = wallet.Name;
+                        _context.SaveChanges();
+                        return GetWallet(wallet.WalletID);
+                    }
+                }
+                return null;
+            } catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
-            return null;
         }
+
+
 
         // change wallet status
         public Wallet? ChangeWalletStatus(int WalletID, int VisionStatusID)
@@ -112,6 +153,38 @@ namespace pbms_be.DataAccess
             //    return GetWallet(WalletID);
             //}
             return null;
+        }
+
+        internal Wallet ChangeWalletActiveState(ChangeWalletActiveStateDTO changeActiveStateDTO)
+        {
+            try
+            {
+                var wallet = GetWallet(changeActiveStateDTO.WalletID);
+                if (wallet == null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+                wallet.ActiveStateID = changeActiveStateDTO.ActiveStateID;
+                _context.SaveChanges();
+                return GetWallet(wallet.WalletID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object DeleteWallet(WalletDeleteDTO deleteDTO)
+        {
+            try
+            {
+                var wallet = GetWallet(deleteDTO.WalletID);
+                if (wallet == null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+                wallet.ActiveStateID = ActiveStateConst.DELETED;
+                _context.SaveChanges();
+                return GetWallet(wallet.WalletID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+using AutoMapper;
+using pbms_be.Data.Budget;
 using pbms_be.Library;
 
 namespace pbms_be.Configurations
@@ -7,13 +8,20 @@ namespace pbms_be.Configurations
     {
         public MapperConfig ()
         {
+            //Account
             CreateMap<Data.Auth.Account, DTOs.AccountDTO>().ReverseMap();
             CreateMap<Data.Auth.Account, DTOs.AccountUpdateDTO>().ReverseMap();
             CreateMap<Data.Auth.Account, DTOs.Account_VM_DTO>().ReverseMap();
 
+            //Wallet
+
             CreateMap<Data.WalletF.Wallet, DTOs.WalletDTO>().ReverseMap();
             CreateMap<Data.WalletF.Wallet, DTOs.WalletCreateDTO>().ReverseMap();
+            CreateMap<Data.WalletF.Wallet, DTOs.WalletDeleteDTO>().ReverseMap();
 
+           //Budget
+            CreateMap<Data.Budget.Budget, DTOs.CreateBudgetDTO>().ReverseMap();
+            CreateMap<Data.Budget.Budget, DTOs.UpdateBudgetDTO>().ReverseMap();
             // Category
             CreateMap<Data.Filter.Category, DTOs.Category_VM_DTO>().ReverseMap();
 
@@ -22,7 +30,11 @@ namespace pbms_be.Configurations
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category))
                 .ReverseMap();
         
+            CreateMap<Data.WalletF.Wallet, DTOs.WalletUpdateDTO>().ReverseMap();
+            CreateMap<Data.WalletF.Wallet, DTOs.ChangeWalletActiveStateDTO>().ReverseMap();
+
             //CollabFund
+            CreateMap<Data.CollabFund.CollabFund, DTOs.CollabAccountDTO>().ReverseMap();
             CreateMap<Data.CollabFund.CollabFund, DTOs.CreateCollabFundDTO>().ReverseMap();
             CreateMap<Data.CollabFund.CollabFund, DTOs.UpdateCollabFundDTO>().ReverseMap();
             CreateMap<Data.CollabFund.CollabFund, DTOs.ChangeCollabFundActiveStateDTO>().ReverseMap();
