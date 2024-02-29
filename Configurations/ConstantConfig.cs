@@ -75,7 +75,14 @@
         public const string FILE_IS_NOT_PDF_JPG_PNG = "File is null or not of type pdf, jpg or png";
       
         //Budget
-        public const string Budget_ALREADY_EXIST = "Budget already exist";
+        public const string BUDGET_ALREADY_EXIST = "Budget already exist";
+        public const string BUDGET_ID_REQUIRED = "BudgetID is required";
+        public const string BUDGET_NOT_FOUND = "Budget not found";
+
+        // Category
+        public const string CATEGORY_ALREADY_EXIST = "Category already exist";
+        public const string CATEGORY_ID_REQUIRED = "CategoryID is required";
+        public const string CATEGORY_NOT_FOUND = "Category not found";
         // email address is required
         public const string EMAIL_ADDRESS_REQUIRED = "Email address is required";
 
@@ -109,6 +116,16 @@
 
         // Activity 
         public const string COLLAB_FUND_ACTIVITY_NOT_FOUND = "Collab fund activity not found";
+
+        // Wallet
+        public const string WALLET_ID_REQUIRED = "WalletID is required";
+        public const string WALLET_NOT_FOUND = "Wallet not found";
+    }
+
+    public class  CurrencyConst
+    {
+        public const string dVND = "đ";
+        public const int DEFAULT_CURRENCY_ID_VND = 2;
     }
 
     public class ActiveStateConst
