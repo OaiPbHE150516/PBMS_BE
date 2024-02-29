@@ -21,7 +21,7 @@ namespace pbms_be.DataAccess
             _context = context;
         }
 
-        internal CollabFund CreateCollabFund(CollabFund collabFund)
+        internal CollabFund CreateCollabFund(CollabFund collabFund, string accountID)
         {
             try
             {
@@ -31,7 +31,17 @@ namespace pbms_be.DataAccess
                 }
                 _context.CollabFund.Add(collabFund);
                 _context.SaveChanges();
-                return GetCollabFund(collabFund.CollabFundID);
+                var result = GetCollabFund(collabFund.CollabFundID);
+                var collabAccount = new AccountCollab
+                {
+                    AccountID = accountID,
+                    CollabFundID = result.CollabFundID,
+                    IsFundholder = true,
+                    ActiveStateID = ActiveStateConst.ACTIVE
+                };
+                _context.AccountCollab.Add(collabAccount);
+                _context.SaveChanges();
+                return result;
             }
             catch (Exception e)
             {
@@ -409,7 +419,7 @@ namespace pbms_be.DataAccess
         }
 
         // check if an account is already invited to collab fund
-        private bool IsAlreadyInvitedCollabFund(int collabFundID, string accountMemberID)
+        internal bool IsAlreadyInvitedCollabFund(int collabFundID, string accountMemberID)
         {
             try
             {
@@ -556,14 +566,6 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                // 1. check if account is fundholder
-                var isFundholder = IsFundholderCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountFundholderID);
-                if (!isFundholder) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
-
-                // 2. check if account is already invited
-                var isInvited = IsAlreadyInvitedCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountMemberID);
-                if (!isInvited) throw new Exception(Message.ACCOUNT_WAS_NOT_INVITED);
-
                 // 3. delete account as member
                 var accountCollab = _context.AccountCollab
                     .Where(ca => ca.CollabFundID == deleteInvitationCollabFundDTO.CollabFundID
@@ -666,7 +668,7 @@ namespace pbms_be.DataAccess
                     {
                         itemDetail.FromAccount = _authDA.GetAccount(itemDetail.FromAccountID);
                         itemDetail.ToAccount = _authDA.GetAccount(itemDetail.ToAccountID);
-                        var time = ConvertTimeFromUtc(itemDetail.LastTime);
+                        var time = LConvertVariable.ConvertUtcToLocalTime(itemDetail.LastTime);
                         itemDetail.LastTime = time;
                     }
                     dividingMoneyDetail.AddRange(detail);
@@ -695,16 +697,6 @@ namespace pbms_be.DataAccess
             {
                 throw new Exception(e.Message);
             }
-        }
-
-        // a function to add system location utc time to input time
-        internal DateTime ConvertTimeFromUtc(DateTime time)
-        {
-            //return TimeZoneInfo.ConvertTimeFromUtc(time, TimeZoneInfo.Local);
-            //var timeZone = TimeZoneInfo.Local.GetUtcOffset(time).Hours;
-            //Console.WriteLine("timeZone: " + timeZone);
-            //return time.AddHours(timeZone);
-            return time.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
         }
 
         //internal object GetAllAmountContributed(int collabFundID, string accountID)
@@ -1007,6 +999,7 @@ namespace pbms_be.DataAccess
             }
         }
 
+        // this function is used to test delete newest activity
         internal object DeleteCFActivity()
         {
             try
@@ -1034,6 +1027,23 @@ namespace pbms_be.DataAccess
                 _context.CollabFundActivity.Remove(activity);
                 _context.SaveChanges();
                 return null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object DeleteCollabFund(CollabAccountDTO deleteCollabFundDTO)
+        {
+            try
+            {
+                var collabFund = GetCollabFund(deleteCollabFundDTO.CollabFundID);
+                if (collabFund is null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+                collabFund.ActiveStateID = ActiveStateConst.DELETED;
+                _context.SaveChanges();
+                // return list collab fund
+                return GetCollabFunds(deleteCollabFundDTO.AccountID);
             }
             catch (Exception e)
             {

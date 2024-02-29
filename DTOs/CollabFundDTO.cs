@@ -11,6 +11,8 @@ namespace pbms_be.DTOs
     // CreateCollabFundDTO
     public class CreateCollabFundDTO
     {
+        public string AccountID { get; set; } = String.Empty;
+
         public string Name { get; set; } = String.Empty;
         public string Description { get; set; } = String.Empty;
         public string ImageURL { get; set; } = String.Empty;
@@ -33,6 +35,7 @@ namespace pbms_be.DTOs
     public class ChangeCollabFundActiveStateDTO
     {
         public int CollabFundID { get; set; }
+        public string AccountID { get; set; } = String.Empty;
         public int ActiveStateID { get; set; }
     }
 

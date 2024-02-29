@@ -190,7 +190,7 @@ namespace pbms_be.Controllers
                 if (_collabFundDA.IsCollabFundExist(collabFundEntity))
                     return BadRequest(Message.COLLAB_FUND_ALREADY_EXIST);
                 collabFundEntity.ActiveStateID = ActiveStateConst.ACTIVE;
-                var result = _collabFundDA.CreateCollabFund(collabFundEntity);
+                var result = _collabFundDA.CreateCollabFund(collabFundEntity, collabFundDTO.AccountID);
                 return Ok(result);
             }
             catch (System.Exception e)
@@ -302,6 +302,8 @@ namespace pbms_be.Controllers
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (!_collabFundDA.IsFundholderCollabFund(changeActiveStateDTO.CollabFundID, changeActiveStateDTO.AccountID))
+                    return BadRequest(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
                 var result = _collabFundDA.ChangeCollabFundActiveState(changeActiveStateDTO);
                 return Ok(result);
             }
@@ -370,7 +372,33 @@ namespace pbms_be.Controllers
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
+                // 1. check if account is fundholder
+                var isFundholder = _collabFundDA.IsFundholderCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountFundholderID);
+                if (!isFundholder) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+
+                // 2. check if account is already invited
+                var isInvited = _collabFundDA.IsAlreadyInvitedCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountMemberID);
+                if (!isInvited) throw new Exception(Message.ACCOUNT_WAS_NOT_INVITED);
+
                 var result = _collabFundDA.DeleteInvitationCollabFund(deleteInvitationCollabFundDTO);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // delete collab fund by collab fund id and account id, only fundholder can delete collab fund
+        [HttpDelete("delete")]
+        public IActionResult DeleteCollabFund([FromBody] CollabAccountDTO deleteCollabFundDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (!_collabFundDA.IsFundholderCollabFund(deleteCollabFundDTO.CollabFundID, deleteCollabFundDTO.AccountID))
+                    return BadRequest(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+                var result = _collabFundDA.DeleteCollabFund(deleteCollabFundDTO);
                 return Ok(result);
             }
             catch (System.Exception e)
