@@ -190,7 +190,7 @@ namespace pbms_be.Controllers
                 if (_collabFundDA.IsCollabFundExist(collabFundEntity))
                     return BadRequest(Message.COLLAB_FUND_ALREADY_EXIST);
                 collabFundEntity.ActiveStateID = ActiveStateConst.ACTIVE;
-                var result = _collabFundDA.CreateCollabFund(collabFundEntity);
+                var result = _collabFundDA.CreateCollabFund(collabFundEntity, collabFundDTO.AccountID);
                 return Ok(result);
             }
             catch (System.Exception e)
