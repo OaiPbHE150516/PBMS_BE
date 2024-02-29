@@ -22,6 +22,9 @@ namespace pbms_be.Configurations
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category))
                 .ReverseMap();
         
+            CreateMap<Data.WalletF.Wallet, DTOs.WalletUpdateDTO>().ReverseMap();
+            CreateMap<Data.WalletF.Wallet, DTOs.ChangeWalletActiveStateDTO>().ReverseMap();
+
             //CollabFund
             CreateMap<Data.CollabFund.CollabFund, DTOs.CreateCollabFundDTO>().ReverseMap();
             CreateMap<Data.CollabFund.CollabFund, DTOs.UpdateCollabFundDTO>().ReverseMap();
