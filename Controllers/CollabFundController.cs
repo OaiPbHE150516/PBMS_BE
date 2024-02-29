@@ -151,21 +151,23 @@ namespace pbms_be.Controllers
         [HttpGet("get/divide-money-info/")]
         public IActionResult GetDivideMoneyInfo()
         {
-            int collabFundID = 2;
-            string accountID = "117911566377016615313";
+            int collabFundID = 5;
+            string accountID = "a1";
             try
             {
                 if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+                //out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result
+                var cfdividingmoney_result = new CF_DividingMoney();
+                var cfdm_detail_result = new List<CF_DividingMoneyDetail>();
+                _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID, out cfdividingmoney_result, out cfdm_detail_result);
 
-                var dividemoneyinfor = _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID);
-
-                if (dividemoneyinfor is null) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
+                if (cfdividingmoney_result is null || cfdm_detail_result is null) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 // convert property in dividemoneyinfor to string
                 //var cf_dividing_moneyEntity = _mapper.Map<CF_DividingMoney_MV_DTO>(dividemoneyinfor);
-                return Ok(dividemoneyinfor);
+                return Ok(new { cfdividingmoney_result, cfdm_detail_result });
             }
             catch (System.Exception e)
             {
@@ -252,6 +254,25 @@ namespace pbms_be.Controllers
             }
         }
 
+        // divide money of collab fund by collab fund id and account id, only fundholder can divide money
+        [HttpPost("divide-money")]
+        public IActionResult DivideMoneyCollabFund([FromBody] CollabAccountDTO collabAccountDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                // check is fundholder
+                if (!_collabFundDA.IsFundholderCollabFund(collabAccountDTO.CollabFundID, collabAccountDTO.AccountID))
+                    return BadRequest(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+                var result = _collabFundDA.DivideMoneyCollabFund(collabAccountDTO);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         #endregion Post Methods
 
         #region Put Methods
@@ -281,6 +302,8 @@ namespace pbms_be.Controllers
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (!_collabFundDA.IsFundholderCollabFund(changeActiveStateDTO.CollabFundID, changeActiveStateDTO.AccountID))
+                    return BadRequest(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
                 var result = _collabFundDA.ChangeCollabFundActiveState(changeActiveStateDTO);
                 return Ok(result);
             }
@@ -349,7 +372,33 @@ namespace pbms_be.Controllers
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
+                // 1. check if account is fundholder
+                var isFundholder = _collabFundDA.IsFundholderCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountFundholderID);
+                if (!isFundholder) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+
+                // 2. check if account is already invited
+                var isInvited = _collabFundDA.IsAlreadyInvitedCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountMemberID);
+                if (!isInvited) throw new Exception(Message.ACCOUNT_WAS_NOT_INVITED);
+
                 var result = _collabFundDA.DeleteInvitationCollabFund(deleteInvitationCollabFundDTO);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // delete collab fund by collab fund id and account id, only fundholder can delete collab fund
+        [HttpDelete("delete")]
+        public IActionResult DeleteCollabFund([FromBody] CollabAccountDTO deleteCollabFundDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (!_collabFundDA.IsFundholderCollabFund(deleteCollabFundDTO.CollabFundID, deleteCollabFundDTO.AccountID))
+                    return BadRequest(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+                var result = _collabFundDA.DeleteCollabFund(deleteCollabFundDTO);
                 return Ok(result);
             }
             catch (System.Exception e)
@@ -371,8 +420,8 @@ I. Collab_Fund
         một người tham gia collab fund (kể từ lần chia cuối cùng) đến thời điểm hiện tại.
         - trong thời gian chia tiền, nếu người dùng có thêm giao dịch thì để cho lần sau chia tiền.
     - Nếu đã thực hiện thao tác chia tiền rồi thì người dùng không thể update giao dịch ( thông qua hoạt động) đã xảy ra trước khi chia tiền
-    - Thêm hàm để xem thông tin chia tiền của 1 lần chia tiền trước khi thực hiện hành động chia tiền
-    - Thêm hàm để thực hiện hành động chia tiền. thêm popup để chọn người cần chia tiền ( thường là tất cả mọi người)
+    - OK: Thêm hàm để xem thông tin chia tiền của 1 lần chia tiền trước khi thực hiện hành động chia tiền
+    - OK: Thêm hàm để thực hiện hành động chia tiền. (thêm popup để chọn người cần chia tiền ( thường là tất cả mọi người) ver 2)
     - Thêm hàm để 1 người dùng lấy thông tin của ví người đích ( mã QR và banking infor) 
         cùng với số tiền để chuyển
     - Thêm hàm để sau khi người dùng chuyển tiền xong, thì cập nhật lại isDone của 

@@ -14,6 +14,10 @@ namespace pbms_be.Data
 
         public DbSet<WalletF.Wallet> Wallet { get; set; }
 
+        public DbSet<Budget.Budget> Budget { get; set; }
+
+        public DbSet<Budget.BudgetCategory> BudgetCategory { get; set; }
+
         public DbSet<Status.ActiveState> ActiveState { get; set; }
 
         public DbSet<Filter.Category> Category { get; set; }

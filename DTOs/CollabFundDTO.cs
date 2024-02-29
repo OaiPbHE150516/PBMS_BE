@@ -33,6 +33,7 @@ namespace pbms_be.DTOs
     public class ChangeCollabFundActiveStateDTO
     {
         public int CollabFundID { get; set; }
+        public string AccountID { get; set; } = String.Empty;
         public int ActiveStateID { get; set; }
     }
 
@@ -105,5 +106,11 @@ namespace pbms_be.DTOs
         public DateTime CreateTime { get; set; } = DateTime.UtcNow;
         public string CreateTimeString { get; set; } = String.Empty;
         public string MinusTimeNowString { get; set; } = String.Empty;
+    }
+
+    public class CollabAccountDTO
+    {
+        public int CollabFundID { get; set; }
+        public string AccountID { get; set; } = String.Empty;
     }
 }
