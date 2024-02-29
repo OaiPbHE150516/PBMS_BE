@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 using pbms_be.Data;
 using pbms_be.DataAccess;
 
@@ -35,6 +36,24 @@ namespace pbms_be.Controllers
             var collabFundDA = new CollabFundDA(_context);
             var result = collabFundDA.DeleteCFActivity();
             return Ok(result);
+        }
+
+        // get all category by account id
+        [HttpGet("getCategories")]
+        public IActionResult GetCategories()
+        {
+            var accountID = "117911566377016615313";
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest("AccountID is required");
+                CategoryDA categoryDA = new CategoryDA(_context);
+                var result = categoryDA.GetCategories(accountID);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
     }
 }
