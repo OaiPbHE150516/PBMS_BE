@@ -73,6 +73,9 @@
         public const string INVOICE_ID_REQUIRED = "InvoiceID is required";
         public const string FILE_IS_NULL = "File is null or not of type pdf";
         public const string FILE_IS_NOT_PDF_JPG_PNG = "File is null or not of type pdf, jpg or png";
+      
+        //Budget
+        public const string Budget_ALREADY_EXIST = "Budget already exist";
         // email address is required
         public const string EMAIL_ADDRESS_REQUIRED = "Email address is required";
 
