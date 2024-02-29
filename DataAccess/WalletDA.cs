@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.CollabFund;
@@ -45,8 +46,17 @@ namespace pbms_be.DataAccess
         }
         public bool IsWalletExist(string AccountID, int WalletID)
         {
-            var result = GetWallet(WalletID);
-            return result != null;
+            try
+            {
+                var result = _context.Wallet.Where(w => w.WalletID == WalletID && w.AccountID == AccountID)
+                .FirstOrDefault();
+                return result != null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
         }
 
         // get a wallet by account id and wallet id
@@ -97,17 +107,28 @@ namespace pbms_be.DataAccess
         }
 
 
-       // update a wallet
-       //check duplicate
+        // update a wallet
+        //check duplicate
         public Wallet? UpdateWallet(Wallet wallet)
         {
-            if (IsWalletExist(wallet.AccountID, wallet.WalletID))
+            try
             {
-                _context.Wallet.Update(wallet);
-                _context.SaveChanges();
-                return GetWallet(wallet.WalletID);
+                if (IsWalletExist(wallet.AccountID, wallet.WalletID))
+                {
+                    var result = _context.Wallet.Where(w => w.WalletID == wallet.WalletID && w.AccountID == wallet.AccountID)
+                    .FirstOrDefault();
+                    if (result != null)
+                    {
+                        result.Name = wallet.Name;
+                        _context.SaveChanges();
+                        return GetWallet(wallet.WalletID);
+                    }
+                }
+                return null;
+            } catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
-            return null;
         }
 
 
@@ -134,7 +155,7 @@ namespace pbms_be.DataAccess
                 if (wallet == null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 wallet.ActiveStateID = changeActiveStateDTO.ActiveStateID;
                 _context.SaveChanges();
-                 return GetWallet(wallet.WalletID);
+                return GetWallet(wallet.WalletID);
             }
             catch (Exception e)
             {
