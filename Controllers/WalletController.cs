@@ -75,8 +75,8 @@ namespace pbms_be.Controllers
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
-                WalletDA collabFundDA = new WalletDA(_context);
-                var result = collabFundDA.ChangeWalletActiveState(changeActiveStateDTO);
+                WalletDA walletDA = new WalletDA(_context);
+                var result = walletDA.ChangeWalletActiveState(changeActiveStateDTO);
                 return Ok(result);
             }
             catch (System.Exception e)

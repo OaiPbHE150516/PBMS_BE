@@ -73,13 +73,20 @@ namespace pbms_be.DataAccess
         // get wallet by wallet id
         public Wallet? GetWallet(int WalletID)
         {
-            // get wallet by wallet id
-            var result = _context.Wallet
-                .Where(w => w.WalletID == WalletID)
-                .Include(w => w.Currency)
-                .Include(w => w.ActiveState)
-                .FirstOrDefault();
-            return result;
+            try
+            {
+                // get wallet by wallet id
+                var result = _context.Wallet
+                    .Where(w => w.WalletID == WalletID)
+                    .Include(w => w.Currency)
+                    .Include(w => w.ActiveState)
+                    .FirstOrDefault();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         // get wallet by status id and account id
