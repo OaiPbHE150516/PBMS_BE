@@ -1,4 +1,7 @@
-﻿namespace pbms_be.DTOs
+﻿using pbms_be.Data.Filter;
+using pbms_be.Data.WalletF;
+
+namespace pbms_be.DTOs
 {
     public class TransactionDTO
     {
@@ -14,6 +17,23 @@
         public long TotalAmount { get; set; }
         public string Note { get; set; } = String.Empty;
         public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
+        public string FromPerson { get; set; } = String.Empty;
+        public string ToPerson { get; set; } = String.Empty;
+        public string ImageURL { get; set; } = String.Empty;
+    }
+
+    public class TransactionP_VM_DTO
+    {
+        public int TransactionID { get; set; }
+        public int WalletID { get; set; }
+        public virtual Wallet Wallet { get; set; } = null!;
+        public int CategoryID { get; set; }
+        public virtual Category Category { get; set; } = null!;
+        public string TotalAmount { get; set; } = String.Empty;
+        public string Note { get; set; } = String.Empty;
+        public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
+        public string TransactionDateStr { get; set; } = String.Empty;
+        public string TransactionDateMinus { get; set; } = String.Empty;
         public string FromPerson { get; set; } = String.Empty;
         public string ToPerson { get; set; } = String.Empty;
         public string ImageURL { get; set; } = String.Empty;

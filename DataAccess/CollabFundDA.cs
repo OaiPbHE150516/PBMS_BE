@@ -131,13 +131,28 @@ namespace pbms_be.DataAccess
                                         && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(cf => cf.ActiveState)
                             .ToList();
-                foreach (var item in result)
-                {
-                    item.CollabFundActivities = GetAllActivityCollabFund(item.CollabFundID, accountID);
-                }
+                //foreach (var item in result)
+                //{
+                //    item.CollabFundActivities = GetAllActivityCollabFund(item.CollabFundID, accountID);
+                //}
                 return result;
             }
             catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public bool IsFundholderEasy(int collabFundID, string accountID)
+        {
+            try
+            {
+                var isFundholder = _context.AccountCollab.Any(ca => ca.CollabFundID == collabFundID
+                    && ca.AccountID == accountID
+                    && ca.IsFundholder == true
+                    && ca.ActiveStateID == ActiveStateConst.ACTIVE);
+                return isFundholder;
+            }catch (Exception e)
             {
                 throw new Exception(e.Message);
             }

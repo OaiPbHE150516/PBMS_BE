@@ -31,7 +31,7 @@
         public const string MINE_TYPE_JPG = "image/jpg";
 
         // Bucket config
-        public const string BUCKET_NAME = "user_invoice";
+        public const string BUCKET_NAME = "pbms-user";
 
         // Value
         public const long NEGATIVE_VALUE = -1;
@@ -73,6 +73,9 @@
         public const string INVOICE_ID_REQUIRED = "InvoiceID is required";
         public const string FILE_IS_NULL = "File is null or not of type pdf";
         public const string FILE_IS_NOT_PDF_JPG_PNG = "File is null or not of type pdf, jpg or png";
+
+        // Transaction
+        public const string TRANSACTION_NOT_FOUND = "Transaction not found";
       
         //Budget
         public const string BUDGET_ALREADY_EXIST = "Budget already exist";

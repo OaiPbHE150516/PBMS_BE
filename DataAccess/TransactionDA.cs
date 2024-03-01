@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Trans;
 
@@ -14,13 +15,21 @@ namespace pbms_be.DataAccess
 
         public List<Transaction> GetTransactions(string AccountID)
         {
-            var result = _context.Transaction
+            try
+            {
+                var result = _context.Transaction
                 .Where(t => t.AccountID == AccountID)
                 .Include(t => t.ActiveState)
-                //.Include(t => t.Category)
-                //.Include(t => t.Wallet)
+                .Include(t => t.Category)
+                .Include(t => t.Wallet)
                 .ToList();
-            return result;
+                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         public Transaction GetTransaction(int TransactionID)
@@ -34,7 +43,8 @@ namespace pbms_be.DataAccess
                 .Include(t => t.Wallet)
                 .FirstOrDefault();
                 return result;
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
@@ -62,6 +72,6 @@ namespace pbms_be.DataAccess
             return result;
         }
 
-        
+
     }
 }

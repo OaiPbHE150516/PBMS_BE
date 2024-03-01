@@ -26,7 +26,15 @@ namespace pbms_be.Configurations
             //Budget
             CreateMap<Data.Budget.Budget, DTOs.CreateBudgetDTO>().ReverseMap();
             CreateMap<Data.Budget.Budget, DTOs.UpdateBudgetDTO>().ReverseMap();
-            CreateMap<Data.Budget.Budget, DTOs.BudgetWithCategoryDTO>().ReverseMap();
+            CreateMap<Data.Budget.Budget, DTOs.BudgetWithCategoryDTO>()
+                .ForMember(dest => dest.RemainAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TargetAmount - src.CurrentAmount)))
+                .ForMember(dest => dest.CurrentAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.CurrentAmount)))
+                .ForMember(dest => dest.TargetAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TargetAmount)))
+                .ForMember(dest => dest.BeginDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.BeginDate)))
+                .ForMember(dest => dest.EndDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.EndDate)))
+                .ForMember(dest => dest.CreateTimeStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.CreateTime)))
+                .ForMember(dest => dest.PercentProgress, opt => opt.MapFrom(src => LConvertVariable.ConvertPercentToString(LConvertVariable.CalculatePercentProgress(src.CurrentAmount, src.TargetAmount), 0)))
+                .ReverseMap();
 
             // Category
             CreateMap<Data.Filter.Category, DTOs.Category_VM_DTO>().ReverseMap();
@@ -36,7 +44,13 @@ namespace pbms_be.Configurations
             CreateMap<Data.Trans.Transaction, DTOs.Transaction_VM_DTO>()
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category))
                 .ReverseMap();
-        
+            // TransactionP_VM_DTO and Transaction, convert long number to money format, datetime to string
+            CreateMap<Data.Trans.Transaction, DTOs.TransactionP_VM_DTO>()
+                .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
+                .ForMember(dest => dest.TransactionDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.TransactionDate)))
+                .ForMember(dest => dest.TransactionDateMinus, opt => opt.MapFrom(src => LConvertVariable.ConvertMinusTimeNowString(src.TransactionDate)))
+                .ReverseMap();
+
             CreateMap<Data.WalletF.Wallet, DTOs.WalletUpdateDTO>().ReverseMap();
             CreateMap<Data.WalletF.Wallet, DTOs.ChangeWalletActiveStateDTO>().ReverseMap();
 
@@ -45,6 +59,9 @@ namespace pbms_be.Configurations
             CreateMap<Data.CollabFund.CollabFund, DTOs.CreateCollabFundDTO>().ReverseMap();
             CreateMap<Data.CollabFund.CollabFund, DTOs.UpdateCollabFundDTO>().ReverseMap();
             CreateMap<Data.CollabFund.CollabFund, DTOs.ChangeCollabFundActiveStateDTO>().ReverseMap();
+            CreateMap<Data.CollabFund.CollabFund, DTOs.CollabFund_VM_DTO>()
+                .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
+                .ReverseMap();
 
             //CollabFundActivity
             CreateMap<Data.CollabFund.CollabFundActivity, DTOs.CreateCfaNoTransactionDTO>().ReverseMap();

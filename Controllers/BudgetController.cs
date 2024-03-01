@@ -28,6 +28,20 @@ namespace pbms_be.Controllers
 
         #region Get Methods
 
+        // get all budget type 
+        [HttpGet("get/budgettype")]
+        public IActionResult GetBudgetType()
+        {
+            try
+            {
+                return Ok(_budgetDA.GetBudgetType());
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet("get/all/{accountID}")]
         public IActionResult GetBudget(string accountID)
         {
