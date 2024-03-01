@@ -53,6 +53,10 @@ public class Budget
     [Column("enddate")]
     public DateTime EndDate { get; set; } = DateTime.UtcNow;
 
+    [Column("btype")]
+    public int BudgetTypeID { get; set; }
+    public virtual BudgetType BudgetType { get; set; } = null!;
+
     [Column("repeatenterval")]
     public int RepeatInterVal { get; set; }
 
@@ -66,4 +70,10 @@ public class Budget
     public int ActiveStateID { get; set; }
     public virtual ActiveState ActiveState { get; set; } = null!;
 
+}
+
+public class BudgetType
+{
+    public int BudgetTypeID { get; set; }
+    public string TypeName { get; set; } = string.Empty;
 }

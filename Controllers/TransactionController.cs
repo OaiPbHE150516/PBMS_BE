@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.DataAccess;
+using pbms_be.DTOs;
 
 namespace pbms_be.Controllers
 {
@@ -12,11 +14,13 @@ namespace pbms_be.Controllers
     {
         private readonly PbmsDbContext _context;
         private readonly IMapper? _mapper;
+        private TransactionDA _transactionDA;
 
         public TransactionController(PbmsDbContext context, IMapper? mapper)
         {
             _context = context;
             _mapper = mapper;
+            _transactionDA = new TransactionDA(_context);
         }
 
         // get all transaction by account id
@@ -25,10 +29,11 @@ namespace pbms_be.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(accountID)) return BadRequest("AccountID is required");
-                TransactionDA transactionDA = new TransactionDA(_context);
-                var result = transactionDA.GetTransactions(accountID);
-                return Ok(result);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if(_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var result = _transactionDA.GetTransactions(accountID);
+                var resultDTO = _mapper.Map<List<TransactionP_VM_DTO>>(result);
+                return Ok(resultDTO);
             }
             catch (System.Exception e)
             {

@@ -12,11 +12,25 @@ namespace pbms_be.Controllers
         private readonly PbmsDbContext _context;
         private readonly IMapper? _mapper;
 
+        public ActiveStateController(PbmsDbContext context, IMapper? mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
+
         // get all active states
-        [HttpGet]
+        [HttpGet("all")]
         public IActionResult GetActiveStates()
         {
-            return Ok();
+            try
+            {
+                var result = _context.ActiveState.ToList();
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
     }
