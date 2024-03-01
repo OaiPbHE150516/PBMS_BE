@@ -23,6 +23,19 @@ namespace pbms_be.DTOs
         public string Balance { get; set; } = String.Empty;
     }
 
+    public class WalletDetail_VM_DTO
+    {
+        public int WalletID { get; set; }
+        public string AccountID { get; set; } = String.Empty;
+        public string Name { get; set; } = String.Empty;
+        public string Note { get; set; } = String.Empty;
+        public bool IsBanking { get; set; }
+        public string QRCodeURL { get; set; } = String.Empty;
+        public string BankName { get; set; } = String.Empty;
+        public string BankAccount { get; set; } = String.Empty;
+        public string BankUsername { get; set; } = String.Empty;
+    }
+
     // all total balance of all wallets
     public class WalletTotalBalance_VM_DTO
     {
