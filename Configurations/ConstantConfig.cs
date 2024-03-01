@@ -31,7 +31,7 @@
         public const string MINE_TYPE_JPG = "image/jpg";
 
         // Bucket config
-        public const string BUCKET_NAME = "pbms-user";
+        public const string BUCKET_NAME = "pbms-user/invoice";
 
         // Value
         public const long NEGATIVE_VALUE = -1;
