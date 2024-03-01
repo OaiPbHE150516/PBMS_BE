@@ -49,5 +49,22 @@ namespace pbms_be.Library
         {
             return time.ToString(ConstantConfig.DEFAULT_DATETIME_FORMAT);
         }
+
+
+        // convert float of percent progress to string, làm tròn and add % at the end
+        public static string ConvertPercentToString(float percent, int digits)
+        {
+            var result = Math.Round(percent, digits).ToString() + "%";
+            return result;
+        }
+
+        // CalculatePercentProgress
+        public static float CalculatePercentProgress(long currentAmount, long targetAmount)
+        {
+            if (targetAmount == 0)
+                return 0;
+            return (float)currentAmount / targetAmount * 100;
+        }
+
     }
 }

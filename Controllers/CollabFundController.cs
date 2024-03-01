@@ -31,14 +31,20 @@ namespace pbms_be.Controllers
 
         #region Get Methods
         // get all collab fund by account id
-        [HttpGet("get/account/{accountID}")]
+        [HttpGet("get/all/{accountID}")]
         public IActionResult GetCollabFunds(string accountID)
         {
             try
             {
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 var result = _collabFundDA.GetCollabFunds(accountID);
-                return Ok(result);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var resultDTO = _mapper.Map<List<CollabFund_VM_DTO>>(result);
+                foreach (var item in resultDTO)
+                {
+                    item.isFundholder = _collabFundDA.IsFundholderEasy(item.CollabFundID, accountID);
+                }
+                return Ok(resultDTO);
             }
             catch (System.Exception e)
             {

@@ -13,9 +13,16 @@ namespace pbms_be.DataAccess
     public class BudgetDA
     {
         private readonly PbmsDbContext _context;
+        private readonly List<BudgetType> _budgetTypes;
         public BudgetDA(PbmsDbContext context)
         {
             _context = context;
+            _budgetTypes = new List<BudgetType>
+            {
+                new BudgetType { BudgetTypeID = 0, TypeName = "Other" },
+                new BudgetType { BudgetTypeID = 1, TypeName = "Week" },
+                new BudgetType { BudgetTypeID = 2, TypeName = "Month" }
+            };
         }
         //GetBudget by ID
         internal Budget GetBudget(int budgetID)
@@ -46,6 +53,12 @@ namespace pbms_be.DataAccess
                                          && x.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(x => x.ActiveState)
                             .ToList();
+                foreach (var item in result)
+                {
+                    var btype = _budgetTypes.Find(x => x.BudgetTypeID == item.BudgetTypeID);
+                    if (btype is null) throw new Exception();
+                    item.BudgetType = btype;
+                }
                 return result;
             }
             catch (Exception e)
@@ -63,6 +76,9 @@ namespace pbms_be.DataAccess
                             .Include(x => x.ActiveState)
                             .FirstOrDefault();
                 if (result is null) throw new Exception(Message.BUDGET_NOT_FOUND);
+                var btype = _budgetTypes.Find(x => x.BudgetTypeID == result.BudgetTypeID);
+                if (btype is null) throw new Exception();
+                result.BudgetType = btype;
                 // get all category by budget id
                 var categories = _context.BudgetCategory
                                 .Where(x => x.BudgetID == budgetID && x.ActiveStateID == ActiveStateConst.ACTIVE)
@@ -112,6 +128,7 @@ namespace pbms_be.DataAccess
                 budget.BeginDate = DateTime.UtcNow;
                 budget.EndDate = DateTime.UtcNow;
                 budget.ActiveStateID = 1;
+                budget.BudgetTypeID = 0;
                 _context.Budget.Add(budget);
                 _context.SaveChanges();
 
@@ -157,5 +174,16 @@ namespace pbms_be.DataAccess
             return null;
         }
 
+        internal object? GetBudgetType()
+        {
+            try
+            {
+                return _budgetTypes;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }

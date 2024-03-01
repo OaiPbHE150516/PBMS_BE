@@ -43,4 +43,5 @@ public class CollabFund
     public virtual ActiveState ActiveState { get; set; } = null!;
 
     public virtual List<CollabFundActivity> CollabFundActivities { get; set; } = null!;
+    //public virtual bool isFundholder { get; set; } = false;
 }
