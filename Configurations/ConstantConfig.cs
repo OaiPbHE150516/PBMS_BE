@@ -102,6 +102,12 @@
         public const string ACCOUNT_ALREADY_ACCEPTED = "Account is already accepted";
         public const string ACCOUNT_ALREADY_REJECTED = "Account is already rejected";
         public const string ACCOUNT_WAS_NOT_INVITED = "Account was not invited";
+        public const string ACCOUNT_FROM_NOT_FOUND = "Account from not found";
+        public const string ACCOUNT_TO_NOT_FOUND = "Account to not found";
+        public const string COLLAB_FUND_ACTIVITY_NOT_FOUND = "Collab fund activity not found";
+
+        // cfdm detail not found
+        public const string CFDM_DETAIL_NOT_FOUND = "Collab Fund dividing money detail not found";
 
         // just now
         public const string VN_JUST_NOW = "vừa xong";
@@ -115,7 +121,7 @@
         public const string MAPPER_IS_NULL = "Mapper is null";
 
         // Activity 
-        public const string COLLAB_FUND_ACTIVITY_NOT_FOUND = "Collab fund activity not found";
+
 
         // Wallet
         public const string WALLET_ID_REQUIRED = "WalletID is required";

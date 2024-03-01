@@ -94,6 +94,13 @@ namespace pbms_be.DTOs
         public string MinusTimeNowString { get; set; } = String.Empty;
     }
 
+    public class CF_DividingMoneyDetail_Wallet_DTO
+    {
+        public int CF_DividingMoneyDetailID { get; set; }
+        public string FromAccountID { get; set; } = String.Empty;
+        public string ToAccountID { get; set; } = String.Empty;
+    }
+
     // CollabFundActivity_MV_DTO to response to client and convert long number to string, money format
     public class CollabFundActivity_MV_DTO
     {

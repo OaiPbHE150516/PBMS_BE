@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Auth;
@@ -6,6 +7,7 @@ using pbms_be.Data.CollabFund;
 using pbms_be.Data.Custom;
 using pbms_be.Data.Status;
 using pbms_be.Data.Trans;
+using pbms_be.Data.WalletF;
 using pbms_be.DTOs;
 using pbms_be.Library;
 using System.Collections.Generic;
@@ -1044,6 +1046,48 @@ namespace pbms_be.DataAccess
                 _context.SaveChanges();
                 // return list collab fund
                 return GetCollabFunds(deleteCollabFundDTO.AccountID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal void GetPersonalDivideMoneyInfor(int cfdm_detailID, string fromAccountID, string toAccountID, out string totalAmountString, out List<Wallet> listWallet, out Account toAccount)
+        {
+            try
+            {
+                var totalAmount = _context.CF_DividingMoneyDetail
+                    .Where(cfdmd => cfdmd.CF_DividingMoneyDetailID == cfdm_detailID
+                                    && cfdmd.FromAccountID == fromAccountID
+                                    && cfdmd.ToAccountID == toAccountID).FirstOrDefault();
+                if (totalAmount is null) throw new Exception(Message.CFDM_DETAIL_NOT_FOUND);
+
+                totalAmountString = LConvertVariable.ConvertToMoneyFormat(totalAmount.DividingAmount);
+
+                var walletDA = new WalletDA(_context);
+                listWallet = walletDA.GetWallets(toAccountID);
+
+                var authDa = new AuthDA(_context);
+                toAccount = authDa.GetAccount(toAccountID);
+            } catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object ChangeIsDoneDividingMoneyDetail(CF_DividingMoneyDetail_Wallet_DTO cfdm_detail)
+        {
+            try
+            {
+                var result = _context.CF_DividingMoneyDetail
+                   .Where(cfdmd => cfdmd.CF_DividingMoneyDetailID == cfdm_detail.CF_DividingMoneyDetailID
+                                   && cfdmd.FromAccountID == cfdm_detail.FromAccountID
+                                   && cfdmd.ToAccountID == cfdm_detail.ToAccountID).FirstOrDefault();
+                if (result is null) throw new Exception(Message.CFDM_DETAIL_NOT_FOUND);
+                result.IsDone = true;
+                _context.SaveChanges();
+                return result;
             }
             catch (Exception e)
             {
