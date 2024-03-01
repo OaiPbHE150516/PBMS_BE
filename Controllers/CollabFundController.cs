@@ -6,6 +6,7 @@ using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Auth;
 using pbms_be.Data.CollabFund;
+using pbms_be.Data.WalletF;
 using pbms_be.DataAccess;
 using pbms_be.DTOs;
 
@@ -146,13 +147,9 @@ namespace pbms_be.Controllers
         //}
 
         // get divide money information by collab fund id and account id before divide money action
-        //[HttpGet("get/divide-money-info/{collabFundID}/{accountID}")]
-        //public IActionResult GetDivideMoneyInfo(int collabFundID, string accountID)
-        [HttpGet("get/divide-money-info/")]
-        public IActionResult GetDivideMoneyInfo()
+        [HttpGet("get/divide-money-info/{collabFundID}/{accountID}")]
+        public IActionResult GetDivideMoneyInfo(int collabFundID, string accountID)
         {
-            int collabFundID = 5;
-            string accountID = "a1";
             try
             {
                 if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
@@ -168,6 +165,38 @@ namespace pbms_be.Controllers
                 // convert property in dividemoneyinfor to string
                 //var cf_dividing_moneyEntity = _mapper.Map<CF_DividingMoney_MV_DTO>(dividemoneyinfor);
                 return Ok(new { cfdividingmoney_result, cfdm_detail_result });
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // post to get divide money information by collab fund id and account id
+        [HttpGet("get/personal/divide-money-info/{cfdm_detailID}/{fromAccountID}/{toAccountID}")]
+        public IActionResult GetPersonalDivideMoneyInfor(int cfdm_detailID, string fromAccountID, string toAccountID)
+        {
+            try
+            {
+                if (cfdm_detailID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(fromAccountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (string.IsNullOrEmpty(toAccountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+
+                var authDA = new AuthDA(_context);
+                if (!authDA.IsAccountExist(fromAccountID)) return BadRequest(Message.ACCOUNT_FROM_NOT_FOUND);
+                if (!authDA.IsAccountExist(toAccountID)) return BadRequest(Message.ACCOUNT_TO_NOT_FOUND);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                string totalAmountString = String.Empty;
+                var listWallet = new List<Wallet>();
+                var toAccount = new Account();
+                _collabFundDA.GetPersonalDivideMoneyInfor(cfdm_detailID, fromAccountID, toAccountID, out totalAmountString, out listWallet, out toAccount);
+                var result = new
+                {
+                    totalAmount = totalAmountString,
+                    listWallet = _mapper.Map<List<WalletDetail_VM_DTO>>(listWallet),
+                    toAccount = _mapper.Map<Account_VM_DTO>(toAccount)
+                };
+                return Ok(result);
             }
             catch (System.Exception e)
             {
@@ -272,6 +301,23 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        // post method to change 'isDone' property of cf_dividing_money_detail
+        [HttpPost("change/isdone")]
+        public IActionResult ChangeIsDoneDividingMoneyDetail([FromBody] CF_DividingMoneyDetail_Wallet_DTO cfDividingMoneyDetailWalletDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = _collabFundDA.ChangeIsDoneDividingMoneyDetail(cfDividingMoneyDetailWalletDTO);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
 
         #endregion Post Methods
 
@@ -421,10 +467,12 @@ I. Collab_Fund
         - trong thời gian chia tiền, nếu người dùng có thêm giao dịch thì để cho lần sau chia tiền.
     - Nếu đã thực hiện thao tác chia tiền rồi thì người dùng không thể update giao dịch ( thông qua hoạt động) đã xảy ra trước khi chia tiền
     - OK: Thêm hàm để xem thông tin chia tiền của 1 lần chia tiền trước khi thực hiện hành động chia tiền
-    - OK: Thêm hàm để thực hiện hành động chia tiền. (thêm popup để chọn người cần chia tiền ( thường là tất cả mọi người) ver 2)
-    - Thêm hàm để 1 người dùng lấy thông tin của ví người đích ( mã QR và banking infor) 
+    - OK: Thêm hàm để thực hiện hành động chia tiền. 
+        (thêm popup để chọn người cần chia tiền ( thường là tất cả mọi người) ver 2)
+    - Chia tiền thì nhớ check đã chia tiền trước đó chưa
+    - OK: Thêm hàm để 1 người dùng lấy thông tin của ví người đích ( mã QR và banking infor) 
         cùng với số tiền để chuyển
-    - Thêm hàm để sau khi người dùng chuyển tiền xong, thì cập nhật lại isDone của 
+    - OK: Thêm hàm để sau khi người dùng chuyển tiền xong, thì cập nhật lại isDone của 
         cf_dividing_money_detail
 III. Transaction
     1. Thêm hàm để chuyển tiền từ 1 người này sang người khác
