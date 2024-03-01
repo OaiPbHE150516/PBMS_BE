@@ -25,7 +25,7 @@ namespace pbms_be.DataAccess
             var storage = StorageClient.Create();
             var fileUpload = file.OpenReadStream();
             // file name = file name + date time now timestamp
-            var fileName = pre + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + file.FileName;
+            var fileName = "/" + "invoice" + pre + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + file.FileName;
             storage.UploadObject(ConstantConfig.BUCKET_NAME, fileName, null, fileUpload);
             return fileName;
         }
