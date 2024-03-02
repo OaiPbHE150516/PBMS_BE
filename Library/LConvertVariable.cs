@@ -74,12 +74,6 @@ namespace pbms_be.Library
             var result = new string(Enumerable.Repeat(stringToUse, length)
                              .Select(s => s[random.Next(s.Length)]).ToArray());
             return result;
-
-            //// tạo ra chuỗi ngẫu nhiên từ chuỗi input, độ dài = length
-            //var random = new Random();
-            //var result = new string(Enumerable.Repeat(input, length)
-            //                                .Select(s => s[random.Next(s.Length)]).ToArray());
-            //return result;
         }
 
         // get filename execpt file extension
