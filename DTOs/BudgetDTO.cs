@@ -19,7 +19,7 @@ namespace pbms_be.DTOs
         public string RemainAmount{ get; set; } = string.Empty;
         public string CurrentAmount { get; set; } = string.Empty;
         public string TargetAmount { get; set; } = string.Empty;
-        public string PercentProgress { get; set; } = string.Empty;
+        public double PercentProgress { get; set; }
         public DateTime BeginDate { get; set; } = DateTime.UtcNow;
         public string BeginDateStr { get; set; } = string.Empty;
         public DateTime EndDate { get; set; } = DateTime.UtcNow;
