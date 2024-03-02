@@ -19,6 +19,10 @@ namespace pbms_be.Configurations
             CreateMap<Data.WalletF.Wallet, DTOs.WalletDeleteDTO>().ReverseMap();
             CreateMap<Data.WalletF.Wallet, DTOs.Wallet_VM_DTO>()
                 .ForMember(dest => dest.Balance, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.Balance)))
+                .ForMember(dest => dest.CreateTime, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.CreateTime)))
+                .ReverseMap();
+            CreateMap<Data.WalletF.Wallet, DTOs.Wallet_Balance_VM_DTO>()
+                .ForMember(dest => dest.Balance, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.Balance)))
                 .ReverseMap();
             CreateMap<Data.WalletF.Wallet, DTOs.WalletDetail_VM_DTO>().ReverseMap();
 

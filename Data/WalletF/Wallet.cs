@@ -73,6 +73,9 @@ public class Wallet
     [Column("bank_username")]
     public string BankUsername { get; set; } = String.Empty;
 
+    [Column("create_time")]
+    public DateTime CreateTime { get; set; } = DateTime.UtcNow;
+
     [Column("as_id")]
     public int ActiveStateID { get; set; }
     public virtual ActiveState ActiveState { get; set; } = null!;
