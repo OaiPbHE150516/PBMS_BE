@@ -16,10 +16,13 @@ namespace pbms_be.DTOs
         public int BudgetID { get; set; }
         public string AccountID { get; set; } = String.Empty;
         public string BudgetName { get; set; } = string.Empty;
-        public string RemainAmount{ get; set; } = string.Empty;
-        public string CurrentAmount { get; set; } = string.Empty;
-        public string TargetAmount { get; set; } = string.Empty;
-        public string PercentProgress { get; set; } = string.Empty;
+        public long RemainAmount { get; set; }
+        public string RemainAmountStr{ get; set; } = string.Empty;
+        public long CurrentAmount { get; set; }
+        public string CurrentAmountStr { get; set; } = string.Empty;
+        public long TargetAmount { get; set; }
+        public string TargetAmountStr { get; set; } = string.Empty;
+        public double PercentProgress { get; set; }
         public DateTime BeginDate { get; set; } = DateTime.UtcNow;
         public string BeginDateStr { get; set; } = string.Empty;
         public DateTime EndDate { get; set; } = DateTime.UtcNow;
@@ -41,6 +44,7 @@ namespace pbms_be.DTOs
         public long TargetAmount { get; set; }
         public DateTime BeginDate { get; set; } = DateTime.UtcNow;
         public DateTime EndDate { get; set; } = DateTime.UtcNow;
+        public int BudgetTypeID { get; set; }
         public int RepeatInterVal { get; set; }
         public string Note { get; set; } = string.Empty;
         public DateTime CreateTime { get; set; } = DateTime.UtcNow;
@@ -54,5 +58,11 @@ namespace pbms_be.DTOs
         public string BudgetName { get; set; } = string.Empty;
         public long BudgetAmount { get; set; }
         public string Note { get; set; } = string.Empty;
+    }
+
+    public class DeleteBudgetDTO
+    {
+        public int BudgetID { get; set; }
+        public string AccountID { get; set; } = string.Empty;
     }
 }

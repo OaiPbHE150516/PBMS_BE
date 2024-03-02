@@ -73,21 +73,21 @@ namespace pbms_be.Controllers
 
         //}
 
-        [HttpPost("upload")]
-        public IActionResult UploadFile(IFormFile file, CancellationToken cancellationtoken)
-        {
-            if (file == null) return BadRequest("File is null or not of type pdf");
-            if (file.ContentType != ConstantConfig.MINE_TYPE_PDF
-                && file.ContentType != ConstantConfig.MINE_TYPE_JPEG
-                && file.ContentType != ConstantConfig.MINE_TYPE_JPG
-                && file.ContentType != ConstantConfig.MINE_TYPE_PNG)
-                return BadRequest("File is null or not of type pdf, jpg or png");
-            var result = DocumentAiApi.ProcessDocument(file);
-            var imageURL = GCP_BucketDA.UploadFile(file);
-            Invoice invoice = DocumentAiApi.GetInvoiceFromDocument(result);
-            invoice.InvoiceImageURL = imageURL;
-            return Ok(invoice);
-        }
+        //[HttpPost("upload")]
+        //public IActionResult UploadFile(IFormFile file, CancellationToken cancellationtoken)
+        //{
+        //    if (file == null) return BadRequest("File is null or not of type pdf");
+        //    if (file.ContentType != ConstantConfig.MINE_TYPE_PDF
+        //        && file.ContentType != ConstantConfig.MINE_TYPE_JPEG
+        //        && file.ContentType != ConstantConfig.MINE_TYPE_JPG
+        //        && file.ContentType != ConstantConfig.MINE_TYPE_PNG)
+        //        return BadRequest("File is null or not of type pdf, jpg or png");
+        //    var result = DocumentAiApi.ProcessDocument(file);
+        //    var imageURL = GCP_BucketDA.UploadFile(file);
+        //    Invoice invoice = DocumentAiApi.GetInvoiceFromDocument(result);
+        //    invoice.InvoiceImageURL = imageURL;
+        //    return Ok(invoice);
+        //}
 
         //[HttpGet]
         //[Route("DownloadFile")]

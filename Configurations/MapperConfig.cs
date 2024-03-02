@@ -19,6 +19,10 @@ namespace pbms_be.Configurations
             CreateMap<Data.WalletF.Wallet, DTOs.WalletDeleteDTO>().ReverseMap();
             CreateMap<Data.WalletF.Wallet, DTOs.Wallet_VM_DTO>()
                 .ForMember(dest => dest.Balance, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.Balance)))
+                .ForMember(dest => dest.CreateTime, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.CreateTime)))
+                .ReverseMap();
+            CreateMap<Data.WalletF.Wallet, DTOs.Wallet_Balance_VM_DTO>()
+                .ForMember(dest => dest.Balance, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.Balance)))
                 .ReverseMap();
             CreateMap<Data.WalletF.Wallet, DTOs.WalletDetail_VM_DTO>().ReverseMap();
 
@@ -26,14 +30,16 @@ namespace pbms_be.Configurations
             //Budget
             CreateMap<Data.Budget.Budget, DTOs.CreateBudgetDTO>().ReverseMap();
             CreateMap<Data.Budget.Budget, DTOs.UpdateBudgetDTO>().ReverseMap();
+            CreateMap<Data.Budget.Budget, DTOs.DeleteBudgetDTO>().ReverseMap();
             CreateMap<Data.Budget.Budget, DTOs.BudgetWithCategoryDTO>()
-                .ForMember(dest => dest.RemainAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TargetAmount - src.CurrentAmount)))
-                .ForMember(dest => dest.CurrentAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.CurrentAmount)))
-                .ForMember(dest => dest.TargetAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TargetAmount)))
-                .ForMember(dest => dest.BeginDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.BeginDate)))
-                .ForMember(dest => dest.EndDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.EndDate)))
+                .ForMember(dest => dest.RemainAmount, otp => otp.MapFrom(src => src.TargetAmount - src.CurrentAmount))
+                .ForMember(dest => dest.RemainAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TargetAmount - src.CurrentAmount)))
+                .ForMember(dest => dest.CurrentAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.CurrentAmount)))
+                .ForMember(dest => dest.TargetAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TargetAmount)))
+                .ForMember(dest => dest.BeginDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(src.BeginDate, ConstantConfig.DEFAULT_DATE_FORMAT)))
+                .ForMember(dest => dest.EndDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(src.EndDate, ConstantConfig.DEFAULT_DATE_FORMAT)))
                 .ForMember(dest => dest.CreateTimeStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.CreateTime)))
-                .ForMember(dest => dest.PercentProgress, opt => opt.MapFrom(src => LConvertVariable.ConvertPercentToString(LConvertVariable.CalculatePercentProgress(src.CurrentAmount, src.TargetAmount), 0)))
+                .ForMember(dest => dest.PercentProgress, opt => opt.MapFrom(src => LConvertVariable.CalculatePercentProgress(src.CurrentAmount, src.TargetAmount, 2)))
                 .ReverseMap();
 
             // Category

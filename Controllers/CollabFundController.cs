@@ -215,7 +215,7 @@ namespace pbms_be.Controllers
         #region Post Methods
         // create collab fund
         [HttpPost("create")]
-        public IActionResult CreateCollabFund([FromBody] CreateCollabFundDTO collabFundDTO)
+        public IActionResult CreateCollabFund(CreateCollabFundDTO collabFundDTO)
         {
             try
             {
@@ -224,7 +224,6 @@ namespace pbms_be.Controllers
                 var collabFundEntity = _mapper.Map<CollabFund>(collabFundDTO);
                 if (_collabFundDA.IsCollabFundExist(collabFundEntity))
                     return BadRequest(Message.COLLAB_FUND_ALREADY_EXIST);
-                collabFundEntity.ActiveStateID = ActiveStateConst.ACTIVE;
                 var result = _collabFundDA.CreateCollabFund(collabFundEntity, collabFundDTO.AccountID);
                 return Ok(result);
             }

@@ -1,4 +1,5 @@
 ﻿using pbms_be.Configurations;
+using static Google.Cloud.DocumentAI.V1.Document.Types.Provenance.Types;
 
 namespace pbms_be.Library
 {
@@ -50,6 +51,11 @@ namespace pbms_be.Library
             return time.ToString(ConstantConfig.DEFAULT_DATETIME_FORMAT);
         }
 
+        public static string ConvertDateTimeToStringCustom(DateTime time, string format)
+        {
+            return time.ToString(format);
+        }
+
 
         // convert float of percent progress to string, làm tròn and add % at the end
         public static string ConvertPercentToString(float percent, int digits)
@@ -59,11 +65,28 @@ namespace pbms_be.Library
         }
 
         // CalculatePercentProgress
-        public static float CalculatePercentProgress(long currentAmount, long targetAmount)
+        public static double CalculatePercentProgress(long currentAmount, long targetAmount, int digits)
         {
             if (targetAmount == 0)
                 return 0;
-            return (float)currentAmount / targetAmount * 100;
+            var per = (float)currentAmount / targetAmount * 100;
+            return Math.Round(per, digits); ;
+        }
+
+        public static string GenerateRandomString(int length, string input)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var stringToUse = string.IsNullOrEmpty(input) ? chars : input + chars;
+            var random = new Random();
+            var result = new string(Enumerable.Repeat(stringToUse, length)
+                             .Select(s => s[random.Next(s.Length)]).ToArray());
+            return result;
+        }
+
+        // get filename execpt file extension
+        public static string GetFileNameWithoutExtension(string fileName)
+        {
+            return Path.GetFileNameWithoutExtension(fileName);
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using pbms_be.Data.WalletF;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace pbms_be.DTOs
 {
@@ -13,10 +14,26 @@ namespace pbms_be.DTOs
         public string Name { get; set; } = String.Empty;
         public long Balance { get; set; }
         public int CurrencyID { get; set; }
-        public int ActiveStateID { get; set; }
     }
 
     public class Wallet_VM_DTO
+    {
+        public int WalletID { get; set; }
+        public string Name { get; set; } = String.Empty;
+        public string Balance { get; set; } = String.Empty;
+        public int CurrencyID { get; set; }
+        public virtual Currency Currency { get; set; } = null!;
+        public string Note { get; set; } = String.Empty;
+        public bool IsBanking { get; set; } = false;
+        public string QRCodeURL { get; set; } = String.Empty;
+        public string BankName { get; set; } = String.Empty;
+        public string BankAccount { get; set; } = String.Empty;
+        public string BankUsername { get; set; } = String.Empty;
+        public string CreateTime { get; set; } = String.Empty;
+
+    }
+
+    public class Wallet_Balance_VM_DTO
     {
         public int WalletID { get; set; }
         public string Name { get; set; } = String.Empty;
@@ -34,6 +51,7 @@ namespace pbms_be.DTOs
         public string BankName { get; set; } = String.Empty;
         public string BankAccount { get; set; } = String.Empty;
         public string BankUsername { get; set; } = String.Empty;
+
     }
 
     // all total balance of all wallets
