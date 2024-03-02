@@ -57,7 +57,7 @@ namespace pbms_be.DataAccess
                 }
                 storage.UploadObject(bucketname, fileName, contentType, fileUpload);
 
-                var url = CloudStorageConfig.PUBLIC_URL + "/" + bucketname + "/" + fileName;
+                var url = CloudStorageConfig.PUBLIC_URL + bucketname + "/" + fileName;
                 return url;
             }
             catch (Exception e)
