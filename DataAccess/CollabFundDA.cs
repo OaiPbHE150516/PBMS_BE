@@ -147,10 +147,6 @@ namespace pbms_be.DataAccess
                                         && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(cf => cf.ActiveState)
                             .ToList();
-                //foreach (var item in result)
-                //{
-                //    item.CollabFundActivities = GetAllActivityCollabFund(item.CollabFundID, accountID);
-                //}
                 return result;
             }
             catch (Exception e)
@@ -168,7 +164,8 @@ namespace pbms_be.DataAccess
                     && ca.IsFundholder == true
                     && ca.ActiveStateID == ActiveStateConst.ACTIVE);
                 return isFundholder;
-            }catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
@@ -243,7 +240,8 @@ namespace pbms_be.DataAccess
                     if (item.TransactionID > ConstantConfig.DEFAULT_NULL_TRANSACTION_ID)
                     {
                         item.Transaction = transDA.GetTransaction(item.TransactionID);
-                    } else
+                    }
+                    else
                     {
                         item.TransactionID = ConstantConfig.DEFAULT_ZERO_VALUE;
                     }
@@ -830,7 +828,8 @@ namespace pbms_be.DataAccess
                 _context.SaveChanges();
                 return new { cf_dividingmoney, list_cfdm_detail };
 
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
@@ -860,7 +859,7 @@ namespace pbms_be.DataAccess
             return listDividingMoneyDetail;
         }
 
-        private List<DivideMoneyExecute> CalculateTheAdditionalAmount(List<DivideMoneyInfo> listinfor,long averageAmount)
+        private List<DivideMoneyExecute> CalculateTheAdditionalAmount(List<DivideMoneyInfo> listinfor, long averageAmount)
         {
             var listDetail = new List<DivideMoneyExecute>();
             foreach (var item in listinfor)
@@ -1037,10 +1036,10 @@ namespace pbms_be.DataAccess
         {
             try
             {
-               // delete activity has newest id
-               var activity = _context.CollabFundActivity
-                    .OrderByDescending(cfa => cfa.CollabFundActivityID)
-                    .FirstOrDefault();
+                // delete activity has newest id
+                var activity = _context.CollabFundActivity
+                     .OrderByDescending(cfa => cfa.CollabFundActivityID)
+                     .FirstOrDefault();
                 if (activity is null) throw new Exception(Message.COLLAB_FUND_ACTIVITY_NOT_FOUND);
 
                 var cfdm = _context.CF_DividingMoney
@@ -1101,7 +1100,8 @@ namespace pbms_be.DataAccess
 
                 var authDa = new AuthDA(_context);
                 toAccount = authDa.GetAccount(toAccountID);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
@@ -1119,6 +1119,38 @@ namespace pbms_be.DataAccess
                 result.IsDone = true;
                 _context.SaveChanges();
                 return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal List<AccountInCollabFundDTO> GetAccountInCollabFunds(int collabFundID)
+        {
+            try
+            {
+                var result = _context.AccountCollab
+                    .Where(ca => ca.CollabFundID == collabFundID
+                                                   && ca.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .ToList();
+                var listAccount = new List<AccountInCollabFundDTO>();
+                var authDA = new AuthDA(_context);
+                foreach (var item in result)
+                {
+                    var account = _context.Account
+                        .Where(a => a.AccountID == item.AccountID)
+                        .FirstOrDefault();
+                    if (account is null) continue;
+                    var accountInCollabFund = new AccountInCollabFundDTO
+                    {
+                        AccountID = account.AccountID,
+                        AccountName = account.AccountName,
+                        EmailAddress = account.EmailAddress,
+                    };
+                    listAccount.Add(accountInCollabFund);
+                }
+                return listAccount;
             }
             catch (Exception e)
             {
