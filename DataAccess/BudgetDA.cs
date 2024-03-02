@@ -119,16 +119,13 @@ namespace pbms_be.DataAccess
                     TargetAmount = budgetDTO.TargetAmount,
                     BeginDate = budgetDTO.BeginDate,
                     EndDate = budgetDTO.EndDate,
+                    BudgetTypeID = budgetDTO.BudgetTypeID,
                     RepeatInterVal = budgetDTO.RepeatInterVal,
                     Note = budgetDTO.Note,
                     CreateTime = DateTime.UtcNow,
                     ActiveStateID = ActiveStateConst.ACTIVE
                 };
-
-                budget.BeginDate = DateTime.UtcNow;
-                budget.EndDate = DateTime.UtcNow;
                 budget.ActiveStateID = 1;
-                budget.BudgetTypeID = 0;
                 _context.Budget.Add(budget);
                 _context.SaveChanges();
 
@@ -184,6 +181,12 @@ namespace pbms_be.DataAccess
             {
                 throw new Exception(e.Message);
             }
+        }
+
+        internal bool IsBudgetTypeExist(int budgetTypeID)
+        {
+            var exist = _budgetTypes.Any(x => x.BudgetTypeID == budgetTypeID);
+            return exist;
         }
     }
 }

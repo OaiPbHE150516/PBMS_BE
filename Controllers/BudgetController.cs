@@ -110,6 +110,8 @@ namespace pbms_be.Controllers
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                // if budgetDTO.BudgetTypeID is not exist in budget type, return error
+                if (!_budgetDA.IsBudgetTypeExist(budgetDTO.BudgetTypeID)) return BadRequest(Message.BUDGET_TYPE_NOT_FOUND);
                 // check budget exist, if exist return error
                 // check budget name exist, if exist return error
                 var result = _budgetDA.CreateBudget(budgetDTO);

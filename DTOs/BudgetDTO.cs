@@ -41,6 +41,7 @@ namespace pbms_be.DTOs
         public long TargetAmount { get; set; }
         public DateTime BeginDate { get; set; } = DateTime.UtcNow;
         public DateTime EndDate { get; set; } = DateTime.UtcNow;
+        public int BudgetTypeID { get; set; }
         public int RepeatInterVal { get; set; }
         public string Note { get; set; } = string.Empty;
         public DateTime CreateTime { get; set; } = DateTime.UtcNow;

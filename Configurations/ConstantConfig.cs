@@ -84,6 +84,7 @@
         public const string BUDGET_ALREADY_EXIST = "Budget already exist";
         public const string BUDGET_ID_REQUIRED = "BudgetID is required";
         public const string BUDGET_NOT_FOUND = "Budget not found";
+        public const string BUDGET_TYPE_NOT_FOUND = "Budget type not found";
 
         // Category
         public const string CATEGORY_ALREADY_EXIST = "Category already exist";
