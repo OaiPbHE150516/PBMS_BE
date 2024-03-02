@@ -32,9 +32,10 @@ namespace pbms_be.Configurations
             CreateMap<Data.Budget.Budget, DTOs.UpdateBudgetDTO>().ReverseMap();
             CreateMap<Data.Budget.Budget, DTOs.DeleteBudgetDTO>().ReverseMap();
             CreateMap<Data.Budget.Budget, DTOs.BudgetWithCategoryDTO>()
-                .ForMember(dest => dest.RemainAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TargetAmount - src.CurrentAmount)))
-                .ForMember(dest => dest.CurrentAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.CurrentAmount)))
-                .ForMember(dest => dest.TargetAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TargetAmount)))
+                .ForMember(dest => dest.RemainAmount, otp => otp.MapFrom(src => src.TargetAmount - src.CurrentAmount))
+                .ForMember(dest => dest.RemainAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TargetAmount - src.CurrentAmount)))
+                .ForMember(dest => dest.CurrentAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.CurrentAmount)))
+                .ForMember(dest => dest.TargetAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TargetAmount)))
                 .ForMember(dest => dest.BeginDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(src.BeginDate, ConstantConfig.DEFAULT_DATE_FORMAT)))
                 .ForMember(dest => dest.EndDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(src.EndDate, ConstantConfig.DEFAULT_DATE_FORMAT)))
                 .ForMember(dest => dest.CreateTimeStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.CreateTime)))
