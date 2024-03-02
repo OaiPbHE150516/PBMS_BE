@@ -15,12 +15,27 @@ namespace pbms_be.DTOs
         public string Name { get; set; } = String.Empty;
         public string Description { get; set; } = String.Empty;
         public string ImageURL { get; set; } = String.Empty;
-        public string TotalAmount { get; set; } = String.Empty;
+        public long TotalAmount { get; set; }
+        public string TotalAmountStr { get; set; } = String.Empty;
         public virtual bool isFundholder { get; set; } = false;
 
         public virtual List<AccountInCollabFundDTO> AccountInCollabFunds { get; set; } = null!;
         //public virtual List<CollabFundActivity> CollabFundActivities { get; set; } = null!;
 
+    }
+
+    public class CollabFundDetail_VM_DTO
+    {
+        public int CollabFundID { get; set; }
+        public string Name { get; set; } = String.Empty;
+        public string Description { get; set; } = String.Empty;
+        public string ImageURL { get; set; } = String.Empty;
+        public long TotalAmount { get; set; }
+        public string TotalAmountStr { get; set; } = String.Empty;
+        public DateTime CreateTime { get; set; } = DateTime.UtcNow;
+        public string CreateTimeStr { get; set; } = String.Empty;
+        public virtual List<AccountInCollabFundDTO> AccountInCollabFunds { get; set; } = null!;
+        public virtual List<CollabFundActivity_MV_DTO> CollabFundActivities { get; set; } = null!;
     }
 
     // CreateCollabFundDTO
