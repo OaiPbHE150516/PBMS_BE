@@ -57,8 +57,14 @@ namespace pbms_be.DataAccess
         // check if a wallet exist by wallet name and account id
         public bool IsWalletExist(string AccountID, string WalletName)
         {
-            var result = GetWalletByName(AccountID, WalletName);
-            return result != null;
+            try
+            {
+                var result = _context.Wallet.Any(w => w.Name.Contains(WalletName) && w.AccountID == AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE);
+                return result;
+            } catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
         public bool IsWalletExist(string AccountID, int WalletID)
         {
@@ -119,13 +125,20 @@ namespace pbms_be.DataAccess
 
         public Wallet? CreateWallet(Wallet wallet)
         {
-            if (!IsWalletExist(wallet.AccountID, wallet.Name))
+            try
             {
-                _context.Wallet.Add(wallet);
-                _context.SaveChanges();
-                return GetWallet(wallet.WalletID);
+                if (!IsWalletExist(wallet.AccountID, wallet.Name))
+                {
+                    wallet.ActiveStateID = ActiveStateConst.ACTIVE;
+                    _context.Wallet.Add(wallet);
+                    _context.SaveChanges();
+                    return GetWallet(wallet.WalletID);
+                }
+                return null;
+            } catch (Exception e)
+            {
+                throw new Exception(e.Message);
             }
-            return null;
         }
 
 

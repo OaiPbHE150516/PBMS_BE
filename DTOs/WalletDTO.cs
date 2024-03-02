@@ -14,7 +14,6 @@ namespace pbms_be.DTOs
         public string Name { get; set; } = String.Empty;
         public long Balance { get; set; }
         public int CurrencyID { get; set; }
-        public int ActiveStateID { get; set; }
     }
 
     public class Wallet_VM_DTO
