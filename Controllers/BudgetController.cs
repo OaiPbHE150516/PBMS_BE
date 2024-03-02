@@ -147,9 +147,7 @@ namespace pbms_be.Controllers
                 var authDA = new AuthDA(_context);
                 if (!authDA.IsAccountExist(budget.AccountID)) return BadRequest(Message.ACCOUNT_NOT_FOUND);
                 if (!_budgetDA.IsBudgetExist(budget.AccountID, budget.BudgetID)) return BadRequest(Message.BUDGET_NOT_FOUND);
-                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
-                var budgetDTO = _mapper.Map<Budget>(budget);
-                var result = _budgetDA.DeleteBudget(budgetDTO);
+                var result = _budgetDA.DeleteBudget(budget);
                 return Ok(result);
             }
             catch (System.Exception e)

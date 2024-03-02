@@ -195,7 +195,7 @@ namespace pbms_be.DataAccess
             return exist;
         }
 
-        internal object DeleteBudget(Budget budget)
+        internal object DeleteBudget(DeleteBudgetDTO budget)
         {
             try
             {
