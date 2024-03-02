@@ -138,6 +138,7 @@
         public const string FILE_NAME_REQUIRED = "File name is required";
         public const string FILE_IS_NULL_ = "File is null";
         public const string FILE_IS_TOO_LARGE = "File is too large";
+        public const string FILE_IS_NOT_JPG_PNG = "File is not of type jpg or png";
     }
 
     public class CloudStorageConfig

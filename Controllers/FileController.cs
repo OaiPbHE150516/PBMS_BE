@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using pbms_be.Configurations;
+using pbms_be.DataAccess;
 
 namespace pbms_be.Controllers
 {
@@ -19,6 +20,29 @@ namespace pbms_be.Controllers
             // 
             var fileName = DataAccess.GCP_BucketDA.UploadFile(file, prefix, folder);
             return Ok(fileName);
+        }
+
+        [HttpPost("upload/collabfund/imagecover")]
+        public IActionResult UploadCollabFundImageCover(IFormFile file)
+        {
+            // only accept image, pdf, doc, docx, xls, xlsx, ppt, pptx, txt
+            if (file is null) return BadRequest(Message.FILE_IS_NULL_);
+            var mineType = file.ContentType;
+            if (mineType != ConstantConfig.MINE_TYPE_JPEG 
+                && mineType != ConstantConfig.MINE_TYPE_PNG
+                && mineType != ConstantConfig.MINE_TYPE_JPG)
+                return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
+            var filename = file.FileName;
+            var fileURL = GCP_BucketDA.UploadFileCustom(
+                                file,
+                                CloudStorageConfig.PBMS_BUCKET_NAME,
+                                CloudStorageConfig.COLLAB_FUND_FOLDER,
+                                "file",
+                                filename,
+                                "imagecover",
+                                true
+                                );
+            return Ok(fileURL);
         }
 
         //// download file
