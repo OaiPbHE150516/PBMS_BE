@@ -66,5 +66,27 @@ namespace pbms_be.Library
             return (float)currentAmount / targetAmount * 100;
         }
 
+        public static string GenerateRandomString(int length, string input)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var stringToUse = string.IsNullOrEmpty(input) ? chars : input + chars;
+            var random = new Random();
+            var result = new string(Enumerable.Repeat(stringToUse, length)
+                             .Select(s => s[random.Next(s.Length)]).ToArray());
+            return result;
+
+            //// tạo ra chuỗi ngẫu nhiên từ chuỗi input, độ dài = length
+            //var random = new Random();
+            //var result = new string(Enumerable.Repeat(input, length)
+            //                                .Select(s => s[random.Next(s.Length)]).ToArray());
+            //return result;
+        }
+
+        // get filename execpt file extension
+        public static string GetFileNameWithoutExtension(string fileName)
+        {
+            return Path.GetFileNameWithoutExtension(fileName);
+        }
+
     }
 }

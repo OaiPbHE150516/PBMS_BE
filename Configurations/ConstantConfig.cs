@@ -138,6 +138,7 @@
         public const string FILE_NAME_REQUIRED = "File name is required";
         public const string FILE_IS_NULL_ = "File is null";
         public const string FILE_IS_TOO_LARGE = "File is too large";
+        public const string FILE_IS_NOT_JPG_PNG = "File is not of type jpg or png";
     }
 
     public class CloudStorageConfig
@@ -153,6 +154,7 @@
         public const string FILE_DEFAULT_FOLDER = PUBLIC_URL + "/" + PBMS_BUCKET_NAME + "/" + FILE_FOLDER;
         //         public static string UploadFileCustom(IFormFile file, string bucketname, string folder, string prefix, string filename, string suffix, bool isWithDatetime)
 
+        public const int DEFAULT_FILE_NAME_LENGTH = 15;
     }
 
     public class  CurrencyConst

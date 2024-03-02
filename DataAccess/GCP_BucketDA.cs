@@ -36,7 +36,7 @@ namespace pbms_be.DataAccess
             try
             {
                 // throw exception if file is null or too large > 20MB
-                if (file == null) throw new Exception(Message.FILE_IS_NULL_);
+                if (file is null) throw new Exception(Message.FILE_IS_NULL_);
                 if (file.Length > ConstantConfig.FILE_SIZE_LIMIT) throw new Exception(Message.FILE_IS_TOO_LARGE);
                 // nếu prefix = null thì prefix = file, nếu không thì prefix = prefix
                 prefix = prefix ?? "file";

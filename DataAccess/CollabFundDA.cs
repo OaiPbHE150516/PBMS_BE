@@ -23,7 +23,7 @@ namespace pbms_be.DataAccess
             _context = context;
         }
 
-        internal CollabFund CreateCollabFund(CollabFund collabFund, string accountID, IFormFile fileImageCover)
+        internal CollabFund CreateCollabFund(CollabFund collabFund, string accountID)
         {
             try
             {
@@ -32,19 +32,19 @@ namespace pbms_be.DataAccess
                     throw new Exception(Message.COLLAB_FUND_ALREADY_EXIST);
                 }
 
-                if (fileImageCover != null)
-                {
-                    var fileName = GCP_BucketDA.UploadFileCustom(
-                                    fileImageCover, 
-                                    CloudStorageConfig.PBMS_BUCKET_NAME, 
-                                    CloudStorageConfig.COLLAB_FUND_FOLDER,
-                                    accountID,
-                                    collabFund.Name,
-                                    "imagecover",
-                                    true
-                                    );
-                    collabFund.ImageURL = fileName;
-                }
+                //if (fileImageCover != null)
+                //{
+                //    var fileName = GCP_BucketDA.UploadFileCustom(
+                //                    fileImageCover, 
+                //                    CloudStorageConfig.PBMS_BUCKET_NAME, 
+                //                    CloudStorageConfig.COLLAB_FUND_FOLDER,
+                //                    accountID,
+                //                    collabFund.Name,
+                //                    "imagecover",
+                //                    true
+                //                    );
+                //    collabFund.ImageURL = fileName;
+                //}
 
                 collabFund.ActiveStateID = ActiveStateConst.ACTIVE;
                 _context.CollabFund.Add(collabFund);
