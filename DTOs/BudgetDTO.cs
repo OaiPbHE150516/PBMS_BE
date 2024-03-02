@@ -56,4 +56,10 @@ namespace pbms_be.DTOs
         public long BudgetAmount { get; set; }
         public string Note { get; set; } = string.Empty;
     }
+
+    public class DeleteBudgetDTO
+    {
+        public int BudgetID { get; set; }
+        public string AccountID { get; set; } = string.Empty;
+    }
 }

@@ -30,6 +30,7 @@ namespace pbms_be.Configurations
             //Budget
             CreateMap<Data.Budget.Budget, DTOs.CreateBudgetDTO>().ReverseMap();
             CreateMap<Data.Budget.Budget, DTOs.UpdateBudgetDTO>().ReverseMap();
+            CreateMap<Data.Budget.Budget, DTOs.DeleteBudgetDTO>().ReverseMap();
             CreateMap<Data.Budget.Budget, DTOs.BudgetWithCategoryDTO>()
                 .ForMember(dest => dest.RemainAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TargetAmount - src.CurrentAmount)))
                 .ForMember(dest => dest.CurrentAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.CurrentAmount)))

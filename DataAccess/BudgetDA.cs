@@ -159,6 +159,12 @@ namespace pbms_be.DataAccess
             return exist;
         }
 
+        public bool IsBudgetExist(string accountID, int budgetID)
+        {
+            var exist = _context.Budget.Any(x => x.BudgetID == budgetID && x.AccountID == accountID);
+            return exist;
+        }
+
         // Update Budget
         public Budget? UpdateBudget(Budget budget)
         {
@@ -187,6 +193,40 @@ namespace pbms_be.DataAccess
         {
             var exist = _budgetTypes.Any(x => x.BudgetTypeID == budgetTypeID);
             return exist;
+        }
+
+        internal object DeleteBudget(DeleteBudgetDTO budget)
+        {
+            try
+            {
+                var result = GetBudget(budget.BudgetID, budget.AccountID);
+                if (result is null) throw new Exception(Message.BUDGET_NOT_FOUND);
+                if (result.AccountID != budget.AccountID) throw new Exception(Message.BUDGET_NOT_FOUND);
+                result.ActiveStateID = ActiveStateConst.DELETED;
+                _context.Budget.Update(result);
+                _context.SaveChanges();
+                return GetBudgets(budget.AccountID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public Budget GetBudget(int budgetID, string accountID)
+        {
+            try
+            {
+                var result = _context.Budget
+                        .Where(x => x.BudgetID == budgetID && x.AccountID == accountID && x.ActiveStateID == ActiveStateConst.ACTIVE)
+                        .Include(x => x.ActiveState)
+                        .FirstOrDefault();
+                if (result is null) throw new Exception(Message.BUDGET_NOT_FOUND);
+                return result;
+            } catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
     }
 }
