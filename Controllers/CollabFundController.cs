@@ -43,6 +43,7 @@ namespace pbms_be.Controllers
                 foreach (var item in resultDTO)
                 {
                     item.isFundholder = _collabFundDA.IsFundholderEasy(item.CollabFundID, accountID);
+                    item.AccountInCollabFunds = _collabFundDA.GetAccountInCollabFunds(item.CollabFundID);
                 }
                 return Ok(resultDTO);
             }

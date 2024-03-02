@@ -11,6 +11,7 @@ namespace pbms_be.Configurations
             CreateMap<Data.Auth.Account, DTOs.AccountDTO>().ReverseMap();
             CreateMap<Data.Auth.Account, DTOs.AccountUpdateDTO>().ReverseMap();
             CreateMap<Data.Auth.Account, DTOs.Account_VM_DTO>().ReverseMap();
+            CreateMap<Data.Auth.Account, DTOs.AccountInCollabFundDTO>().ReverseMap();
 
             //Wallet
 
