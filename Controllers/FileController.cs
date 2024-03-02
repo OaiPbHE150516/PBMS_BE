@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using pbms_be.Configurations;
 
 namespace pbms_be.Controllers
 {
@@ -10,7 +11,12 @@ namespace pbms_be.Controllers
         [HttpPost("upload")]
         public IActionResult UploadFile(IFormFile file, string prefix, string suffix, string folder)
         {
-            if (file == null) return BadRequest("File is null or not of type pdf");
+            // only accept image, pdf, doc, docx, xls, xlsx, ppt, pptx, txt
+            if (file == null) return BadRequest("File is null");
+            var mineType = file.ContentType;
+            if (mineType != ConstantConfig.MINE_TYPE_PDF && mineType != ConstantConfig.MINE_TYPE_JPEG && mineType != ConstantConfig.MINE_TYPE_PNG)
+                return BadRequest(Message.FILE_IS_NOT_PDF_JPG_PNG);
+            // 
             var fileName = DataAccess.GCP_BucketDA.UploadFile(file, prefix, folder);
             return Ok(fileName);
         }
