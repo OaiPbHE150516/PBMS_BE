@@ -19,14 +19,15 @@ namespace pbms_be.DataAccess
             return fileName;
         }
 
-        public static string UploadFile(IFormFile file, string prefix)
+        public static string UploadFile(IFormFile file, string prefix, string folder)
         {
             var pre = prefix ?? "file";
             var storage = StorageClient.Create();
             var fileUpload = file.OpenReadStream();
+            var contentType = file.ContentType;
             // file name = file name + date time now timestamp
-            var fileName = "invoice" + "/" + pre + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + file.FileName;
-            storage.UploadObject(ConstantConfig.BUCKET_NAME, fileName, null, fileUpload);
+            var fileName = folder + "/" + pre + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + file.FileName;
+            storage.UploadObject(ConstantConfig.BUCKET_NAME, fileName, contentType, fileUpload);
             return fileName;
         }
 
