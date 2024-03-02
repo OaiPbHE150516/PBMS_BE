@@ -215,7 +215,7 @@ namespace pbms_be.Controllers
         #region Post Methods
         // create collab fund
         [HttpPost("create")]
-        public IActionResult CreateCollabFund([FromBody] CreateCollabFundDTO collabFundDTO)
+        public IActionResult CreateCollabFund([FromBody] CreateCollabFundDTO collabFundDTO, IFormFile file)
         {
             try
             {
@@ -225,9 +225,9 @@ namespace pbms_be.Controllers
                 if (_collabFundDA.IsCollabFundExist(collabFundEntity))
                     return BadRequest(Message.COLLAB_FUND_ALREADY_EXIST);
                 // throw exception if file is null or too large > 20MB
-                if (collabFundDTO.ImageFile == null) throw new Exception(Message.FILE_IS_NULL_);
-                if (collabFundDTO.ImageFile.Length > ConstantConfig.FILE_SIZE_LIMIT) throw new Exception(Message.FILE_IS_TOO_LARGE);
-                var result = _collabFundDA.CreateCollabFund(collabFundEntity, collabFundDTO.AccountID, collabFundDTO.ImageFile);
+                if (file == null) throw new Exception(Message.FILE_IS_NULL_);
+                if (file.Length > ConstantConfig.FILE_SIZE_LIMIT) throw new Exception(Message.FILE_IS_TOO_LARGE);
+                var result = _collabFundDA.CreateCollabFund(collabFundEntity, collabFundDTO.AccountID, file);
                 return Ok(result);
             }
             catch (System.Exception e)
