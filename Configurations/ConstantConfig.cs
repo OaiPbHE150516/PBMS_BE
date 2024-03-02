@@ -154,6 +154,7 @@
         public const string FILE_DEFAULT_FOLDER = PUBLIC_URL + "/" + PBMS_BUCKET_NAME + "/" + FILE_FOLDER;
         //         public static string UploadFileCustom(IFormFile file, string bucketname, string folder, string prefix, string filename, string suffix, bool isWithDatetime)
 
+        public const int DEFAULT_FILE_NAME_LENGTH = 15;
     }
 
     public class  CurrencyConst
