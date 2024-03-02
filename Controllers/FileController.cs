@@ -8,10 +8,10 @@ namespace pbms_be.Controllers
     public class FileController : ControllerBase
     {
         [HttpPost("upload")]
-        public IActionResult UploadFile(IFormFile file, string prefix, string suffix)
+        public IActionResult UploadFile(IFormFile file, string prefix, string suffix, string folder)
         {
             if (file == null) return BadRequest("File is null or not of type pdf");
-            var fileName = DataAccess.GCP_BucketDA.UploadFile(file, prefix);
+            var fileName = DataAccess.GCP_BucketDA.UploadFile(file, prefix, folder);
             return Ok(fileName);
         }
 
