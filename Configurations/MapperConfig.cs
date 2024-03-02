@@ -67,7 +67,11 @@ namespace pbms_be.Configurations
             CreateMap<Data.CollabFund.CollabFund, DTOs.UpdateCollabFundDTO>().ReverseMap();
             CreateMap<Data.CollabFund.CollabFund, DTOs.ChangeCollabFundActiveStateDTO>().ReverseMap();
             CreateMap<Data.CollabFund.CollabFund, DTOs.CollabFund_VM_DTO>()
-                .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
+                .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
+                .ReverseMap();
+            CreateMap<Data.CollabFund.CollabFund, DTOs.CollabFundDetail_VM_DTO>()
+                .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
+                .ForMember(dest => dest.CreateTimeStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.CreateTime)))
                 .ReverseMap();
 
             //CollabFundActivity
