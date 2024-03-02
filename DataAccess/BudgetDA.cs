@@ -203,7 +203,6 @@ namespace pbms_be.DataAccess
                 if (result is null) throw new Exception(Message.BUDGET_NOT_FOUND);
                 if (result.AccountID != budget.AccountID) throw new Exception(Message.BUDGET_NOT_FOUND);
                 result.ActiveStateID = ActiveStateConst.DELETED;
-                _context.Budget.Update(result);
                 _context.SaveChanges();
                 return GetBudgets(budget.AccountID);
             }
