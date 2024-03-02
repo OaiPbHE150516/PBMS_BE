@@ -30,6 +30,8 @@
         public const string MINE_TYPE_PNG = "image/png";
         public const string MINE_TYPE_JPG = "image/jpg";
 
+
+
         // Bucket config
         public const string BUCKET_NAME = "pbms-user";
 
@@ -63,6 +65,7 @@
 
         // default VND thousand separator dong format
         public const int DEFAULT_VND_THOUSAND_SEPARATOR = 1000;
+        public const int FILE_SIZE_LIMIT = 20971520;
 
     }
 
@@ -129,6 +132,27 @@
         // Wallet
         public const string WALLET_ID_REQUIRED = "WalletID is required";
         public const string WALLET_NOT_FOUND = "Wallet not found";
+
+        // File
+        public const string FILE_NOT_FOUND = "File not found";
+        public const string FILE_NAME_REQUIRED = "File name is required";
+        public const string FILE_IS_NULL_ = "File is null";
+        public const string FILE_IS_TOO_LARGE = "File is too large";
+    }
+
+    public class CloudStorageConfig
+    {
+        public const string PUBLIC_URL = "https://storage.googleapis.com/";
+        public const string PBMS_BUCKET_NAME = "pbms-user";
+        public const string INVOICE_FOLDER = "invoice";
+        public const string COLLAB_FUND_FOLDER = "collabfund";
+        public const string FILE_FOLDER = "file";
+        // pbms-user/invoice default = public_url + pbms-user/invoice
+        public const string INVOICE_DEFAULT_FOLDER = PUBLIC_URL + "/" + PBMS_BUCKET_NAME + "/" + INVOICE_FOLDER;
+        // pbms-user/file default = public_url + pbms-user/file
+        public const string FILE_DEFAULT_FOLDER = PUBLIC_URL + "/" + PBMS_BUCKET_NAME + "/" + FILE_FOLDER;
+        //         public static string UploadFileCustom(IFormFile file, string bucketname, string folder, string prefix, string filename, string suffix, bool isWithDatetime)
+
     }
 
     public class  CurrencyConst
