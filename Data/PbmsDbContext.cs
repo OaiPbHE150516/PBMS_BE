@@ -22,6 +22,10 @@ namespace pbms_be.Data
 
         public DbSet<Filter.Category> Category { get; set; }
 
+        public DbSet<Filter.CategoryType> CategoryType { get; set; }
+
+        public DbSet<Filter.DefaultCategory> DefaultCategory { get; set; }
+
         public DbSet<Trans.Transaction> Transaction { get; set; }
 
         public DbSet<Invo.Invoice> Invoice { get; set; }

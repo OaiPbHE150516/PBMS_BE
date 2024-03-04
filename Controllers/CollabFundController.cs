@@ -43,6 +43,7 @@ namespace pbms_be.Controllers
                 foreach (var item in resultDTO)
                 {
                     item.isFundholder = _collabFundDA.IsFundholderEasy(item.CollabFundID, accountID);
+                    item.AccountInCollabFunds = _collabFundDA.GetAccountInCollabFunds(item.CollabFundID);
                 }
                 return Ok(resultDTO);
             }
@@ -67,7 +68,10 @@ namespace pbms_be.Controllers
                 bool isExist = false;
                 _collabFundDA.GetDetailCollabFund(collabFundID, accountID, out isExist, out collabfund);
                 if (!isExist) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
-                return Ok(collabfund);
+                if( _mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var collabfundEntity = _mapper.Map<CollabFundDetail_VM_DTO>(collabfund);
+                collabfundEntity.AccountInCollabFunds = _collabFundDA.GetAccountInCollabFunds(collabfund.CollabFundID);
+                return Ok(collabfundEntity);
             }
             catch (System.Exception e)
             {

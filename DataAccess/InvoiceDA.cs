@@ -13,21 +13,21 @@ namespace pbms_be.DataAccess
             _context = context;
         }
 
-        public List<Invoice> GetInvoices(string accountID)
-        {
-            TransactionDA transactionDA = new TransactionDA(_context);
-            var transactions = transactionDA.GetTransactions(accountID);
-            List<Invoice> invoices = new List<Invoice>();
-            foreach (var transaction in transactions)
-            {
-                var invoice = GetInvoiceByTransaction(transaction.TransactionID);
-                if (invoice != null)
-                {
-                    invoices.Add(invoice);
-                }
-            }
-            return invoices;
-        }
+        //public List<Invoice> GetInvoices(string accountID)
+        //{
+        //    TransactionDA transactionDA = new TransactionDA(_context);
+        //    var transactions = transactionDA.GetTransactions(accountID);
+        //    List<Invoice> invoices = new List<Invoice>();
+        //    foreach (var transaction in transactions)
+        //    {
+        //        var invoice = GetInvoiceByTransaction(transaction.TransactionID);
+        //        if (invoice != null)
+        //        {
+        //            invoices.Add(invoice);
+        //        }
+        //    }
+        //    return invoices;
+        //}
 
         public Invoice? GetInvoiceByTransaction(int transactionID)
         {

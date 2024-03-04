@@ -63,6 +63,21 @@
         // default date format
         public const string DEFAULT_DATE_FORMAT = "dd/MM/yyyy";
 
+        // default category name en
+        public const string DEFAULT_CATEGORY_NAME_EN_INCOME = "Income";
+        public const string DEFAULT_CATEGORY_NAME_VN_INCOME = "Thu nhập";
+        public const string DEFAULT_CATEGORY_NAME_EN_EXPENSE = "Expense";
+        public const string DEFAULT_CATEGORY_NAME_VN_EXPENSE = "Chi tiêu";
+        public const string DEFAULT_CATEGORY_NAME_EN_OTHER = "Other";
+        public const string DEFAULT_CATEGORY_NAME_VN_OTHER = "Khác";
+
+        // default Sort & Filter
+        // public const string ascending sort
+        public const string ASCENDING_SORT = "asc";
+        // public const string descending sort
+        public const string DESCENDING_SORT = "desc";
+        // public const string sort type
+
         // default VND thousand separator dong format
         public const int DEFAULT_VND_THOUSAND_SEPARATOR = 1000;
         public const int FILE_SIZE_LIMIT = 20971520;
@@ -72,49 +87,62 @@
     // Message to response to client
     public class Message
     {
-        public const string ACCOUNT_ID_REQUIRED = "AccountID is required";
-        public const string INVOICE_ID_REQUIRED = "InvoiceID is required";
-        public const string FILE_IS_NULL = "File is null or not of type pdf";
-        public const string FILE_IS_NOT_PDF_JPG_PNG = "File is null or not of type pdf, jpg or png";
+        public const string ACCOUNT_ID_REQUIRED = " AccountID is required";
+        public const string INVOICE_ID_REQUIRED = " InvoiceID is required";
+        public const string FILE_IS_NULL = " File is null or not of type pdf";
+        public const string FILE_IS_NOT_PDF_JPG_PNG = " File is null or not of type pdf, jpg or png";
+
+        // Page
+        public const string PAGE_NOT_FOUND = " Page not found";
+        public const string PAGE_NUMBER_REQUIRED = " Page number is required";
+        public const string PAGE_SIZE_REQUIRED = " Page size is required";
+
+        // Sort & Filter
+        public const string SORT_TYPE_REQUIRED = " Sort type is required";
 
         // Transaction
-        public const string TRANSACTION_NOT_FOUND = "Transaction not found";
+        public const string TRANSACTION_NOT_FOUND = " Transaction not found";
       
-        //Budget
-        public const string BUDGET_ALREADY_EXIST = "Budget already exist";
-        public const string BUDGET_ID_REQUIRED = "BudgetID is required";
-        public const string BUDGET_NOT_FOUND = "Budget not found";
-        public const string BUDGET_TYPE_NOT_FOUND = "Budget type not found";
+        // Budget
+        public const string BUDGET_ALREADY_EXIST = " Budget already exist";
+        public const string BUDGET_ID_REQUIRED = " BudgetID is required";
+        public const string BUDGET_NOT_FOUND = " Budget not found";
+        public const string BUDGET_TYPE_NOT_FOUND = " Budget type not found";
 
         // Category
-        public const string CATEGORY_ALREADY_EXIST = "Category already exist";
-        public const string CATEGORY_ID_REQUIRED = "CategoryID is required";
-        public const string CATEGORY_NOT_FOUND = "Category not found";
+        public const string CATEGORY_ALREADY_EXIST = " Category already exist";
+        public const string CATEGORY_ID_REQUIRED = " CategoryID is required";
+        public const string CATEGORY_NOT_FOUND = " Category not found";
+        public const string CATEGORY_PARENT_NOT_FOUND = " Category parent not found";
+
+        // Category type
+        public const string CATEGORY_TYPE_NOT_FOUND = " Category type not found";
+
         // email address is required
-        public const string EMAIL_ADDRESS_REQUIRED = "Email address is required";
+        public const string EMAIL_ADDRESS_REQUIRED = " Email address is required";
 
         // Collab fund
-        public const string COLLAB_FUND_ALREADY_EXIST = "Collab fund already exist";
-        public const string COLLAB_FUND_ID_REQUIRED = "CollabFundID is required";
-        public const string COLLAB_FUND_NOT_EXIST = "Collab fund not exist";
-        public const string COLLAB_FUND_DUPLICATE = "Collab fund duplicate";
-        public const string COLLAB_FUND_ACTIVITY_DUPLICATE = "Collab fund activity duplicate";
-        public const string ACCOUNT_IS_NOT_FUNDHOLDER = "Account is not fundholder";
-        public const string ACCOUNT_NOT_FOUND = "Account not found";
-        public const string ACCOUNT_IS_NOT_MEMBER = "Account is not member";
-        public const string ACCOUNT_ALREADY_IS_MEMBER = "Account is member";
-        public const string ACCOUNT_ALREADY_IS_FUNDHOLDER = "Account is fundholder";
-        public const string ACCOUNT_IS_NOT_IN_COLLAB_FUND = "Account is not in collab fund";
-        public const string ACCOUNT_ALREADY_INVITED = "Account is already invited";
-        public const string ACCOUNT_ALREADY_ACCEPTED = "Account is already accepted";
-        public const string ACCOUNT_ALREADY_REJECTED = "Account is already rejected";
-        public const string ACCOUNT_WAS_NOT_INVITED = "Account was not invited";
-        public const string ACCOUNT_FROM_NOT_FOUND = "Account from not found";
-        public const string ACCOUNT_TO_NOT_FOUND = "Account to not found";
-        public const string COLLAB_FUND_ACTIVITY_NOT_FOUND = "Collab fund activity not found";
+        public const string COLLAB_FUND_ALREADY_EXIST = " Collab fund already exist";
+        public const string COLLAB_FUND_ID_REQUIRED = " CollabFundID is required";
+        public const string COLLAB_FUND_NOT_EXIST = " Collab fund not exist";
+        public const string COLLAB_FUND_DUPLICATE = " Collab fund duplicate";
+        public const string COLLAB_FUND_ACTIVITY_DUPLICATE = " Collab fund activity duplicate";
+        public const string ACCOUNT_IS_NOT_FUNDHOLDER = " Account is not fundholder";
+        public const string ACCOUNT_NOT_FOUND = " Account not found";
+        public const string ACCOUNT_IS_NOT_MEMBER = " Account is not member";
+        public const string ACCOUNT_ALREADY_IS_MEMBER = " Account is member";
+        public const string ACCOUNT_ALREADY_IS_FUNDHOLDER = " Account is fundholder";
+        public const string ACCOUNT_IS_NOT_IN_COLLAB_FUND = " Account is not in collab fund";
+        public const string ACCOUNT_ALREADY_INVITED = " Account is already invited";
+        public const string ACCOUNT_ALREADY_ACCEPTED = " Account is already accepted";
+        public const string ACCOUNT_ALREADY_REJECTED =  "Account is already rejected";
+        public const string ACCOUNT_WAS_NOT_INVITED = " Account was not invited";
+        public const string ACCOUNT_FROM_NOT_FOUND = " Account from not found";
+        public const string ACCOUNT_TO_NOT_FOUND = " Account to not found";
+        public const string COLLAB_FUND_ACTIVITY_NOT_FOUND = " Collab fund activity not found";
 
         // cfdm detail not found
-        public const string CFDM_DETAIL_NOT_FOUND = "Collab Fund dividing money detail not found";
+        public const string CFDM_DETAIL_NOT_FOUND = " Collab Fund dividing money detail not found";
 
         // just now
         public const string VN_JUST_NOW = "vừa xong";
@@ -125,21 +153,21 @@
 
 
         // Mapper
-        public const string MAPPER_IS_NULL = "Mapper is null";
+        public const string MAPPER_IS_NULL = " Mapper is null";
 
         // Activity 
 
 
         // Wallet
-        public const string WALLET_ID_REQUIRED = "WalletID is required";
-        public const string WALLET_NOT_FOUND = "Wallet not found";
+        public const string WALLET_ID_REQUIRED = " WalletID is required";
+        public const string WALLET_NOT_FOUND = " Wallet not found";
 
         // File
-        public const string FILE_NOT_FOUND = "File not found";
-        public const string FILE_NAME_REQUIRED = "File name is required";
-        public const string FILE_IS_NULL_ = "File is null";
-        public const string FILE_IS_TOO_LARGE = "File is too large";
-        public const string FILE_IS_NOT_JPG_PNG = "File is not of type jpg or png";
+        public const string FILE_NOT_FOUND = " File not found";
+        public const string FILE_NAME_REQUIRED = " File name is required";
+        public const string FILE_IS_NULL_ = " File is null";
+        public const string FILE_IS_TOO_LARGE = " File is too large";
+        public const string FILE_IS_NOT_JPG_PNG = " File is not of type jpg or png";
     }
 
     public class CloudStorageConfig
