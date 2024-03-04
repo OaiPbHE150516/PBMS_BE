@@ -24,16 +24,19 @@ namespace pbms_be.Controllers
         }
 
         // get all transaction by account id
-        [HttpGet("get/account/{accountID}")]
-        public IActionResult GetTransactions(string accountID)
+        [HttpGet("get/{accountID}/{pageNumber}/{pageSize}/{sortType}")]
+        public IActionResult GetTransactions(string accountID, int pageNumber, int pageSize, string sortType)
         {
             try
             {
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
-                if(_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
-                var result = _transactionDA.GetTransactions(accountID);
-                var resultDTO = _mapper.Map<List<TransactionP_VM_DTO>>(result);
-                return Ok(resultDTO);
+                if (pageNumber <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.PAGE_NUMBER_REQUIRED);
+                if (pageSize <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.PAGE_SIZE_REQUIRED);
+                if (string.IsNullOrEmpty(sortType)) return BadRequest(Message.SORT_TYPE_REQUIRED);
+                var result = _transactionDA.GetTransactions(accountID, pageNumber, pageSize, sortType);
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
+                return Ok(new { pageNumber, pageSize, sortType, resultDTO });
             }
             catch (System.Exception e)
             {

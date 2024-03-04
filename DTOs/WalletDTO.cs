@@ -29,7 +29,7 @@ namespace pbms_be.DTOs
         public string BankName { get; set; } = String.Empty;
         public string BankAccount { get; set; } = String.Empty;
         public string BankUsername { get; set; } = String.Empty;
-        public string CreateTime { get; set; } = String.Empty;
+        public string CreateTimeStr { get; set; } = String.Empty;
 
     }
 
@@ -93,5 +93,11 @@ namespace pbms_be.DTOs
         public string AccountID { get; set; } = String.Empty;
         public int WalletID { get; set; }
         public int ActiveStateID { get; set; }
+    }
+
+    public class WalletInTransaction_VM_DTO
+    {
+        public string Name { get; set; } = String.Empty;
+        public string Balance { get; set; } = String.Empty;
     }
 }
