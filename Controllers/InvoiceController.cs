@@ -27,21 +27,21 @@ namespace pbms_be.Controllers
         }
 
         // get all invoice by account id
-        [HttpGet("get/account/{accountID}")]
-        public IActionResult GetInvoices(string accountID)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(accountID)) return BadRequest("AccountID is required");
-                InvoiceDA invoiceDA = new InvoiceDA(_context);
-                var result = invoiceDA.GetInvoices(accountID);
-                return Ok(result);
-            }
-            catch (System.Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+        //[HttpGet("get/account/{accountID}")]
+        //public IActionResult GetInvoices(string accountID)
+        //{
+        //    try
+        //    {
+        //        if (string.IsNullOrEmpty(accountID)) return BadRequest("AccountID is required");
+        //        InvoiceDA invoiceDA = new InvoiceDA(_context);
+        //        var result = invoiceDA.GetInvoices(accountID);
+        //        return Ok(result);
+        //    }
+        //    catch (System.Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
         // get invoice by invoice id
         [HttpGet("get/id/{invoiceID}")]

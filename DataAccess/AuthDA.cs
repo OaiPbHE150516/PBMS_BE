@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Auth;
@@ -34,6 +35,7 @@ namespace pbms_be.DataAccess
                     account.PictureURL = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_PICTURE).Value;
                     account.CreateTime = DateTime.UtcNow;
                     var resultAccount = CreateAccount(account);
+                    GenerateDefaultInformation(resultAccount);
                     return resultAccount;
                 }
                 else
@@ -48,7 +50,18 @@ namespace pbms_be.DataAccess
             }
         }
 
-
+        private void GenerateDefaultInformation(Account resultAccount)
+        {
+            try
+            {
+                var _categoryDA = new CategoryDA(_context);
+                var result = _categoryDA.GenerateDefaultCategories(resultAccount.AccountID);
+            }
+            catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
 
         public bool IsAccountExist(string AccountID)
         {
@@ -68,7 +81,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        private Account? CreateAccount(Account account)
+        private Account CreateAccount(Account account)
         {
             try
             {

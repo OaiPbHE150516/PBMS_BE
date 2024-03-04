@@ -32,6 +32,22 @@ namespace pbms_be.Library
             return minusTimeNowString;
         }
 
+        public static string ConvertMinusTimeNowMonthString(DateTime time)
+        {
+            var now = DateTime.UtcNow;
+            var minusTime = now - time;
+            var minusTimeNowString = string.Empty;
+            if (minusTime.TotalMinutes < ConstantConfig.MIN_MINUTES_AGO)
+                minusTimeNowString = Message.VN_JUST_NOW;
+            else if (minusTime.TotalMinutes < ConstantConfig.MIN_HOURS_AGO)
+                minusTimeNowString = minusTime.Minutes + Message.VN_MINUTES_AGO;
+            else if (minusTime.TotalHours < ConstantConfig.MIN_DAYS_AGO)
+                minusTimeNowString = minusTime.Hours + Message.VN_HOURS_AGO;
+            else if (minusTime.TotalDays < ConstantConfig.MIN_MONTHS_AGO)
+                minusTimeNowString = minusTime.Days + Message.VN_DAYS_AGO;
+            return minusTimeNowString;
+        }
+
         // convert utc time to local time
         public static DateTime ConvertUtcToLocalTime(DateTime utcTime)
         {
