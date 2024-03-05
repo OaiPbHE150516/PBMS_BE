@@ -24,21 +24,20 @@ namespace pbms_be.Controllers
         }
 
         // get all transaction by account id
-        [HttpGet("get/{accountID}/{pageNumber}/{pageSize}/{sortType}")]
-        public IActionResult GetTransactions(string accountID, int pageNumber, int pageSize, string sortType)
+        [HttpGet("get/{accountID}/{pageNumber}/{pageSize}")]
+        public IActionResult GetTransactions(string accountID, int pageNumber, int pageSize)
         {
             try
             {
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 if (pageNumber <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.PAGE_NUMBER_REQUIRED);
                 if (pageSize <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.PAGE_SIZE_REQUIRED);
-                if (string.IsNullOrEmpty(sortType)) return BadRequest(Message.SORT_TYPE_REQUIRED);
-                var result = _transactionDA.GetTransactions(accountID, pageNumber, pageSize, sortType);
+                var result = _transactionDA.GetTransactions(accountID, pageNumber, pageSize, ConstantConfig.DESCENDING_SORT);
                 if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
                 // calculate total page
                 var totalPage = _transactionDA.GetTotalPage(accountID, pageSize);
-                return Ok(new { pageNumber, totalPage, pageSize, sortType, resultDTO });
+                return Ok(new { pageNumber, totalPage, pageSize, ConstantConfig.DESCENDING_SORT, resultDTO });
             }
             catch (System.Exception e)
             {
@@ -47,6 +46,22 @@ namespace pbms_be.Controllers
         }
 
         // get transaction by id
-        //[HttpGet("get/{transactionID}")]
+        [HttpGet("get/{transactionID}/{accountID}")]
+        public IActionResult GetTransaction(int transactionID, string accountID)
+        {
+            try
+            {
+                if (transactionID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.TRANSACTION_ID_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                var result = _transactionDA.GetTransaction(transactionID, accountID);
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var resultDTO = _mapper.Map<TransactionDetail_VM_DTO>(result);
+                return Ok(resultDTO);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

@@ -119,5 +119,26 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+
+        internal object GetTransaction(int transactionID, string accountID)
+        {
+            try
+            {
+                var result = _context.Transaction
+                            .Where(t => t.TransactionID == transactionID && t.AccountID == accountID)
+                            .Include(t => t.ActiveState)
+                            .Include(t => t.Category)
+                            .Include(t => t.Wallet)
+                            .FirstOrDefault();
+                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                var cateDA = new CategoryDA(_context);
+                result.Category.CategoryType = cateDA.GetCategoryType(result.Category.CategoryTypeID);
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }
