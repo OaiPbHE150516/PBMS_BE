@@ -63,5 +63,25 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        #region Post Methods
+
+        // add new transaction
+        [HttpPost("create")]
+        public IActionResult CreateTransaction([FromBody] Transaction_VM_DTO transaction)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = _transactionDA.CreateTransaction(transaction);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        #endregion
     }
 }

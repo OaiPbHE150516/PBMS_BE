@@ -20,7 +20,8 @@ namespace pbms_be.DTOs
     {
         public int WalletID { get; set; }
         public string Name { get; set; } = String.Empty;
-        public string Balance { get; set; } = String.Empty;
+        public long Balance { get; set; }
+        public string BalanceStr { get; set; } = String.Empty;
         public int CurrencyID { get; set; }
         public virtual Currency Currency { get; set; } = null!;
         public string Note { get; set; } = String.Empty;

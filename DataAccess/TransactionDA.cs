@@ -2,6 +2,7 @@
 using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Trans;
+using pbms_be.DTOs;
 
 namespace pbms_be.DataAccess
 {
@@ -139,6 +140,11 @@ namespace pbms_be.DataAccess
             {
                 throw new Exception(e.Message);
             }
+        }
+
+        internal object CreateTransaction(Transaction_VM_DTO transaction)
+        {
+            throw new NotImplementedException();
         }
     }
 }
