@@ -28,7 +28,7 @@ namespace pbms_be.Library
                 var result = file.ContentType != ConstantConfig.MINE_TYPE_JPEG
                                && file.ContentType != ConstantConfig.MINE_TYPE_JPG
                                && file.ContentType != ConstantConfig.MINE_TYPE_PNG;
-                return !result;
+                return result;
             }
             catch (Exception e)
             {
