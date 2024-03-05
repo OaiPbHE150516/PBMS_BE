@@ -33,13 +33,13 @@ namespace pbms_be.DataAccess
                 switch (sortType.ToLower())
                 {
                     case ConstantConfig.ASCENDING_SORT:
-                        result = result.OrderBy(t => t.TransactionID).ToList();
+                        result = result.OrderBy(t => t.TransactionDate).ToList();
                         break;
                     case ConstantConfig.DESCENDING_SORT:
-                        result = result.OrderByDescending(t => t.TransactionID).ToList();
+                        result = result.OrderByDescending(t => t.TransactionDate).ToList();
                         break;
                     default:
-                        result = result.OrderBy(t => t.TransactionID).ToList();
+                        result = result.OrderBy(t => t.TransactionDate).ToList();
                         break;
                 }
                 //var result = _context.Transaction
@@ -72,6 +72,7 @@ namespace pbms_be.DataAccess
                 .Include(t => t.Category)
                 .Include(t => t.Wallet)
                 .FirstOrDefault();
+                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
                 return result;
             }
             catch (Exception e)

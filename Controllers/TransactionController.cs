@@ -45,5 +45,8 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        // get transaction by id
+        //[HttpGet("get/{transactionID}")]
     }
 }
