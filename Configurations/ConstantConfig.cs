@@ -102,6 +102,7 @@
 
         // Transaction
         public const string TRANSACTION_NOT_FOUND = " Transaction not found";
+        public const string TRANSACTION_ID_REQUIRED = " TransactionID is required";
       
         // Budget
         public const string BUDGET_ALREADY_EXIST = " Budget already exist";

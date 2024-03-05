@@ -38,4 +38,21 @@ namespace pbms_be.DTOs
         public string ToPerson { get; set; } = String.Empty;
         public string ImageURL { get; set; } = String.Empty;
     }
+
+    public class TransactionDetail_VM_DTO
+    {
+        public int TransactionID { get; set; }
+        public int WalletID { get; set; }
+        public virtual WalletInTransaction_VM_DTO Wallet { get; set; } = null!;
+        public int CategoryID { get; set; }
+        public virtual CategoryInTransaction_VM_DTO Category { get; set; } = null!;
+        public string TotalAmount { get; set; } = String.Empty;
+        public string Note { get; set; } = String.Empty;
+        public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
+        public string TransactionDateStr { get; set; } = String.Empty;
+        public string TransactionDateMinus { get; set; } = String.Empty;
+        public string FromPerson { get; set; } = String.Empty;
+        public string ToPerson { get; set; } = String.Empty;
+        public string ImageURL { get; set; } = String.Empty;
+    }
 }
