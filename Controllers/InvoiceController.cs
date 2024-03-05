@@ -8,6 +8,7 @@ using pbms_be.Data;
 using pbms_be.Data.Invo;
 using pbms_be.Data.Material;
 using pbms_be.DataAccess;
+using pbms_be.Library;
 using pbms_be.ThirdParty;
 using System.Net.Http.Headers;
 
@@ -19,23 +20,21 @@ namespace pbms_be.Controllers
     {
         private readonly PbmsDbContext _context;
         private readonly IMapper? _mapper;
+        private InvoiceDA _invoiceDA;
 
         public InvoiceController(PbmsDbContext context, IMapper? mapper)
         {
             _context = context;
             _mapper = mapper;
+            _invoiceDA = new InvoiceDA(context);
         }
 
         // scanning invoice
         [HttpPost("scan")]
         public IActionResult ScanInvoice(IFormFile file)
         {
-            if (file == null) return BadRequest("File is null or not of type pdf");
-            if (file.ContentType != ConstantConfig.MINE_TYPE_PDF
-                               && file.ContentType != ConstantConfig.MINE_TYPE_JPEG
-                               && file.ContentType != ConstantConfig.MINE_TYPE_JPG
-                               && file.ContentType != ConstantConfig.MINE_TYPE_PNG)
-                return BadRequest("File is null or not of type pdf, jpg or png");
+            if (file == null) return BadRequest(Message.FILE_IS_NULL_);
+            if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
             var result = DocumentAiApi.ProcessDocument(file);
             //var imageURL = GCP_BucketDA.UploadFile(file);
             Invoice invoice = DocumentAiApi.GetInvoiceFromDocument(result);
