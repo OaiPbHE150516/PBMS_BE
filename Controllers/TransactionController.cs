@@ -36,7 +36,9 @@ namespace pbms_be.Controllers
                 var result = _transactionDA.GetTransactions(accountID, pageNumber, pageSize, sortType);
                 if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
-                return Ok(new { pageNumber, pageSize, sortType, resultDTO });
+                // calculate total page
+                var totalPage = _transactionDA.GetTotalPage(accountID, pageSize);
+                return Ok(new { pageNumber, totalPage, pageSize, sortType, resultDTO });
             }
             catch (System.Exception e)
             {

@@ -102,6 +102,21 @@ namespace pbms_be.DataAccess
             return result;
         }
 
-
+        internal object GetTotalPage(string accountID, int pageSize)
+        {
+            try
+            {
+                var totalRecord = _context.Transaction
+                                .Where(t => t.AccountID == accountID)
+                                .Count();
+                var totalPage = totalRecord / pageSize;
+                if (totalRecord % pageSize != 0) totalPage++;
+                return totalPage;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }
