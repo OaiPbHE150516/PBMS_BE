@@ -107,6 +107,10 @@
         public const string TRANSACTION_ID_REQUIRED = " TransactionID is required";
         public const string TRANSACTION_CREATE_FAILED = " Transaction create failed";
         public const string TRANSACTION_EXISTED = " Transaction existed";
+        // MONTH_REQUIRED, YEAR_REQUIRED
+        public const string MONTH_REQUIRED = " Month is required";
+        public const string YEAR_REQUIRED = " Year is required";
+
 
         // Budget
         public const string BUDGET_ALREADY_EXIST = " Budget already exist";
