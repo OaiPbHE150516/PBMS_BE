@@ -69,7 +69,7 @@ public class Invoice
     public string IDOfInvoice { get; set; } = String.Empty;
 
     [Column("invoice_date")]
-    public DateTime InvoiceDate { get; set; } = DateTime.Now;
+    public DateTime InvoiceDate { get; set; } = DateTime.UtcNow;
 
     [Column("invoice_type")]
     public string InvoiceType { get; set; } = String.Empty;

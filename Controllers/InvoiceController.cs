@@ -8,6 +8,7 @@ using pbms_be.Data;
 using pbms_be.Data.Invo;
 using pbms_be.Data.Material;
 using pbms_be.DataAccess;
+using pbms_be.Library;
 using pbms_be.ThirdParty;
 using System.Net.Http.Headers;
 
@@ -19,12 +20,28 @@ namespace pbms_be.Controllers
     {
         private readonly PbmsDbContext _context;
         private readonly IMapper? _mapper;
+        private InvoiceDA _invoiceDA;
 
         public InvoiceController(PbmsDbContext context, IMapper? mapper)
         {
             _context = context;
             _mapper = mapper;
+            _invoiceDA = new InvoiceDA(context);
         }
+
+        // scanning invoice
+        [HttpPost("scan")]
+        public IActionResult ScanInvoice(IFormFile file)
+        {
+            if (file == null) return BadRequest(Message.FILE_IS_NULL_);
+            if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
+            var result = DocumentAiApi.ProcessDocument(file);
+            //var imageURL = GCP_BucketDA.UploadFile(file);
+            Invoice invoice = DocumentAiApi.GetInvoiceFromDocument(result);
+           // invoice.InvoiceImageURL = imageURL;
+            return Ok(invoice);
+        }
+
 
         // get all invoice by account id
         //[HttpGet("get/account/{accountID}")]
@@ -44,28 +61,28 @@ namespace pbms_be.Controllers
         //}
 
         // get invoice by invoice id
-        [HttpGet("get/id/{invoiceID}")]
-        public IActionResult GetInvoice(int invoiceID)
-        {
-            try
-            {
-                if (invoiceID <= 0) return BadRequest("InvoiceID is required");
-                InvoiceDA invoiceDA = new InvoiceDA(_context);
-                var result = invoiceDA.GetInvoice(invoiceID);
-                return Ok(result);
-            }
-            catch (System.Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+        //[HttpGet("get/id/{invoiceID}")]
+        //public IActionResult GetInvoice(int invoiceID)
+        //{
+        //    try
+        //    {
+        //        if (invoiceID <= 0) return BadRequest("InvoiceID is required");
+        //        InvoiceDA invoiceDA = new InvoiceDA(_context);
+        //        var result = invoiceDA.GetInvoice(invoiceID);
+        //        return Ok(result);
+        //    }
+        //    catch (System.Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
-        [HttpPost("create")]
-        public IActionResult CreateInvoice([FromBody] string invoiceByteString)
-        {
-            Console.WriteLine(invoiceByteString);
-            return Ok();
-        }
+        //[HttpPost("create")]
+        //public IActionResult CreateInvoice([FromBody] string invoiceByteString)
+        //{
+        //    Console.WriteLine(invoiceByteString);
+        //    return Ok();
+        //}
 
         //[HttpPost("upload"), Route("image")]
         //public FileBundle UploadImage()

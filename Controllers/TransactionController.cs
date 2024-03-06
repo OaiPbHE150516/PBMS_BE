@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using pbms_be.Configurations;
 using pbms_be.Data;
+using pbms_be.Data.Invo;
 using pbms_be.DataAccess;
 using pbms_be.DTOs;
+using System.Transactions;
 
 namespace pbms_be.Controllers
 {
@@ -68,13 +70,22 @@ namespace pbms_be.Controllers
 
         // add new transaction
         [HttpPost("create")]
-        public IActionResult CreateTransaction([FromBody] Transaction_VM_DTO transaction)
+        public IActionResult CreateTransaction([FromBody] TransactionCreateDTO transactionDTO)
         {
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
-                var result = _transactionDA.CreateTransaction(transaction);
-                return Ok(result);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var transaction = _mapper.Map<Data.Trans.Transaction>(transactionDTO);
+                if(_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
+                var resultTransaction = _transactionDA.CreateTransaction(transaction);
+                var invoiceDA = new InvoiceDA(_context);
+                var resultInvoice = invoiceDA.CreateInvoice(_mapper.Map<Invoice>(transactionDTO.Invoice), resultTransaction.TransactionID);
+                if (resultTransaction is null || resultInvoice is null) return BadRequest(Message.TRANSACTION_CREATE_FAILED);
+                var listProductInInvoice = _mapper.Map<List<ProductInInvoice>>(transactionDTO.Invoice.Products);
+                var resultProduct = invoiceDA.CreateProduct(listProductInInvoice, resultInvoice.InvoiceID);
+                // return 3 results
+                return Ok(new { resultTransaction, resultInvoice, resultProduct });
             }
             catch (System.Exception e)
             {

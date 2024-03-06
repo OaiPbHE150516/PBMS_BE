@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using pbms_be.Configurations;
 using pbms_be.Data;
+using pbms_be.Data.Invo;
 using pbms_be.Data.Trans;
 using pbms_be.DTOs;
 
@@ -142,9 +143,44 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal object CreateTransaction(Transaction_VM_DTO transaction)
+        internal Transaction CreateTransaction(Transaction transaction)
         {
-            throw new NotImplementedException();
+            try
+            {
+                transaction.TransactionDate = DateTime.UtcNow;
+                transaction.ActiveStateID = ActiveStateConst.ACTIVE;
+                _context.Transaction.Add(transaction);
+                _context.SaveChanges();
+                return transaction;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal bool IsTransactionExist(Transaction transaction)
+        {
+            try
+            {
+                transaction.TransactionDate = DateTime.UtcNow;
+                transaction.ActiveStateID = ActiveStateConst.ACTIVE;
+                var result = _context.Transaction
+                            .Any(t => t.AccountID == transaction.AccountID
+                             && t.WalletID == transaction.WalletID
+                             && t.CategoryID == transaction.CategoryID
+                             && t.TotalAmount == transaction.TotalAmount
+                             && t.Note == transaction.Note
+                             && t.TransactionDate == transaction.TransactionDate
+                             && t.FromPerson == transaction.FromPerson
+                             && t.ToPerson == transaction.ToPerson
+                             && t.ImageURL == transaction.ImageURL);
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
     }
 }

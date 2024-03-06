@@ -54,6 +54,13 @@ namespace pbms_be.Library
             return utcTime.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
         }
 
+        // convert local time to utc time
+        public static DateTime ConvertLocalToUtcTime(DateTime localTime)
+        {
+            var utcdatetime = new DateTime(localTime.Year, localTime.Month, localTime.Day, localTime.Hour, localTime.Minute, localTime.Second, DateTimeKind.Utc);
+            return utcdatetime.AddHours(-ConstantConfig.VN_TIMEZONE_UTC);
+        }
+
         public static string ConvertToMoneyFormat(long number)
         {
             var result = number.ToString("N0");
