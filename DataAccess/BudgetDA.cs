@@ -13,9 +13,16 @@ namespace pbms_be.DataAccess
     public class BudgetDA
     {
         private readonly PbmsDbContext _context;
+        private readonly List<BudgetType> _budgetTypes;
         public BudgetDA(PbmsDbContext context)
         {
             _context = context;
+            _budgetTypes = new List<BudgetType>
+            {
+                new BudgetType { BudgetTypeID = 0, TypeName = "Other" },
+                new BudgetType { BudgetTypeID = 1, TypeName = "Week" },
+                new BudgetType { BudgetTypeID = 2, TypeName = "Month" }
+            };
         }
         //GetBudget by ID
         internal Budget GetBudget(int budgetID)
@@ -46,6 +53,12 @@ namespace pbms_be.DataAccess
                                          && x.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(x => x.ActiveState)
                             .ToList();
+                foreach (var item in result)
+                {
+                    var btype = _budgetTypes.Find(x => x.BudgetTypeID == item.BudgetTypeID);
+                    if (btype is null) throw new Exception();
+                    item.BudgetType = btype;
+                }
                 return result;
             }
             catch (Exception e)
@@ -63,6 +76,9 @@ namespace pbms_be.DataAccess
                             .Include(x => x.ActiveState)
                             .FirstOrDefault();
                 if (result is null) throw new Exception(Message.BUDGET_NOT_FOUND);
+                var btype = _budgetTypes.Find(x => x.BudgetTypeID == result.BudgetTypeID);
+                if (btype is null) throw new Exception();
+                result.BudgetType = btype;
                 // get all category by budget id
                 var categories = _context.BudgetCategory
                                 .Where(x => x.BudgetID == budgetID && x.ActiveStateID == ActiveStateConst.ACTIVE)
@@ -103,14 +119,12 @@ namespace pbms_be.DataAccess
                     TargetAmount = budgetDTO.TargetAmount,
                     BeginDate = budgetDTO.BeginDate,
                     EndDate = budgetDTO.EndDate,
+                    BudgetTypeID = budgetDTO.BudgetTypeID,
                     RepeatInterVal = budgetDTO.RepeatInterVal,
                     Note = budgetDTO.Note,
                     CreateTime = DateTime.UtcNow,
                     ActiveStateID = ActiveStateConst.ACTIVE
                 };
-
-                budget.BeginDate = DateTime.UtcNow;
-                budget.EndDate = DateTime.UtcNow;
                 budget.ActiveStateID = 1;
                 _context.Budget.Add(budget);
                 _context.SaveChanges();
@@ -145,6 +159,12 @@ namespace pbms_be.DataAccess
             return exist;
         }
 
+        public bool IsBudgetExist(string accountID, int budgetID)
+        {
+            var exist = _context.Budget.Any(x => x.BudgetID == budgetID && x.AccountID == accountID);
+            return exist;
+        }
+
         // Update Budget
         public Budget? UpdateBudget(Budget budget)
         {
@@ -157,5 +177,55 @@ namespace pbms_be.DataAccess
             return null;
         }
 
+        internal object? GetBudgetType()
+        {
+            try
+            {
+                return _budgetTypes;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal bool IsBudgetTypeExist(int budgetTypeID)
+        {
+            var exist = _budgetTypes.Any(x => x.BudgetTypeID == budgetTypeID);
+            return exist;
+        }
+
+        internal object DeleteBudget(DeleteBudgetDTO budget)
+        {
+            try
+            {
+                var result = GetBudget(budget.BudgetID, budget.AccountID);
+                if (result is null) throw new Exception(Message.BUDGET_NOT_FOUND);
+                if (result.AccountID != budget.AccountID) throw new Exception(Message.BUDGET_NOT_FOUND);
+                result.ActiveStateID = ActiveStateConst.DELETED;
+                _context.SaveChanges();
+                return GetBudgets(budget.AccountID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public Budget GetBudget(int budgetID, string accountID)
+        {
+            try
+            {
+                var result = _context.Budget
+                        .Where(x => x.BudgetID == budgetID && x.AccountID == accountID && x.ActiveStateID == ActiveStateConst.ACTIVE)
+                        .Include(x => x.ActiveState)
+                        .FirstOrDefault();
+                if (result is null) throw new Exception(Message.BUDGET_NOT_FOUND);
+                return result;
+            } catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }

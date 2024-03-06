@@ -1,4 +1,5 @@
 ﻿using pbms_be.Configurations;
+using static Google.Cloud.DocumentAI.V1.Document.Types.Provenance.Types;
 
 namespace pbms_be.Library
 {
@@ -31,10 +32,33 @@ namespace pbms_be.Library
             return minusTimeNowString;
         }
 
+        public static string ConvertMinusTimeNowMonthString(DateTime time)
+        {
+            var now = DateTime.UtcNow;
+            var minusTime = now - time;
+            var minusTimeNowString = string.Empty;
+            if (minusTime.TotalMinutes < ConstantConfig.MIN_MINUTES_AGO)
+                minusTimeNowString = Message.VN_JUST_NOW;
+            else if (minusTime.TotalMinutes < ConstantConfig.MIN_HOURS_AGO)
+                minusTimeNowString = minusTime.Minutes + Message.VN_MINUTES_AGO;
+            else if (minusTime.TotalHours < ConstantConfig.MIN_DAYS_AGO)
+                minusTimeNowString = minusTime.Hours + Message.VN_HOURS_AGO;
+            else if (minusTime.TotalDays < ConstantConfig.MIN_MONTHS_AGO)
+                minusTimeNowString = minusTime.Days + Message.VN_DAYS_AGO;
+            return minusTimeNowString;
+        }
+
         // convert utc time to local time
         public static DateTime ConvertUtcToLocalTime(DateTime utcTime)
         {
             return utcTime.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
+        }
+
+        // convert local time to utc time
+        public static DateTime ConvertLocalToUtcTime(DateTime localTime)
+        {
+            var utcdatetime = new DateTime(localTime.Year, localTime.Month, localTime.Day, localTime.Hour, localTime.Minute, localTime.Second, DateTimeKind.Utc);
+            return utcdatetime.AddHours(-ConstantConfig.VN_TIMEZONE_UTC);
         }
 
         public static string ConvertToMoneyFormat(long number)
@@ -49,5 +73,44 @@ namespace pbms_be.Library
         {
             return time.ToString(ConstantConfig.DEFAULT_DATETIME_FORMAT);
         }
+
+        public static string ConvertDateTimeToStringCustom(DateTime time, string format)
+        {
+            return time.ToString(format);
+        }
+
+
+        // convert float of percent progress to string, làm tròn and add % at the end
+        public static string ConvertPercentToString(float percent, int digits)
+        {
+            var result = Math.Round(percent, digits).ToString() + "%";
+            return result;
+        }
+
+        // CalculatePercentProgress
+        public static double CalculatePercentProgress(long currentAmount, long targetAmount, int digits)
+        {
+            if (targetAmount == 0)
+                return 0;
+            var per = (float)currentAmount / targetAmount * 100;
+            return Math.Round(per, digits); ;
+        }
+
+        public static string GenerateRandomString(int length, string input)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var stringToUse = string.IsNullOrEmpty(input) ? chars : input + chars;
+            var random = new Random();
+            var result = new string(Enumerable.Repeat(stringToUse, length)
+                             .Select(s => s[random.Next(s.Length)]).ToArray());
+            return result;
+        }
+
+        // get filename execpt file extension
+        public static string GetFileNameWithoutExtension(string fileName)
+        {
+            return Path.GetFileNameWithoutExtension(fileName);
+        }
+
     }
 }

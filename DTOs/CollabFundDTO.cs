@@ -1,4 +1,5 @@
 ﻿using pbms_be.Data.Auth;
+using pbms_be.Data.CollabFund;
 using pbms_be.Data.Status;
 using pbms_be.Data.Trans;
 
@@ -6,6 +7,35 @@ namespace pbms_be.DTOs
 {
     public class CollabFundDTO
     {
+    }
+
+    public class CollabFund_VM_DTO
+    {
+        public int CollabFundID { get; set; }
+        public string Name { get; set; } = String.Empty;
+        public string Description { get; set; } = String.Empty;
+        public string ImageURL { get; set; } = String.Empty;
+        public long TotalAmount { get; set; }
+        public string TotalAmountStr { get; set; } = String.Empty;
+        public virtual bool isFundholder { get; set; } = false;
+
+        public virtual List<AccountInCollabFundDTO> AccountInCollabFunds { get; set; } = null!;
+        //public virtual List<CollabFundActivity> CollabFundActivities { get; set; } = null!;
+
+    }
+
+    public class CollabFundDetail_VM_DTO
+    {
+        public int CollabFundID { get; set; }
+        public string Name { get; set; } = String.Empty;
+        public string Description { get; set; } = String.Empty;
+        public string ImageURL { get; set; } = String.Empty;
+        public long TotalAmount { get; set; }
+        public string TotalAmountStr { get; set; } = String.Empty;
+        public DateTime CreateTime { get; set; } = DateTime.UtcNow;
+        public string CreateTimeStr { get; set; } = String.Empty;
+        public virtual List<AccountInCollabFundDTO> AccountInCollabFunds { get; set; } = null!;
+        public virtual List<CollabFundActivity_MV_DTO> CollabFundActivities { get; set; } = null!;
     }
 
     // CreateCollabFundDTO
@@ -92,6 +122,13 @@ namespace pbms_be.DTOs
         public bool IsDone { get; set; }
         public string LastTime { get; set; } = String.Empty;
         public string MinusTimeNowString { get; set; } = String.Empty;
+    }
+
+    public class CF_DividingMoneyDetail_Wallet_DTO
+    {
+        public int CF_DividingMoneyDetailID { get; set; }
+        public string FromAccountID { get; set; } = String.Empty;
+        public string ToAccountID { get; set; } = String.Empty;
     }
 
     // CollabFundActivity_MV_DTO to response to client and convert long number to string, money format

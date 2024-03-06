@@ -36,3 +36,12 @@ public class DivideMoneyExecute
 
     public int State { get; set; }
 }
+
+public class GenerateDefaultCategory
+{
+    public string NameVN { get; set; } = String.Empty;
+    public string NameEN { get; set; } = String.Empty;
+
+    public string ParentNameVN { get; set; } = String.Empty;
+    public string ParentNameEN { get; set; } = String.Empty;
+}

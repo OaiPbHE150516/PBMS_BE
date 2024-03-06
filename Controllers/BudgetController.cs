@@ -28,6 +28,20 @@ namespace pbms_be.Controllers
 
         #region Get Methods
 
+        // get all budget type 
+        [HttpGet("get/budgettype")]
+        public IActionResult GetBudgetType()
+        {
+            try
+            {
+                return Ok(_budgetDA.GetBudgetType());
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet("get/all/{accountID}")]
         public IActionResult GetBudget(string accountID)
         {
@@ -96,6 +110,8 @@ namespace pbms_be.Controllers
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                // if budgetDTO.BudgetTypeID is not exist in budget type, return error
+                if (!_budgetDA.IsBudgetTypeExist(budgetDTO.BudgetTypeID)) return BadRequest(Message.BUDGET_TYPE_NOT_FOUND);
                 // check budget exist, if exist return error
                 // check budget name exist, if exist return error
                 var result = _budgetDA.CreateBudget(budgetDTO);
@@ -111,6 +127,8 @@ namespace pbms_be.Controllers
         #endregion
 
         #region Put Methods
+        
+        // update budget
 
         #endregion
 
@@ -119,9 +137,23 @@ namespace pbms_be.Controllers
         // Delete Budget
         // delete a member from collab fund by collab fund id and account id, only fundholder can delete member
         [HttpDelete("delete/budget")]
-        public IActionResult DeleteBudget([FromBody] Budget budget)
+        public IActionResult DeleteBudget([FromBody] DeleteBudgetDTO budget)
         {
-            return Ok();
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (string.IsNullOrEmpty(budget.AccountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (budget.BudgetID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.BUDGET_ID_REQUIRED);
+                var authDA = new AuthDA(_context);
+                if (!authDA.IsAccountExist(budget.AccountID)) return BadRequest(Message.ACCOUNT_NOT_FOUND);
+                if (!_budgetDA.IsBudgetExist(budget.AccountID, budget.BudgetID)) return BadRequest(Message.BUDGET_NOT_FOUND);
+                var result = _budgetDA.DeleteBudget(budget);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         #endregion

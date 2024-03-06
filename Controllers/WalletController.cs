@@ -37,7 +37,10 @@ namespace pbms_be.Controllers
                 var authDA = new AuthDA(_context);
                 if (!authDA.IsAccountExist(accountID)) return BadRequest(Message.ACCOUNT_NOT_FOUND);
                 var result = _walletDA.GetWallets(accountID);
-                return Ok(result);
+                if (result is null) return BadRequest(Message.WALLET_NOT_FOUND);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var resultDTO = _mapper.Map<List<Wallet_VM_DTO>>(result);
+                return Ok(resultDTO);
             }
             catch (System.Exception e)
             {
@@ -56,7 +59,10 @@ namespace pbms_be.Controllers
                 if (!authDA.IsAccountExist(accountID)) return BadRequest(Message.ACCOUNT_NOT_FOUND);
                 if (!_walletDA.IsWalletExist(accountID, walletID)) return BadRequest(Message.WALLET_NOT_FOUND);
                 var result = _walletDA.GetWallet(walletID, accountID);
-                return Ok(result);
+                if (result is null) return BadRequest(Message.WALLET_NOT_FOUND);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var resultDTO = _mapper.Map<Wallet_VM_DTO>(result);
+                return Ok(resultDTO);
             }
             catch (System.Exception e)
             {
@@ -94,7 +100,7 @@ namespace pbms_be.Controllers
                 var result = _walletDA.GetTotalAmountEachWallet(accountID);
                 if (result is null) return BadRequest();
                 if(_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
-                var resultDTO = _mapper.Map<List<Wallet_VM_DTO>>(result);
+                var resultDTO = _mapper.Map<List<Wallet_Balance_VM_DTO>>(result);
                 return Ok(resultDTO);
             }
             catch (System.Exception e)
