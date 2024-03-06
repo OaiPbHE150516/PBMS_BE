@@ -56,7 +56,7 @@ public class Transaction
     public string Note { get; set; } = String.Empty;
 
     [Column("transaction_date")]
-    public DateTime TransactionDate { get; set; }
+    public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
 
     [Column("from_person")]
     public string FromPerson { get; set; } = String.Empty;

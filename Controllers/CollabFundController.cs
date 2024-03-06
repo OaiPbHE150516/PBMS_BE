@@ -108,7 +108,7 @@ namespace pbms_be.Controllers
             {
                 if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
-                var result = _collabFundDA.GetAllMemberCollabFund(collabFundID, accountID);
+                var result = _collabFundDA.GetAllMemberWithDetailCollabFund(collabFundID, accountID);
                 return Ok(result);
             }
             catch (System.Exception e)

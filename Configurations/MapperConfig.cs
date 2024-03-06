@@ -1,4 +1,5 @@
 using AutoMapper;
+using pbms_be.DTOs;
 using pbms_be.Library;
 
 namespace pbms_be.Configurations
@@ -12,6 +13,7 @@ namespace pbms_be.Configurations
             CreateMap<Data.Auth.Account, DTOs.AccountUpdateDTO>().ReverseMap();
             CreateMap<Data.Auth.Account, DTOs.Account_VM_DTO>().ReverseMap();
             CreateMap<Data.Auth.Account, DTOs.AccountInCollabFundDTO>().ReverseMap();
+            CreateMap<Data.Auth.Account, DTOs.AccountDetailInCollabFundDTO>().ReverseMap();
 
             //Wallet
 
@@ -66,11 +68,14 @@ namespace pbms_be.Configurations
                .ForMember(dest => dest.TransactionDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.TransactionDate)))
                .ForMember(dest => dest.TransactionDateMinus, opt => opt.MapFrom(src => LConvertVariable.ConvertMinusTimeNowMonthString(src.TransactionDate)))
                .ReverseMap();
-
-            // TransactionCreateDTO
             CreateMap<Data.Trans.Transaction, DTOs.TransactionDetail_VM_DTO>().ReverseMap();
+            CreateMap<Data.Trans.Transaction, DTOs.TransactionCreateDTO>().ReverseMap();
 
+            // Invoice
+            CreateMap<Data.Invo.Invoice, DTOs.InvoiceCreateDTO>().ReverseMap();
 
+            // ProductInInvoice
+            CreateMap<Data.Invo.ProductInInvoice, DTOs.ProductInInvoiceCreateDTO>().ReverseMap();
 
             CreateMap<Data.WalletF.Wallet, DTOs.WalletUpdateDTO>().ReverseMap();
             CreateMap<Data.WalletF.Wallet, DTOs.ChangeWalletActiveStateDTO>().ReverseMap();

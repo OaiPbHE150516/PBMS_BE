@@ -58,6 +58,8 @@
         public const int MIN_MONTHS_AGO = 30;
 
         public const string DEFAULT_DATETIME_FORMAT = "HH:mm, dd/MM/yyyy";
+
+        public const string DEFAULT_UTC_DATETIME_FORMAT = "yyyy-MM-ddTHH:mm:ssZ";
         // default time format
         public const string DEFAULT_TIME_FORMAT = "HH:mm";
         // default date format
@@ -103,7 +105,9 @@
         // Transaction
         public const string TRANSACTION_NOT_FOUND = " Transaction not found";
         public const string TRANSACTION_ID_REQUIRED = " TransactionID is required";
-      
+        public const string TRANSACTION_CREATE_FAILED = " Transaction create failed";
+        public const string TRANSACTION_EXISTED = " Transaction existed";
+
         // Budget
         public const string BUDGET_ALREADY_EXIST = " Budget already exist";
         public const string BUDGET_ID_REQUIRED = " BudgetID is required";

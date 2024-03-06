@@ -58,6 +58,7 @@ namespace pbms_be.DTOs
 
     public class TransactionCreateDTO
     {
+        public string AccountID { get; set; } = String.Empty;
         public int WalletID { get; set; }
         public int CategoryID { get; set; }
         public long TotalAmount { get; set; }
@@ -65,5 +66,6 @@ namespace pbms_be.DTOs
         public string FromPerson { get; set; } = String.Empty;
         public string ToPerson { get; set; } = String.Empty;
         public string ImageURL { get; set; } = String.Empty;
+        public virtual InvoiceCreateDTO Invoice { get; set; } = null!;
     }
 }
