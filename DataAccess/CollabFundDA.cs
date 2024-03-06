@@ -326,27 +326,66 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal List<Account> GetAllMemberCollabFund(int collabFundID, string accountID)
+        //internal List<Account> GetAllMemberCollabFund(int collabFundID, string accountID)
+        //{
+        //    try
+        //    {
+        //        if (!IsMemberCollabFund(collabFundID, accountID)) throw new Exception(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+        //        var collabAccount = _context.AccountCollab
+        //            .Where(ca => ca.CollabFundID == collabFundID
+        //                && ca.ActiveStateID == ActiveStateConst.ACTIVE)
+        //            .Select(ca => ca.AccountID)
+        //            .ToList();
+
+        //        var result = _context.Account
+        //            .Where(a => collabAccount.Contains(a.AccountID))
+        //            .ToList();
+        //        return result;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception(e.Message);
+        //    }
+        //}
+
+        internal List<AccountDetailInCollabFundDTO> GetAllMemberWithDetailCollabFund(int collabFundID, string accountID)
         {
             try
             {
-                var isInFund = _context.AccountCollab
-                    .Where(ca => ca.CollabFundID == collabFundID
-                                            && ca.AccountID == accountID
-                                            && ca.ActiveStateID == ActiveStateConst.ACTIVE)
-                    .FirstOrDefault();
-                if (isInFund is null) throw new Exception(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
-
+                if (!IsMemberCollabFund(collabFundID, accountID)) throw new Exception(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 var collabAccount = _context.AccountCollab
                     .Where(ca => ca.CollabFundID == collabFundID
                         && ca.ActiveStateID == ActiveStateConst.ACTIVE)
                     .Select(ca => ca.AccountID)
                     .ToList();
-
                 var result = _context.Account
                     .Where(a => collabAccount.Contains(a.AccountID))
                     .ToList();
-                return result;
+                var accountDetailInCollabFundDTOs = new List<AccountDetailInCollabFundDTO>();
+                foreach (var item in result)
+                {
+                    var inCollab = _context.AccountCollab
+                                            .Where(ca => ca.CollabFundID == collabFundID
+                                             && ca.AccountID == item.AccountID
+                                             && ca.ActiveStateID == ActiveStateConst.ACTIVE)
+                                            .Include(ca => ca.ActiveState)
+                                            .FirstOrDefault();
+                    if (inCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                    var accountDetailInCollabFundDTO = new AccountDetailInCollabFundDTO
+                    {
+                        AccountID = item.AccountID,
+                        ClientID = item.ClientID,
+                        AccountName = item.AccountName,
+                        EmailAddress = item.EmailAddress,
+                        PictureURL = item.PictureURL,
+                        IsFundholder = inCollab.IsFundholder,
+                        ActiveStateID = inCollab.ActiveStateID,
+                        ActiveState = inCollab.ActiveState,
+                        LastTime = inCollab.LastTime
+                    };
+                    accountDetailInCollabFundDTOs.Add(accountDetailInCollabFundDTO);
+                }
+                return accountDetailInCollabFundDTOs;
             }
             catch (Exception e)
             {
@@ -355,7 +394,7 @@ namespace pbms_be.DataAccess
         }
 
         // invite member to collab fund
-        internal List<Account> InviteMemberCollabFund(MemberCollabFundDTO InviteMemberDTO)
+        internal List<AccountDetailInCollabFundDTO> InviteMemberCollabFund(MemberCollabFundDTO InviteMemberDTO)
         {
             try
             {
@@ -388,7 +427,7 @@ namespace pbms_be.DataAccess
                 _context.SaveChanges();
 
                 // 6. return all member
-                return GetAllMemberCollabFund(InviteMemberDTO.CollabFundID, InviteMemberDTO.AccountFundholderID);
+                return GetAllMemberWithDetailCollabFund(InviteMemberDTO.CollabFundID, InviteMemberDTO.AccountFundholderID);
             }
             catch (Exception e)
             {
@@ -492,12 +531,11 @@ namespace pbms_be.DataAccess
             try
             {
                 var isMember = _context.AccountCollab
-                    .Where(ca => ca.CollabFundID == collabFundID
+                    .Any(ca => ca.CollabFundID == collabFundID
                     && ca.AccountID == accountID
                     && ca.IsFundholder == false
-                    && ca.ActiveStateID == ActiveStateConst.ACTIVE)
-                    .FirstOrDefault();
-                return isMember != null;
+                    && ca.ActiveStateID == ActiveStateConst.ACTIVE);
+                return isMember;
             }
             catch (Exception e)
             {
@@ -505,7 +543,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal List<Account> DeleteMemberCollabFund(MemberCollabFundDTO deleteMemberCollabFundDTO)
+        internal List<AccountDetailInCollabFundDTO> DeleteMemberCollabFund(MemberCollabFundDTO deleteMemberCollabFundDTO)
         {
             try
             {
@@ -527,7 +565,7 @@ namespace pbms_be.DataAccess
                 _context.SaveChanges();
 
                 // 4. return all member
-                return GetAllMemberCollabFund(deleteMemberCollabFundDTO.CollabFundID, deleteMemberCollabFundDTO.AccountFundholderID);
+                return GetAllMemberWithDetailCollabFund(deleteMemberCollabFundDTO.CollabFundID, deleteMemberCollabFundDTO.AccountFundholderID);
             }
             catch (Exception e)
             {
@@ -558,7 +596,7 @@ namespace pbms_be.DataAccess
                 _context.SaveChanges();
 
                 // 4. return all member
-                return GetAllMemberCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountFundholderID);
+                return GetAllMemberWithDetailCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountFundholderID);
             }
             catch (Exception e)
             {
@@ -585,7 +623,7 @@ namespace pbms_be.DataAccess
                 _context.SaveChanges();
 
                 // 4. return all member
-                return GetAllMemberCollabFund(declineMemberCollabFundDTO.CollabFundID, declineMemberCollabFundDTO.AccountFundholderID);
+                return GetAllMemberWithDetailCollabFund(declineMemberCollabFundDTO.CollabFundID, declineMemberCollabFundDTO.AccountFundholderID);
             }
             catch (Exception e)
             {
@@ -608,7 +646,7 @@ namespace pbms_be.DataAccess
                 _context.SaveChanges();
 
                 // 4. return all member
-                return GetAllMemberCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountFundholderID);
+                return GetAllMemberWithDetailCollabFund(deleteInvitationCollabFundDTO.CollabFundID, deleteInvitationCollabFundDTO.AccountFundholderID);
             }
             catch (Exception e)
             {

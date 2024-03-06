@@ -8,20 +8,22 @@ namespace pbms_be.Data.Invo;
 
 public class ProductInInvoice
 {
-    //CREATE TABLE product_in_invoice(
-    //product_id serial PRIMARY KEY,
-    //invoice_id INT NOT NULL,
-    //product_name VARCHAR ( 100 ) NOT NULL DEFAULT '',
-    //    quanity INT DEFAULT 1,
-    //    unit_price BIGINT DEFAULT 1,
-    //    total_amount BIGINT NOT NULL,
-    //    note VARCHAR( 5000 ) DEFAULT '',
-    //    tag_id INT NOT NULL DEFAULT 1,
-    //    as_id INT NOT NULL DEFAULT 1,
-    //    FOREIGN KEY(invoice_id) REFERENCES invoice(invoice_id),
-    //    FOREIGN KEY(tag_id) REFERENCES tag(tag_id),
-    //    FOREIGN KEY(as_id) REFERENCES active_state(as_id)
-    //);
+    /*
+        CREATE TABLE product_in_invoice (
+            product_id serial PRIMARY KEY,
+            invoice_id INT NOT NULL,
+            product_name VARCHAR ( 100 ) NOT NULL DEFAULT '',
+            quanity INT DEFAULT 1,
+            unit_price BIGINT DEFAULT 1,
+            total_amount BIGINT NOT NULL,
+            note VARCHAR ( 5000 ) DEFAULT '',
+            tag_id INT NOT NULL DEFAULT 1,
+            as_id INT NOT NULL DEFAULT 1,
+            FOREIGN KEY (invoice_id) REFERENCES invoice (invoice_id),
+            FOREIGN KEY (tag_id) REFERENCES tag (tag_id),
+            FOREIGN KEY (as_id) REFERENCES active_state (as_id)
+        );
+     */
 
     [Column("product_id")]
     [Key]
@@ -29,7 +31,7 @@ public class ProductInInvoice
 
     [Column("invoice_id")]
     public int InvoiceID { get; set; }
-    public virtual Invoice Invoice { get; set; } = null!;
+    //public virtual Invoice Invoice { get; set; } = null!;
 
     [Column("product_name")]
     public string ProductName { get; set; } = String.Empty;
@@ -38,7 +40,7 @@ public class ProductInInvoice
     public int Quanity { get; set; } = 1;
 
     [Column("unit_price")]
-    public long UnitPrice { get; set; } = 1;
+    public long UnitPrice { get; set; } = 0;
 
     [Column("total_amount")]
     public long TotalAmount { get; set; }
@@ -47,7 +49,7 @@ public class ProductInInvoice
     public string Note { get; set; } = String.Empty;
 
     [Column("tag_id")]
-    public int TagID { get; set; }
+    public int TagID { get; set; } = 1;
 
     [Column("as_id")]
     public int ActiveStateID { get; set; }
