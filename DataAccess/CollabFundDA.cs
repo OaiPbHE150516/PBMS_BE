@@ -381,7 +381,7 @@ namespace pbms_be.DataAccess
                         IsFundholder = inCollab.IsFundholder,
                         ActiveStateID = inCollab.ActiveStateID,
                         ActiveState = inCollab.ActiveState,
-                        LastTime = inCollab.LastTime
+                        LastTime = LConvertVariable.ConvertUtcToLocalTime(inCollab.LastTime)
                     };
                     accountDetailInCollabFundDTOs.Add(accountDetailInCollabFundDTO);
                 }
