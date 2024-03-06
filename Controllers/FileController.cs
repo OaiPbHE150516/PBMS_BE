@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using pbms_be.Configurations;
+using pbms_be.Data;
+using pbms_be.Data.Custom;
 using pbms_be.DataAccess;
 using pbms_be.Library;
 
@@ -10,6 +12,13 @@ namespace pbms_be.Controllers
     [ApiController]
     public class FileController : ControllerBase
     {
+        private readonly PbmsDbContext _context;
+
+        public FileController(PbmsDbContext context)
+        {
+            _context = context;
+        }
+
         [HttpPost("upload")]
         public IActionResult UploadFile(IFormFile file, string prefix, string suffix, string folder)
         {
@@ -51,6 +60,15 @@ namespace pbms_be.Controllers
                                                         "invoice", filename, "file", true);
             return Ok(fileURL);
         }
+
+        // generate data
+        [HttpGet("generatesqlquery")]
+        public IActionResult GenerateData()
+        {
+            var result = LDataGenerator.GenerateDataBySqlQuery();
+            return Ok(result);
+        }
+
 
         //// download file
         //[HttpGet("download/{fileName}")]

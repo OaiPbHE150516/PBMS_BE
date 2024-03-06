@@ -1,9 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using pbms_be.Configurations;
 using pbms_be.Data;
+using pbms_be.Data.Custom;
 using pbms_be.Data.Invo;
 using pbms_be.Data.Trans;
 using pbms_be.DTOs;
+using pbms_be.Library;
+using System.Collections.Generic;
 
 namespace pbms_be.DataAccess
 {
@@ -159,6 +163,36 @@ namespace pbms_be.DataAccess
             }
         }
 
+        internal Transaction CreateTransactionRaw(Transaction transaction)
+        {
+            try
+            {
+                transaction.ActiveStateID = ActiveStateConst.ACTIVE;
+                _context.Transaction.Add(transaction);
+                _context.SaveChanges();
+                return transaction;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        // create transaction by list of transactions raw
+        internal List<Transaction> CreateTransactionsRaw(List<Transaction> transactions)
+        {
+            try
+            {
+                _context.Transaction.AddRange(transactions);
+                _context.SaveChanges();
+                return transactions;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
         internal bool IsTransactionExist(Transaction transaction)
         {
             try
@@ -183,7 +217,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal object GetTransactionsByDateTime(string accountID, int month, int year)
+        internal List<Transaction> GetTransactionsByMonth(string accountID, int month, int year)
         {
             try
             {
@@ -204,6 +238,135 @@ namespace pbms_be.DataAccess
                 return result;
             }
             catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetTransactionsByDay(string accountID, int day, int month, int year)
+        {
+            try
+            {
+                var result = _context.Transaction
+                                    .Where(t => t.AccountID == accountID
+                                    && t.TransactionDate.Day == day
+                                    && t.TransactionDate.Month == month
+                                    && t.TransactionDate.Year == year)
+                                    .Include(t => t.ActiveState)
+                                    .Include(t => t.Category)
+                                    .Include(t => t.Wallet)
+                                    .ToList();
+                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                var cateDA = new CategoryDA(_context);
+                foreach (var transaction in result)
+                {
+                    transaction.Category.CategoryType = cateDA.GetCategoryType(transaction.Category.CategoryTypeID);
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetTransactionsByDateTimeRange(string accountID, long fromDate, long toDate)
+        {
+            try
+            {
+                var result = _context.Transaction
+                                    .Where(t => t.AccountID == accountID
+                                    && t.TransactionDate.Ticks >= fromDate
+                                    && t.TransactionDate.Ticks <= toDate)
+                                    .Include(t => t.ActiveState)
+                                    .Include(t => t.Category)
+                                    .Include(t => t.Wallet)
+                                    .ToList();
+                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                var cateDA = new CategoryDA(_context);
+                foreach (var transaction in result)
+                {
+                    transaction.Category.CategoryType = cateDA.GetCategoryType(transaction.Category.CategoryTypeID);
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetTransactionsByMonthCalendar(string accountID, int month, int year, IMapper? _mapper)
+        {
+            try
+            {
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var transactions = GetTransactionsByMonth(accountID, month, year);
+                Dictionary<int, TransactionInDayCalendar> transactionsByDay = new Dictionary<int, TransactionInDayCalendar>();
+                var daysInMonth = DateTime.DaysInMonth(year, month);
+                foreach (var transaction in transactions)
+                {
+                    var day = transaction.TransactionDate.Day;
+                    if (transactionsByDay.ContainsKey(day))
+                    {
+                        transactionsByDay[day].TotalAmount += transaction.TotalAmount;
+                        transactionsByDay[day].TransactionCount++;
+                        transactionsByDay[day].Transactions.Add(_mapper.Map<TransactionDetail_VM_DTO>(transaction));
+                    }
+                    else
+                    {
+                        TransactionInDayCalendar transactionInDayCalendar = new TransactionInDayCalendar
+                        {
+                            Date = transaction.TransactionDate,
+                            isHasTransaction = true,
+                            TransactionCount = 1,
+                            Transactions = new List<TransactionDetail_VM_DTO> { _mapper.Map<TransactionDetail_VM_DTO>(transaction) }
+                        };
+                        transactionsByDay.Add(day, transactionInDayCalendar);
+                    }
+                    if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                    {
+                        transactionsByDay[day].isHasTransactionIn = true;
+                        transactionsByDay[day].TotalAmountIn += transaction.TotalAmount;
+                    }
+                    else
+                    {
+                        transactionsByDay[day].isHasTransactionOut = true;
+                        transactionsByDay[day].TotalAmountOut += transaction.TotalAmount;
+                    }
+                }
+                var dayHasNoTransaction = new TransactionInDayCalendar
+                {
+                    TotalAmount = 0,
+                    isHasTransaction = false,
+                    isHasTransactionIn = false,
+                    TotalAmountIn = 0,
+                    isHasTransactionOut = false,
+                    TotalAmountOut = 0,
+                    TransactionCount = 0
+                };
+                for (int i = 1; i <= daysInMonth; i++)
+                {
+                    if (!transactionsByDay.ContainsKey(i))
+                    {
+                        transactionsByDay.Add(i, dayHasNoTransaction);
+                    }
+                }
+                foreach (var item in transactionsByDay)
+                {
+                    if (item.Value.isHasTransaction is false)
+                    {
+                        item.Value.Date = new DateTime(year, month, item.Key);
+                    }
+                    item.Value.TotalAmount = item.Value.TotalAmountIn - item.Value.TotalAmountOut;
+                    item.Value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmount);
+                    item.Value.TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountIn);
+                    item.Value.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountOut);
+                }
+                transactionsByDay[1].Date = new DateTime(year, month, 1);
+                transactionsByDay = transactionsByDay.OrderBy(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
+                return transactionsByDay;
+            } catch (Exception e)
             {
                 throw new Exception(e.Message);
             }

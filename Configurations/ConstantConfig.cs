@@ -73,6 +73,10 @@
         public const string DEFAULT_CATEGORY_NAME_EN_OTHER = "Other";
         public const string DEFAULT_CATEGORY_NAME_VN_OTHER = "Khác";
 
+        public const int DEFAULT_CATEGORY_TYPE_ID_INCOME = 1;
+        public const int DEFAULT_CATEGORY_TYPE_ID_EXPENSE = 2;
+        public const int DEFAULT_CATEGORY_TYPE_ID_OTHER = 3;
+
         // default Sort & Filter
         // public const string ascending sort
         public const string ASCENDING_SORT = "asc";
@@ -107,9 +111,12 @@
         public const string TRANSACTION_ID_REQUIRED = " TransactionID is required";
         public const string TRANSACTION_CREATE_FAILED = " Transaction create failed";
         public const string TRANSACTION_EXISTED = " Transaction existed";
-        // MONTH_REQUIRED, YEAR_REQUIRED
+        public const string DAY_REQUIRED = " Day is required";
         public const string MONTH_REQUIRED = " Month is required";
         public const string YEAR_REQUIRED = " Year is required";
+        public const string FROM_DATE_REQUIRED = " From date is required";
+        public const string TO_DATE_REQUIRED = " To date is required";
+
 
 
         // Budget

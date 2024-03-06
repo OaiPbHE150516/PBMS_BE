@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using pbms_be.Data;
+using pbms_be.Data.Custom;
 using pbms_be.DataAccess;
+using pbms_be.Library;
 
 namespace pbms_be.Controllers
 {
@@ -54,6 +56,15 @@ namespace pbms_be.Controllers
             {
                 return BadRequest(e.Message);
             }
+        }
+
+        // method post to generate data
+        [HttpPost("generate/transaction")]
+        public IActionResult GenerateTransactionData([FromBody] GenerateRandomTransactions data)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var result = LDataGenerator.GenerateRandomTransactionsEF(data, _context);
+            return Ok(result);
         }
     }
 }
