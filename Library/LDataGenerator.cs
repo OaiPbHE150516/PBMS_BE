@@ -184,11 +184,12 @@ namespace pbms_be.Library
                 var after = _context.Transaction
                     .Where(t => t.AccountID == data.AccountID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                     .Count();
-                var description = "Generate " + (before - after).ToString() + " random transactions for account " + data.AccountID;
+                var description = "Generate " + (after - before).ToString() + " random transactions for account " + data.AccountID;
                 var compare = "before: " + before + ", after: " + after;
                 // return the number of transactions before and after
                 return new { description, compare };
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
