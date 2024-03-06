@@ -182,5 +182,31 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+
+        internal object GetTransactionsByDateTime(string accountID, int month, int year)
+        {
+            try
+            {
+                var result = _context.Transaction
+                                    .Where(t => t.AccountID == accountID
+                                    && t.TransactionDate.Month == month
+                                    && t.TransactionDate.Year == year)
+                                    .Include(t => t.ActiveState)
+                                    .Include(t => t.Category)
+                                    .Include(t => t.Wallet)
+                                    .ToList();
+                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                var cateDA = new CategoryDA(_context);
+                foreach (var transaction in result)
+                {
+                    transaction.Category.CategoryType = cateDA.GetCategoryType(transaction.Category.CategoryTypeID);
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }
