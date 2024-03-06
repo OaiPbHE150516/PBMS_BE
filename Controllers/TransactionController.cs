@@ -66,6 +66,87 @@ namespace pbms_be.Controllers
             }
         }
 
+        // get transactions by date time
+        [HttpGet("get/bymonth/{accountID}/{month}/{year}")]
+        public IActionResult GetTransactionsByMonth(string accountID, int month, int year)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (month <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.MONTH_REQUIRED);
+                if (year <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.YEAR_REQUIRED);
+                var result = _transactionDA.GetTransactionsByMonth(accountID, month, year);
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
+                return Ok(resultDTO);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // get transactions by day
+        [HttpGet("get/byday/{accountID}/{day}/{month}/{year}")]
+        public IActionResult GetTransactionsByDay(string accountID, int day, int month, int year)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (day <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.DAY_REQUIRED);
+                if (month <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.MONTH_REQUIRED);
+                if (year <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.YEAR_REQUIRED);
+                var result = _transactionDA.GetTransactionsByDay(accountID, day, month, year);
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
+                return Ok(resultDTO);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // get transactions by date time range
+        [HttpGet("get/bydaterange/{accountID}/{fromDate}/{toDate}")]
+        public IActionResult GetTransactionsByDateTimeRange(string accountID, long fromDate, long toDate)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (fromDate <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.FROM_DATE_REQUIRED);
+                if (toDate <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.TO_DATE_REQUIRED);
+                var result = _transactionDA.GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
+                return Ok(resultDTO);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // get transactions by month
+        [HttpGet("get/calendar/{accountID}/{month}/{year}")]
+        public IActionResult GetTransactionsByMonthCalendar(string accountID, int month, int year)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (month <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.MONTH_REQUIRED);
+                if (year <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.YEAR_REQUIRED);
+                var result = _transactionDA.GetTransactionsByMonthCalendar(accountID, month, year, _mapper);
+                //if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                //var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         #region Post Methods
 
         // add new transaction

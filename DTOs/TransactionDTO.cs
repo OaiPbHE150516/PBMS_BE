@@ -50,6 +50,7 @@ namespace pbms_be.DTOs
         public string Note { get; set; } = String.Empty;
         public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
         public string TransactionDateStr { get; set; } = String.Empty;
+        public string TransactionTimeStr { get; set; } = String.Empty;
         public string TransactionDateMinus { get; set; } = String.Empty;
         public string FromPerson { get; set; } = String.Empty;
         public string ToPerson { get; set; } = String.Empty;
