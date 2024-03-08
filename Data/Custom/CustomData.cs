@@ -64,6 +64,31 @@ public class TransactionInDayCalendar
     public virtual List<TransactionDetail_VM_DTO> Transactions { get; set; } = null!;
 }
 
+public class TransactionInLastDays
+{
+    public DayDetail DayDetail { get; set; } = null!;
+    public int NumberOfTransactionIn { get; set; } = 0;
+    public long TotalAmountIn { get; set; } = 0;
+    public string TotalAmountInStr { get; set; } = String.Empty;
+    public int NumberOfTransactionOut { get; set; } = 0;
+    public long TotalAmountOut { get; set; } = 0;
+    public string TotalAmountOutStr { get; set; } = String.Empty;
+    public int TransactionCount { get; set; } = 0;
+    public long TotalAmount { get; set; } = 0;
+    public string TotalAmountStr { get; set; } = String.Empty;
+}
+
+public class DayDetail
+{
+    public DayOfWeek DayOfWeek { get; set; }
+    public string Short_EN { get; set; } = String.Empty;
+    public string Full_EN { get; set; } = String.Empty;
+    public string Short_VN { get; set; } = String.Empty;
+    public string Full_VN { get; set; } = String.Empty;
+    public string ShortDate { get; set; } = String.Empty;
+    public string FullDate { get; set; } = String.Empty;
+}
+
 public class GenerateRandomTransactions
 {
     public string AccountID { get; set; } = String.Empty;
