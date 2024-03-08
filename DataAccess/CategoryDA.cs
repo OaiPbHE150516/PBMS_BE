@@ -133,7 +133,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal object GetCategoryTypes()
+        internal List<CategoryType> GetCategoryTypes()
         {
             try
             {

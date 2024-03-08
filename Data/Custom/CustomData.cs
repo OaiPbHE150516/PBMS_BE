@@ -50,7 +50,7 @@ public class GenerateDefaultCategory
 
 public class TransactionInDayCalendar
 {
-    public DateTime Date { get; set; }
+    public DateOnly Date { get; set; }
     public bool isHasTransaction { get; set; } = false;
     public long TotalAmount { get; set; }
     public string TotalAmountStr { get; set; } = String.Empty;
