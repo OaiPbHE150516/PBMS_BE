@@ -432,56 +432,102 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var transactionsDict = new Dictionary<DateOnly, object>();
-                var transactions = GetTransactionsByDateTimeRange(accountID, DateTime.UtcNow.AddDays(-ConstantConfig.NUMBER_LAST_DAYS), DateTime.UtcNow);
-                for (int i = 0; i < ConstantConfig.NUMBER_LAST_DAYS; i++)
+                var fromDate = DateTime.UtcNow.AddDays(-ConstantConfig.NUMBER_LAST_DAYS);
+                var toDate = DateTime.UtcNow;
+                var transactions = GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
+                var transactionsDict = new Dictionary<DateOnly, TransactionInLastDays>();
+
+                foreach (var tran in transactions)
                 {
-                    var date = DateTime.UtcNow.Date.AddDays(-i);
-                    long totalAmountIn = 0;
-                    int numberTransIn = 0;
-                    long totalAmountOut = 0;
-                    int numberTransOut = 0;
-                    foreach (var transaction in transactions)
+                    var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
+                    if (transactionsDict.ContainsKey(dateonly))
                     {
-                        if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                        if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
                         {
-                            totalAmountIn += transaction.TotalAmount;
-                            numberTransIn++;
+                            transactionsDict[dateonly].TotalAmountIn += tran.TotalAmount;
+                            transactionsDict[dateonly].NumberOfTransactionIn++;
                         }
                         else
                         {
-                            totalAmountOut += transaction.TotalAmount;
-                            numberTransOut++;
+                            transactionsDict[dateonly].TotalAmountOut += tran.TotalAmount;
+                            transactionsDict[dateonly].NumberOfTransactionOut++;
                         }
                     }
-                    var totalAmount = totalAmountIn - totalAmountOut;
-                    var dateonly = new DateOnly(date.Year, date.Month, date.Day);
-                    transactionsDict.Add(dateonly, new
+                    else
                     {
-                        dayInWeekNum = date.DayOfWeek,
-                        dayInWeekStr = new
+                        var transin = new TransactionInLastDays
                         {
-                            short_EN = date.DayOfWeek.ToString().Substring(0, 3),
-                            full_EN = date.DayOfWeek.ToString(),
-                            short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(date.DayOfWeek),
-                            full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(date.DayOfWeek),
-                            shortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
-                            fullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                            DayDetail = new DayDetail
+                            {
+                                DayOfWeek = dateonly.DayOfWeek,
+                                Short_EN = dateonly.DayOfWeek.ToString().Substring(0, 3),
+                                Full_EN = dateonly.DayOfWeek.ToString(),
+                                Short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                                Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                                ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
+                                FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
 
-                        },
-                        numberTransIn,
-                        totalAmountIn,
-                        totalAmountInStr = LConvertVariable.ConvertToMoneyFormat(totalAmountIn),
-                        numberTransOut,
-                        totalAmountOut,
-                        totalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOut),
-                        totalAmount,
-                        totalNumberTrans = numberTransIn + numberTransOut,
-                        totalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount)
-                    });
+                            }
+                        };
+                        if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                        {
+                            transin.TotalAmountIn += tran.TotalAmount;
+                            transin.NumberOfTransactionIn++;
+                        }
+                        else
+                        {
+                            transin.TotalAmountOut += tran.TotalAmount;
+                            transin.NumberOfTransactionOut++;
+                        }
+                        transactionsDict.Add(dateonly, transin);
+                    }
+                }
+                foreach (var item in transactionsDict)
+                {
+                    item.Value.TotalAmount = item.Value.TotalAmountIn - item.Value.TotalAmountOut;
+                    item.Value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmount);
+                    item.Value.TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountIn);
+                    item.Value.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountOut);
+                }
+
+                var listValue = new List<long>() {
+                    transactionsDict.Values.Max(t => t.TotalAmountIn),
+                    transactionsDict.Values.Max(t => t.TotalAmountOut),
+                    transactionsDict.Values.Min(t => t.TotalAmountIn),
+                    transactionsDict.Values.Min(t => t.TotalAmountOut)
+                };
+
+                // loop from fromDate to toDate, if not exist in transactionsDict, add new TransactionInLastDays with TotalAmount = 0
+                for (var date = fromDate; date <= toDate; date = date.AddDays(1))
+                {
+                    var dateonly = new DateOnly(date.Year, date.Month, date.Day);
+                    if (!transactionsDict.ContainsKey(dateonly))
+                    {
+                        var transin = new TransactionInLastDays
+                        {
+                            DayDetail = new DayDetail
+                            {
+                                DayOfWeek = dateonly.DayOfWeek,
+                                Short_EN = dateonly.DayOfWeek.ToString().Substring(0, 3),
+                                Full_EN = dateonly.DayOfWeek.ToString(),
+                                Short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                                Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                                ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
+                                FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                            }
+                        };
+                        transactionsDict.Add(dateonly, transin);
+                    }
                 }
                 transactionsDict = transactionsDict.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
-                return transactionsDict;
+
+                return new
+                {
+                    minValue = listValue.Min() == 0 ? listValue.OrderBy(v => v).Skip(1).First() : listValue.Min(),
+                    maxValue = listValue.Max(),
+                    transactionsDict
+                };
+
 
             }
             catch (Exception e)
