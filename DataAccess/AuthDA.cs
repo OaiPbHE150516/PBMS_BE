@@ -74,8 +74,10 @@ namespace pbms_be.DataAccess
             try
             {
                 var result = _context.Account.Where(a => a.AccountID == AccountID).FirstOrDefault();
+                if (result is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
                 return result;
-            } catch (SqlException e)
+            }
+            catch (SqlException e)
             {
                 throw new Exception(e.Message);
             }
@@ -88,22 +90,27 @@ namespace pbms_be.DataAccess
                 _context.Account.Add(account);
                 _context.SaveChanges();
                 return GetAccount(account.AccountID);
-            } catch (SqlException e)
+            }
+            catch (SqlException e)
             {
                 throw new Exception(e.Message);
             }
-            
+
         }
 
         public Account? UpdateAccount(Account account)
         {
-            if (!IsAccountExist(account.AccountID))
+            try
             {
                 _context.Account.Update(account);
                 _context.SaveChanges();
                 return GetAccount(account.AccountID);
             }
-            return null;
+            catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
+
         }
 
         // get account by email
@@ -122,7 +129,8 @@ namespace pbms_be.DataAccess
             {
                 var result = _context.Account.Where(a => a.RoleID == ConstantConfig.USER_ROLE_ID).ToList();
                 return result;
-            } catch (SqlException e)
+            }
+            catch (SqlException e)
             {
                 throw new Exception(e.Message);
             }
