@@ -59,16 +59,18 @@ namespace pbms_be.Configurations
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category))
                 .ReverseMap();
             CreateMap<Data.Trans.Transaction, DTOs.TransactionInList_VM_DTO>()
+                // convert transaction date from utc to local time
+                .ForMember(dest => dest.TransactionDate, opt => opt.MapFrom(src => LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate)))
                 .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
                 .ForMember(dest => dest.TransactionDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.TransactionDate)))
                 .ForMember(dest => dest.TransactionDateMinus, opt => opt.MapFrom(src => LConvertVariable.ConvertMinusTimeNowMonthString(src.TransactionDate)))
                 .ReverseMap();
             CreateMap<Data.Trans.Transaction, DTOs.TransactionDetail_VM_DTO>()
-               .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
+               .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
                .ForMember(dest => dest.TransactionDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.TransactionDate)))
                .ForMember(dest => dest.TransactionDateMinus, opt => opt.MapFrom(src => LConvertVariable.ConvertMinusTimeNowMonthString(src.TransactionDate)))
+               .ForMember(dest => dest.TransactionTimeStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(src.TransactionDate, ConstantConfig.DEFAULT_TIME_FORMAT)))
                .ReverseMap();
-            CreateMap<Data.Trans.Transaction, DTOs.TransactionDetail_VM_DTO>().ReverseMap();
             CreateMap<Data.Trans.Transaction, DTOs.TransactionCreateDTO>().ReverseMap();
 
             // Invoice
@@ -112,6 +114,16 @@ namespace pbms_be.Configurations
             CreateMap<Data.CollabFund.CollabFundActivity, DTOs.CollabFundActivity_MV_DTO>()
                 .ForMember(dest => dest.MinusTimeNowString, opt => opt.MapFrom(src => LConvertVariable.ConvertMinusTimeNowString(src.CreateTime)))
                 .ForMember(dest => dest.CreateTimeString, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.CreateTime)))
+                .ReverseMap();
+
+            // Custom Data
+            // TransactionInDayCalendar with its properties are long number, convert to money format
+            CreateMap<Data.Custom.TransactionInDayCalendar, Data.Custom.TransactionInDayCalendar>()
+                // total amount = total amount in - total amount out
+                .ForMember(dest => dest.TotalAmount, otp => otp.MapFrom(src => src.TotalAmountIn - src.TotalAmountOut))
+                .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
+                .ForMember(dest => dest.TotalAmountInStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmountIn)))
+                .ForMember(dest => dest.TotalAmountOutStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmountOut)))
                 .ReverseMap();
 
         }
