@@ -112,6 +112,82 @@ namespace pbms_be.Library
             return Path.GetFileNameWithoutExtension(fileName);
         }
 
+        // i have year, month, day => return datetime with default time 00:00:00
+        public static DateTime GetDateTimeFromYearMonthDay(int year, int month, int day)
+        {
+            //return datetime with default time 00:00:00
+            return new DateTime(year, month, day);
+        }
+
+        // Convert day in week to vietnamese
+        public static string ConvertDayInWeekToVN_SHORT_3(DayOfWeek day)
+        {
+            switch (day)
+            {
+                case DayOfWeek.Monday:
+                    return Message.VN_MONDAY_SHORT_3;
+                case DayOfWeek.Tuesday:
+                    return Message.VN_TUESDAY_SHORT_3;
+                case DayOfWeek.Wednesday:
+                    return Message.VN_WEDNESDAY_SHORT_3;
+                case DayOfWeek.Thursday:
+                    return Message.VN_THURSDAY_SHORT_3;
+                case DayOfWeek.Friday:
+                    return Message.VN_FRIDAY_SHORT_3;
+                case DayOfWeek.Saturday:
+                    return Message.VN_SATURDAY_SHORT_3;
+                case DayOfWeek.Sunday:
+                    return Message.VN_SUNDAY_SHORT_3;
+                default:
+                    return string.Empty;
+            }
+        }
+        public static string ConvertDayInWeekToVN_FULL(DayOfWeek day)
+        {
+            switch (day)
+            {
+                case DayOfWeek.Monday:
+                    return Message.VN_MONDAY;
+                case DayOfWeek.Tuesday:
+                    return Message.VN_TUESDAY;
+                case DayOfWeek.Wednesday:
+                    return Message.VN_WEDNESDAY;
+                case DayOfWeek.Thursday:
+                    return Message.VN_THURSDAY;
+                case DayOfWeek.Friday:
+                    return Message.VN_FRIDAY;
+                case DayOfWeek.Saturday:
+                    return Message.VN_SATURDAY;
+                case DayOfWeek.Sunday:
+                    return Message.VN_SUNDAY;
+                default:
+                    return string.Empty;
+            }
+        }
+
+        // convert dateonly to short string like DayOfWeek, "ngày" dd (+ " tháng" mm if day is 1,2,3, 28, 29, 30, 31)
+        public static string ConvertDateOnlyToVN_ngay_thang(DateOnly date)
+        {
+            var dayInWeek = ConvertDayInWeekToVN_SHORT_3(date.DayOfWeek);
+            var day = date.Day;
+            var month = date.Month;
+            var result = dayInWeek + ", " + Message.VN_DAY + " " + day;
+            if (day == 1 || day == 2 || day == 3 || day == 28 || day == 29 || day == 30 || day == 31)
+                result += " " + Message.VN_MONTH + " " + month;
+            return result;
+        }        
+        public static string ConvertDateOnlyToVN_ng_thg(DateOnly date)
+        {
+            var dayInWeek = ConvertDayInWeekToVN_SHORT_3(date.DayOfWeek);
+            var day = date.Day;
+            var month = date.Month;
+            var result = dayInWeek + ", " + Message.VN_DAY_SHORT + " " + day;
+            if (day == 1 || day == 2 || day == 3 || day == 28 || day == 29 || day == 30 || day == 31)
+                result += " " + Message.VN_MONTH_SHORT + " " + month;
+            return result;
+        }
+
+
 
 
     }

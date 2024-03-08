@@ -109,14 +109,16 @@ namespace pbms_be.Controllers
 
         // get transactions by date time range
         [HttpGet("get/bydaterange/{accountID}/{fromDate}/{toDate}")]
-        public IActionResult GetTransactionsByDateTimeRange(string accountID, long fromDate, long toDate)
+        public IActionResult GetTransactionsByDateTimeRange(string accountID, DateOnly fromDate, DateOnly toDate)
         {
             try
             {
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
-                if (fromDate <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.FROM_DATE_REQUIRED);
-                if (toDate <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.TO_DATE_REQUIRED);
-                var result = _transactionDA.GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
+                // check if fromDate is greater than toDate
+                if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
+                var fromDateTime = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day, 0, 0, 0);
+                var toDateTime = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
+                var result = _transactionDA.GetTransactionsByDateTimeRange(accountID, fromDateTime, toDateTime);
                 if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
                 return Ok(resultDTO);
@@ -139,6 +141,59 @@ namespace pbms_be.Controllers
                 var result = _transactionDA.GetTransactionsByMonthCalendar(accountID, month, year, _mapper);
                 //if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 //var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // get rectly transactions by account id and number of transactions
+        [HttpGet("get/recently/{accountID}/{number}")]
+        public IActionResult GetRecentlyTransactions(string accountID, int number)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (number <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.NUMBER_REQUIRED);
+                var result = _transactionDA.GetRecentlyTransactions(accountID, number);
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
+                return Ok(resultDTO);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // get total amount in and out by account id in month
+        [HttpGet("get/totalamount/{accountID}/{month}/{year}")]
+        public IActionResult GetTotalAmountInAndOutByMonth(string accountID, int month, int year)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (month <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.MONTH_REQUIRED);
+                if (year <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.YEAR_REQUIRED);
+                var result = _transactionDA.GetTotalAmountInAndOutByMonth(accountID, month, year);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // get total amount in and out by account id in last (number) days
+        [HttpGet("get/totalamount/last7days/{accountID}")]
+        public IActionResult GetTotalAmountInAndOutByLastDays(string accountID)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                var result = _transactionDA.GetTotalAmountInAndOutByLastDays(accountID);
                 return Ok(result);
             }
             catch (System.Exception e)
