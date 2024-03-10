@@ -61,7 +61,7 @@ namespace pbms_be.Configurations
             CreateMap<Data.Trans.Transaction, DTOs.TransactionInList_VM_DTO>()
                 // convert transaction date from utc to local time
                 .ForMember(dest => dest.TransactionDate, opt => opt.MapFrom(src => LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate)))
-                .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
+                .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
                 .ForMember(dest => dest.TransactionDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.TransactionDate)))
                 .ForMember(dest => dest.TransactionDateMinus, opt => opt.MapFrom(src => LConvertVariable.ConvertMinusTimeNowMonthString(src.TransactionDate)))
                 .ReverseMap();
