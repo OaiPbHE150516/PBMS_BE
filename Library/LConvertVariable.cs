@@ -34,7 +34,7 @@ namespace pbms_be.Library
 
         public static string ConvertMinusTimeNowMonthString(DateTime time)
         {
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
             var minusTime = now - time;
             var minusTimeNowString = string.Empty;
             if (minusTime.TotalMinutes < ConstantConfig.MIN_MINUTES_AGO)
