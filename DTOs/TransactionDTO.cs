@@ -35,6 +35,9 @@ namespace pbms_be.DTOs
         public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
         public string TransactionDateStr { get; set; } = String.Empty;
         public string TransactionDateMinus { get; set; } = String.Empty;
+        public string TimeStr { get; set; } = String.Empty;
+        public string DateSlashStr { get; set; } = String.Empty;
+        public string DateShortStr { get; set; } = String.Empty;
         public string FromPerson { get; set; } = String.Empty;
         public string ToPerson { get; set; } = String.Empty;
         public string ImageURL { get; set; } = String.Empty;

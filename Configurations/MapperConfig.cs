@@ -64,6 +64,9 @@ namespace pbms_be.Configurations
                 .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
                 .ForMember(dest => dest.TransactionDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate))))
                 .ForMember(dest => dest.TransactionDateMinus, opt => opt.MapFrom(src => LConvertVariable.ConvertMinusTimeNowMonthString(src.TransactionDate)))
+                .ForMember(dest => dest.TimeStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate), ConstantConfig.DEFAULT_TIME_FORMAT)))
+                .ForMember(dest => dest.DateSlashStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate), ConstantConfig.DEFAULT_DATE_FORMAT_SLASH)))
+                .ForMember(dest => dest.DateShortStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate), ConstantConfig.DEFAULT_DATE_FORMAT_SHORT)))
                 .ReverseMap();
             CreateMap<Data.Trans.Transaction, DTOs.TransactionDetail_VM_DTO>()
                .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
