@@ -369,8 +369,9 @@ namespace pbms_be.DataAccess
         {
             try
             {
+                var now = DateTime.UtcNow;
                 var result = _context.Transaction
-                            .Where(t => t.AccountID == accountID)
+                            .Where(t => t.AccountID == accountID && t.TransactionDate <= now)
                             .Include(t => t.ActiveState)
                             .Include(t => t.Category)
                             .Include(t => t.Wallet)
@@ -378,6 +379,15 @@ namespace pbms_be.DataAccess
                             .Take(number)
                             .ToList();
                 if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                var cateDA = new CategoryDA(_context);
+
+                var cates = cateDA.GetCategoryTypes();
+                foreach (var transaction in result)
+                {
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
+                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    transaction.Category.CategoryType = cateType;
+                }
                 return result;
             }
             catch (Exception e)

@@ -29,7 +29,8 @@ namespace pbms_be.DTOs
         public virtual WalletInTransaction_VM_DTO Wallet { get; set; } = null!;
         public int CategoryID { get; set; }
         public virtual CategoryInTransaction_VM_DTO Category { get; set; } = null!;
-        public string TotalAmount { get; set; } = String.Empty;
+        public long TotalAmount { get; set; }
+        public string TotalAmountStr { get; set; } = String.Empty;
         public string Note { get; set; } = String.Empty;
         public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
         public string TransactionDateStr { get; set; } = String.Empty;
