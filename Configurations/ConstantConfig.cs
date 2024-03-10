@@ -65,6 +65,11 @@
         public const string DEFAULT_TIME_FORMAT = "HH:mm";
         // default date format
         public const string DEFAULT_DATE_FORMAT = "dd/MM/yyyy";
+        // DEFAULT_DATE_FORMAT_SLASH
+        public const string DEFAULT_DATE_FORMAT_SLASH = "dd/MM/yy";
+
+        // DEFAULT_DATE_FORMAT_SHORT
+        public const string DEFAULT_DATE_FORMAT_SHORT = "dd thg MM";
 
         // default category name en
         public const string DEFAULT_CATEGORY_NAME_EN_INCOME = "Income";

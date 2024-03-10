@@ -76,6 +76,10 @@ namespace pbms_be.Library
 
         public static string ConvertDateTimeToStringCustom(DateTime time, string format)
         {
+            if (format == ConstantConfig.DEFAULT_DATE_FORMAT_SHORT)
+            {
+                return time.ToString("dd") + " thg " + time.ToString("MM");
+            }
             return time.ToString(format);
         }
 
