@@ -23,37 +23,15 @@ namespace pbms_be.DataAccess
         {
             try
             {
-
-                // get transactions by account id with paging and sorting ascending or descending by using Skip and Take
+                var now = DateTime.UtcNow;
                 int skip = (pageNumber - 1) * pageSize;
                 var result = _context.Transaction
-                            .Where(t => t.AccountID == AccountID)
+                            .Where(t => t.AccountID == AccountID && t.TransactionDate <= now)
                             .Include(t => t.ActiveState)
                             .Include(t => t.Category)
                             .Include(t => t.Wallet)
-                            .OrderBy(t => t.TransactionID)
-                            .Skip(skip)
-                            .Take(pageSize)
+                            .OrderByDescending(t => t.TransactionDate)
                             .ToList();
-                sortType = sortType ?? ConstantConfig.ASCENDING_SORT;
-                switch (sortType.ToLower())
-                {
-                    case ConstantConfig.ASCENDING_SORT:
-                        result = result.OrderBy(t => t.TransactionDate).ToList();
-                        break;
-                    case ConstantConfig.DESCENDING_SORT:
-                        result = result.OrderByDescending(t => t.TransactionDate).ToList();
-                        break;
-                    default:
-                        result = result.OrderBy(t => t.TransactionDate).ToList();
-                        break;
-                }
-                //var result = _context.Transaction
-                //            .Where(t => t.AccountID == AccountID)
-                //            .Include(t => t.ActiveState)
-                //            .Include(t => t.Category)
-                //            .Include(t => t.Wallet)
-                //            .ToList();
                 if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
                 var cateDA = new CategoryDA(_context);
                 var cates = cateDA.GetCategoryTypes();
@@ -63,6 +41,7 @@ namespace pbms_be.DataAccess
                     if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
                     transaction.Category.CategoryType = cateType;
                 }
+                result= result.Skip(skip).Take(pageSize).ToList();
                 return result;
             }
             catch (Exception e)
