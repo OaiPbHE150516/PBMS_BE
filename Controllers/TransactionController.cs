@@ -168,6 +168,56 @@ namespace pbms_be.Controllers
             }
         }
 
+        // get transactions day by day by account id, from date, to date
+        [HttpGet("get/daybyday/{accountID}/{fromDateStr}/{toDateStr}")]
+        public IActionResult GetTransactionsDayByDay(string accountID, string fromDateStr, string toDateStr)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (string.IsNullOrEmpty(fromDateStr)) return BadRequest(Message.FROM_DATE_REQUIRED);
+                if (string.IsNullOrEmpty(toDateStr)) return BadRequest(Message.TO_DATE_REQUIRED);
+                // convert string to date by format like "2/12/2021"
+                var fromDate = DateTime.ParseExact(fromDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                var toDate = DateTime.ParseExact(toDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                // check if fromDate is greater than toDate
+                if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
+                // from dateTime with utc time kind
+                var fromDateTime = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day, 0, 0, 0).ToUniversalTime();
+                var toDateTime = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59).ToUniversalTime();
+                var result = _transactionDA.GetTransactionsDayByDay(accountID, fromDateTime, toDateTime, _mapper);
+                //if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                //var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // get transactions day by day by account id, from date, to date
+        [HttpGet("get/daybyday/custom/{accountID}")]
+        public IActionResult GetTransactionsDayByDayCustom(string accountID)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                var now = DateTime.UtcNow;
+                //  DateOnly fromDateTime = 7 days ago, toDateTime = now
+                var fromDateTime = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0).AddDays(-7).ToUniversalTime();
+                var toDateTime = new DateTime(now.Year, now.Month, now.Day, 23, 59, 59).ToUniversalTime();
+                var result = _transactionDA.GetTransactionsDayByDay(accountID, fromDateTime, toDateTime, _mapper);
+                //if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                //var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         // get total amount in and out by account id in month
         [HttpGet("get/totalamount/{accountID}/{month}/{year}")]
         public IActionResult GetTotalAmountInAndOutByMonth(string accountID, int month, int year)

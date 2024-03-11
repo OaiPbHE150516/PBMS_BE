@@ -78,6 +78,21 @@ public class TransactionInLastDays
     public string TotalAmountStr { get; set; } = String.Empty;
 }
 
+public class TransactionDayByDay
+{
+    public DayDetail DayDetail { get; set; } = null!;
+    public int NumberOfTransactionIn { get; set; } = 0;
+    public long TotalAmountIn { get; set; } = 0;
+    public string TotalAmountInStr { get; set; } = String.Empty;
+    public int NumberOfTransactionOut { get; set; } = 0;
+    public long TotalAmountOut { get; set; } = 0;
+    public string TotalAmountOutStr { get; set; } = String.Empty;
+    public int TransactionCount { get; set; } = 0;
+    public long TotalAmount { get; set; } = 0;
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public virtual List<TransactionInList_VM_DTO> Transactions { get; set; } = null!;
+}
+
 public class DayDetail
 {
     public DayOfWeek DayOfWeek { get; set; }

@@ -65,6 +65,8 @@
         public const string DEFAULT_TIME_FORMAT = "HH:mm";
         // default date format
         public const string DEFAULT_DATE_FORMAT = "dd/MM/yyyy";
+
+        public const string DEFAULT_DATE_FORMAT_DASH = "dd-MM-yyyy";
         // DEFAULT_DATE_FORMAT_SLASH
         public const string DEFAULT_DATE_FORMAT_SLASH = "dd/MM/yy";
 
