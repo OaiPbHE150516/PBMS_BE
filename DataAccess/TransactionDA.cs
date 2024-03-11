@@ -538,5 +538,75 @@ namespace pbms_be.DataAccess
                         },
              */
         }
+
+        internal object GetTransactionsDayByDay(string accountID, DateTime fromDateTime, DateTime toDateTime, IMapper? _mapper)
+        {
+            try
+            {
+                var transactions = GetTransactionsByDateTimeRange(accountID, fromDateTime, toDateTime);
+                var transactionsDict = new Dictionary<DateOnly, TransactionDayByDay>();
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+
+                foreach (var tran in transactions)
+                {
+                    var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
+                    if (transactionsDict.ContainsKey(dateonly))
+                    {
+                        // add transaction to list of transactions
+                        transactionsDict[dateonly].Transactions.Add(_mapper.Map<TransactionInList_VM_DTO>(tran));
+                        if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                        {
+                            transactionsDict[dateonly].TotalAmountIn += tran.TotalAmount;
+                            transactionsDict[dateonly].NumberOfTransactionIn++;
+                        }
+                        else
+                        {
+                            transactionsDict[dateonly].TotalAmountOut += tran.TotalAmount;
+                            transactionsDict[dateonly].NumberOfTransactionOut++;
+                        }
+                    }
+                    else
+                    {
+                        var transin = new TransactionDayByDay
+                        {
+                            DayDetail = new DayDetail
+                            {
+                                DayOfWeek = dateonly.DayOfWeek,
+                                Short_EN = dateonly.DayOfWeek.ToString().Substring(0, 3),
+                                Full_EN = dateonly.DayOfWeek.ToString(),
+                                Short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                                Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                                ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
+                                FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                            }
+                        };
+                        if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                        {
+                            transin.TotalAmountIn += tran.TotalAmount;
+                            transin.NumberOfTransactionIn++;
+                        }
+                        else
+                        {
+                            transin.TotalAmountOut += tran.TotalAmount;
+                            transin.NumberOfTransactionOut++;
+                        }
+                        transin.Transactions = new List<TransactionInList_VM_DTO> { _mapper.Map<TransactionInList_VM_DTO>(tran) };
+                        transactionsDict.Add(dateonly, transin);
+                    }
+                }
+                foreach (var item in transactionsDict)
+                {
+                    item.Value.TotalAmount = item.Value.TotalAmountIn - item.Value.TotalAmountOut;
+                    item.Value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmount);
+                    item.Value.TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountIn);
+                    item.Value.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountOut);
+                }
+                transactionsDict = transactionsDict.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
+                return transactionsDict;
+            } catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }
