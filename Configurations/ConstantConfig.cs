@@ -106,6 +106,9 @@
         public const string FILE_IS_NULL = " File is null or not of type pdf";
         public const string FILE_IS_NOT_PDF_JPG_PNG = " File is null or not of type pdf, jpg or png";
 
+        // DATE_TIME_REQUIRED
+        public const string DATE_TIME_REQUIRED = " Date time is required";
+
         public const string NUMBER_REQUIRED = " Number is required";
 
         // Page
