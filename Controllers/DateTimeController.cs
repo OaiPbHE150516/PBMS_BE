@@ -18,5 +18,12 @@ namespace pbms_be.Controllers
             _mapper = mapper;
         }
 
+        //// get datetime
+        //[HttpGet("getDateTime")]
+        //public IActionResult GetDateTime()
+        //{
+        //    return Ok(new { DateTime = System.DateTime.Now });
+        //}
+
     }
 }

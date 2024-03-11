@@ -41,7 +41,7 @@ namespace pbms_be.DataAccess
                     if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
                     transaction.Category.CategoryType = cateType;
                 }
-                result= result.Skip(skip).Take(pageSize).ToList();
+                result = result.Skip(skip).Take(pageSize).ToList();
                 return result;
             }
             catch (Exception e)
@@ -603,10 +603,122 @@ namespace pbms_be.DataAccess
                 }
                 transactionsDict = transactionsDict.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
                 return transactionsDict;
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
+        }
+
+        internal object GetTransactionsWeekByWeek(string accountID, DateTime fromDateTime, DateTime toDateTime, IMapper? mapper)
+        {
+            try
+            {
+                var result = new TransactionWeekByWeek
+                {
+                    WeekDetail = new WeekDetail
+                    {
+                        StartDate = new DateOnly(fromDateTime.Year, fromDateTime.Month, fromDateTime.Day),
+                        StartDateStrShort = LConvertVariable.ConvertDateToShortStr(fromDateTime),
+                        StartDateStrFull = fromDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT),
+                        DayOfWeekStartStr = LConvertVariable.ConvertDayInWeekToVN_SHORT_4(fromDateTime.DayOfWeek),
+                        EndDate = new DateOnly(toDateTime.Year, toDateTime.Month, toDateTime.Day),
+                        EndDateStrShort = LConvertVariable.ConvertDateToShortStr(toDateTime),
+                        EndDateStrFull = toDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT),
+                        DayOfWeekEndStr = LConvertVariable.ConvertDayInWeekToVN_SHORT_4(toDateTime.DayOfWeek)
+                    },
+                    Transactions = new List<TransactionInList_VM_DTO>()
+                };
+                if (mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var transactions = GetTransactionsByDateTimeRange(accountID, fromDateTime, toDateTime);
+                foreach (var transaction in transactions)
+                {
+                    if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                    {
+                        result.TotalAmountIn += transaction.TotalAmount;
+                        result.NumberOfTransactionIn++;
+                    }
+                    else
+                    {
+                        result.TotalAmountOut += transaction.TotalAmount;
+                        result.NumberOfTransactionOut++;
+                    }
+                    var tran = mapper.Map<TransactionInList_VM_DTO>(transaction);
+                    result.Transactions.Add(tran);
+                }
+                result.TotalAmount = result.TotalAmountIn - result.TotalAmountOut;
+                result.TransactionCount = result.NumberOfTransactionIn + result.NumberOfTransactionOut;
+                result.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(result.TotalAmount);
+                result.TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(result.TotalAmountIn);
+                result.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(result.TotalAmountOut);
+                return result;
+
+
+                //var transactions = GetTransactionsByDateTimeRange(accountID, fromDateTime, toDateTime);
+                //var transactionsDict = new Dictionary<string, TransactionWeekByWeek>();
+                //if (mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+
+                //foreach (var transaction in transactions)
+                //{
+                //    var weekstr = fromDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT) + " - " + toDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT);
+                //    if (transactionsDict.ContainsKey(weekstr))
+                //    {
+                //        transactionsDict[weekstr].Transactions.Add(mapper.Map<TransactionInList_VM_DTO>(transaction));
+                //        if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                //        {
+                //            transactionsDict[weekstr].TotalAmountIn += transaction.TotalAmount;
+                //            transactionsDict[weekstr].NumberOfTransactionIn++;
+                //        }
+                //        else
+                //        {
+                //            transactionsDict[weekstr].TotalAmountOut += transaction.TotalAmount;
+                //            transactionsDict[weekstr].NumberOfTransactionOut++;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        var transin = new TransactionWeekByWeek
+                //        {
+                //            WeekDetail = new WeekDetail
+                //            {
+                //                StartDate = new DateOnly(fromDateTime.Year, fromDateTime.Month, fromDateTime.Day),
+                //                StartDateStrShort = fromDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT_SHORT),
+                //                StartDateStrFull = fromDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT),
+                //                DayOfWeekStartStr = LConvertVariable.ConvertDayInWeekToVN_SHORT_4(fromDateTime.DayOfWeek),
+                //                EndDate = new DateOnly(toDateTime.Year, toDateTime.Month, toDateTime.Day),
+                //                EndDateStrShort = toDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT_SHORT),
+                //                EndDateStrFull = toDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT),
+                //                DayOfWeekEndStr = LConvertVariable.ConvertDayInWeekToVN_SHORT_4(toDateTime.DayOfWeek)
+                //            }
+                //        };
+                //        if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                //        {
+                //            transin.TotalAmountIn += transaction.TotalAmount;
+                //            transin.NumberOfTransactionIn++;
+                //        }
+                //        else
+                //        {
+                //            transin.TotalAmountOut += transaction.TotalAmount;
+                //            transin.NumberOfTransactionOut++;
+                //        }
+                //        transin.Transactions = new List<TransactionInList_VM_DTO> { mapper.Map<TransactionInList_VM_DTO>(transaction) };
+                //        transactionsDict.Add(weekstr, transin);
+                //    }
+                //    foreach (var item in transactionsDict)
+                //    {
+                //        item.Value.TotalAmount = item.Value.TotalAmountIn - item.Value.TotalAmountOut;
+                //        item.Value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmount);
+                //        item.Value.TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountIn);
+                //        item.Value.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountOut);
+                //    }
+
+                //}
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+            throw new NotImplementedException();
         }
     }
 }

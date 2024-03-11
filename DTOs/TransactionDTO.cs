@@ -38,6 +38,9 @@ namespace pbms_be.DTOs
         public string TimeStr { get; set; } = String.Empty;
         public string DateSlashStr { get; set; } = String.Empty;
         public string DateShortStr { get; set; } = String.Empty;
+        public string DayOfWeekStrShort { get; set; } = String.Empty;
+        public string DayOfWeekStrMdl { get; set; } = String.Empty;
+        public string DayOfWeekStrLong { get; set; } = String.Empty;
         public string FromPerson { get; set; } = String.Empty;
         public string ToPerson { get; set; } = String.Empty;
         public string ImageURL { get; set; } = String.Empty;

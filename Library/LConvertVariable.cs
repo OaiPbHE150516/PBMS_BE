@@ -146,6 +146,30 @@ namespace pbms_be.Library
                     return string.Empty;
             }
         }
+
+        // VN_MONDAY_SHORT_4
+        public static string ConvertDayInWeekToVN_SHORT_4(DayOfWeek day)
+        {
+            switch (day)
+            {
+                case DayOfWeek.Monday:
+                    return Message.VN_MONDAY_SHORT_4;
+                case DayOfWeek.Tuesday:
+                    return Message.VN_TUESDAY_SHORT_4;
+                case DayOfWeek.Wednesday:
+                    return Message.VN_WEDNESDAY_SHORT_4;
+                case DayOfWeek.Thursday:
+                    return Message.VN_THURSDAY_SHORT_4;
+                case DayOfWeek.Friday:
+                    return Message.VN_FRIDAY_SHORT_4;
+                case DayOfWeek.Saturday:
+                    return Message.VN_SATURDAY_SHORT_4;
+                case DayOfWeek.Sunday:
+                    return Message.VN_SUNDAY_SHORT_4;
+                default:
+                    return string.Empty;
+            }
+        }
         public static string ConvertDayInWeekToVN_FULL(DayOfWeek day)
         {
             switch (day)
@@ -179,7 +203,7 @@ namespace pbms_be.Library
             if (day == 1 || day == 2 || day == 3 || day == 28 || day == 29 || day == 30 || day == 31)
                 result += " " + Message.VN_MONTH + " " + month;
             return result;
-        }        
+        }
         public static string ConvertDateOnlyToVN_ng_thg(DateOnly date)
         {
             var dayInWeek = ConvertDayInWeekToVN_SHORT_3(date.DayOfWeek);
@@ -191,8 +215,65 @@ namespace pbms_be.Library
             return result;
         }
 
+        internal static string ConvertDateTimeToDayOfWeekShort(DateTime dateTime)
+        {
+            return ConvertDayInWeekToVN_SHORT_3(dateTime.DayOfWeek);
+        }
 
+        internal static object ConvertDateTimeToDayOfWeekLong(DateTime dateTime)
+        {
+            return ConvertDayInWeekToVN_FULL(dateTime.DayOfWeek);
+        }
 
+        internal static object ConvertDateTimeToDayOfWeekMdl(DateTime dateTime)
+        {
+            return ConvertDayInWeekToVN_SHORT_4(dateTime.DayOfWeek);
+        }
 
+        internal static string ConvertDateToShortStr(DateTime dateTime)
+        {
+            var day = dateTime.ToString("dd");
+            // remove 0 at the beginning of day and month if them < 10
+            if (day[0] == '0') day = day.Remove(0, 1);
+            var month = dateTime.ToString("MM");
+            if (month[0] == '0') month = month.Remove(0, 1);
+            return day + ConstantConfig.DEFAULT_DAY_THG_MONTH + month;
+        }
+
+        //// get all week have inside from start date to end date
+        //public static object GetAllWeeksFromStartDateToEndDate(DateOnly startDate, DateOnly endDate)
+        //{
+        //    var result = new Dictionary<string, WeeksInMonth>();
+        //    // loop to Console.WriteLine all dayofweek from start date to end date
+        //    var currentDate = startDate;
+        //    var countWeek = 0;
+        //    while (currentDate <= endDate)
+        //    {
+        //        Console.WriteLine(currentDate.ToString() + ": " + currentDate.DayOfWeek);
+
+        //        if(currentDate.DayOfWeek is DayOfWeek.Sunday)
+        //        {
+        //            var weekNumber = currentDate.Day / 7 + 1;
+        //            var week = new WeeksInMonth
+        //            {
+        //                WeekNumber = weekNumber,
+        //                StartDate = currentDate.AddDays(-6),
+        //                EndDate = currentDate
+        //            };
+        //            result.Add(weekNumber.ToString(), week);
+        //        }
+
+        //        currentDate = currentDate.AddDays(1);
+        //        countWeek++;
+        //    }
+        //    return result;
+        //}
     }
+
+    //public class WeeksInMonth
+    //{
+    //    public int WeekNumber { get; set; }
+    //    public DateOnly StartDate { get; set; }
+    //    public DateOnly EndDate { get; set; }
+    //}
 }
