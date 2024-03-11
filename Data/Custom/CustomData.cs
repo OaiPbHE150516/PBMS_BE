@@ -93,6 +93,21 @@ public class TransactionDayByDay
     public virtual List<TransactionInList_VM_DTO> Transactions { get; set; } = null!;
 }
 
+public class TransactionWeekByWeek
+{
+    public WeekDetail WeekDetail { get; set; } = null!;
+    public int NumberOfTransactionIn { get; set; } = 0;
+    public long TotalAmountIn { get; set; } = 0;
+    public string TotalAmountInStr { get; set; } = String.Empty;
+    public int NumberOfTransactionOut { get; set; } = 0;
+    public long TotalAmountOut { get; set; } = 0;
+    public string TotalAmountOutStr { get; set; } = String.Empty;
+    public int TransactionCount { get; set; } = 0;
+    public long TotalAmount { get; set; } = 0;
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public virtual List<TransactionInList_VM_DTO> Transactions { get; set; } = null!;
+}
+
 public class DayDetail
 {
     public DayOfWeek DayOfWeek { get; set; }
@@ -102,6 +117,18 @@ public class DayDetail
     public string Full_VN { get; set; } = String.Empty;
     public string ShortDate { get; set; } = String.Empty;
     public string FullDate { get; set; } = String.Empty;
+}
+
+public class WeekDetail
+{
+    public DateOnly StartDate { get; set; }
+    public string StartDateStrShort { get; set; } = String.Empty;
+    public string StartDateStrFull { get; set; } = String.Empty;
+    public string DayOfWeekStartStr { get; set; } = String.Empty;
+    public DateOnly EndDate { get; set; }
+    public string EndDateStrShort { get; set; } = String.Empty;
+    public string EndDateStrFull { get; set; } = String.Empty;
+    public string DayOfWeekEndStr { get; set; } = String.Empty;
 }
 
 public class GenerateRandomTransactions

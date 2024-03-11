@@ -73,6 +73,8 @@
         // DEFAULT_DATE_FORMAT_SHORT
         public const string DEFAULT_DATE_FORMAT_SHORT = "dd thg MM";
 
+        public const string DEFAULT_DAY_THG_MONTH = " thg ";
+
         // default category name en
         public const string DEFAULT_CATEGORY_NAME_EN_INCOME = "Income";
         public const string DEFAULT_CATEGORY_NAME_VN_INCOME = "Thu nhập";

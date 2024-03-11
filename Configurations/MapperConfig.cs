@@ -66,7 +66,10 @@ namespace pbms_be.Configurations
                 .ForMember(dest => dest.TransactionDateMinus, opt => opt.MapFrom(src => LConvertVariable.ConvertMinusTimeNowMonthString(src.TransactionDate)))
                 .ForMember(dest => dest.TimeStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate), ConstantConfig.DEFAULT_TIME_FORMAT)))
                 .ForMember(dest => dest.DateSlashStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate), ConstantConfig.DEFAULT_DATE_FORMAT_SLASH)))
-                .ForMember(dest => dest.DateShortStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate), ConstantConfig.DEFAULT_DATE_FORMAT_SHORT)))
+                .ForMember(dest => dest.DateShortStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateToShortStr(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate))))
+                .ForMember(dest => dest.DayOfWeekStrShort, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToDayOfWeekShort(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate))))
+                .ForMember(dest => dest.DayOfWeekStrMdl, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToDayOfWeekMdl(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate))))
+                .ForMember(dest => dest.DayOfWeekStrLong, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToDayOfWeekLong(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate))))
                 .ReverseMap();
             CreateMap<Data.Trans.Transaction, DTOs.TransactionDetail_VM_DTO>()
                .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
