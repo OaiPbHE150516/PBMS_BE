@@ -192,8 +192,12 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var wallet = GetWallet(changeActiveStateDTO.WalletID);
-                if (wallet == null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+                var wallet = _context.Wallet
+                    .Where(w => w.WalletID == changeActiveStateDTO.WalletID)
+                    .Include(w => w.Currency)
+                    .Include(w => w.ActiveState)
+                    .FirstOrDefault();
+                if (wallet is null) throw new Exception(Message.WALLET_NOT_FOUND);
                 wallet.ActiveStateID = changeActiveStateDTO.ActiveStateID;
                 _context.SaveChanges();
                 return GetWallet(wallet.WalletID);
@@ -209,7 +213,7 @@ namespace pbms_be.DataAccess
             try
             {
                 var wallet = GetWallet(deleteDTO.WalletID);
-                if (wallet == null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+                if (wallet is null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 wallet.ActiveStateID = ActiveStateConst.DELETED;
                 _context.SaveChanges();
                 var returnlist = GetWallets(deleteDTO.AccountID);
