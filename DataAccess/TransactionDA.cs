@@ -455,7 +455,8 @@ namespace pbms_be.DataAccess
                                 Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
                                 ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
                                 FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
-
+                                DayStr = dateonly.Day.ToString(),
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
                             }
                         };
                         if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
@@ -503,6 +504,8 @@ namespace pbms_be.DataAccess
                                 Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
                                 ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
                                 FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                                DayStr = dateonly.Day.ToString(),
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
                             }
                         };
                         transactionsDict.Add(dateonly, transin);
@@ -578,6 +581,8 @@ namespace pbms_be.DataAccess
                                 Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
                                 ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
                                 FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                                DayStr = dateonly.Day.ToString(),
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
                             }
                         };
                         if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
@@ -656,6 +661,8 @@ namespace pbms_be.DataAccess
                             Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
                             ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
                             FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                            DayStr = dateonly.Day.ToString(),
+                            MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
                         };
                         result.TransactionsByDay[dateonly].Transactions.Add(tran);
                     }
@@ -672,6 +679,8 @@ namespace pbms_be.DataAccess
                                 Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
                                 ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
                                 FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                                DayStr = dateonly.Day.ToString(),
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
                             },
                             Transactions = new List<TransactionInList_VM_DTO> { tran }
                         });
@@ -695,7 +704,22 @@ namespace pbms_be.DataAccess
                 result.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(result.TotalAmountOut);
 
                 result.TransactionsByDay = result.TransactionsByDay.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
-                return result;
+
+                var result2 = new TransactionWeekByWeek2
+                {
+                    WeekDetail = result.WeekDetail,
+                    NumberOfTransactionIn = result.NumberOfTransactionIn,
+                    TotalAmountIn = result.TotalAmountIn,
+                    TotalAmountInStr = result.TotalAmountInStr,
+                    NumberOfTransactionOut = result.NumberOfTransactionOut,
+                    TotalAmountOut = result.TotalAmountOut,
+                    TotalAmountOutStr = result.TotalAmountOutStr,
+                    TransactionCount = result.TransactionCount,
+                    TotalAmount = result.TotalAmount,
+                    TotalAmountStr = result.TotalAmountStr,
+                    TransactionByDayW = result.TransactionsByDay.Values.ToList()
+                };
+                return result2;
             }
             catch (Exception e)
             {
