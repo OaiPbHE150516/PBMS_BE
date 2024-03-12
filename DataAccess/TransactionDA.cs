@@ -676,6 +676,17 @@ namespace pbms_be.DataAccess
                             Transactions = new List<TransactionInList_VM_DTO> { tran }
                         });
                     }
+                    if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                    {
+                        result.TransactionsByDay[dateonly].TotalAmountIn += transaction.TotalAmount;
+                        // LConvertVariable.ConvertToMoneyFormat
+                        result.TransactionsByDay[dateonly].TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(result.TransactionsByDay[dateonly].TotalAmountIn);
+                    }
+                    else
+                    {
+                        result.TransactionsByDay[dateonly].TotalAmountOut += transaction.TotalAmount;
+                        result.TransactionsByDay[dateonly].TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(result.TransactionsByDay[dateonly].TotalAmountOut);
+                    }
                 }
                 result.TotalAmount = result.TotalAmountIn - result.TotalAmountOut;
                 result.TransactionCount = result.NumberOfTransactionIn + result.NumberOfTransactionOut;

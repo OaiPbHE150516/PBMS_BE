@@ -111,6 +111,10 @@ public class TransactionWeekByWeek
 public class DayInByWeek
 {
     public DayDetail DayDetail { get; set; } = null!;
+    public long TotalAmountIn { get; set; } = 0;
+    public string TotalAmountInStr { get; set; } = String.Empty;
+    public long TotalAmountOut { get; set; } = 0;
+    public string TotalAmountOutStr { get; set; } = String.Empty;
     public virtual List<TransactionInList_VM_DTO> Transactions { get; set; } = null!;
 }
 
