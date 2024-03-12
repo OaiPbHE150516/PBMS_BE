@@ -105,6 +105,12 @@ public class TransactionWeekByWeek
     public int TransactionCount { get; set; } = 0;
     public long TotalAmount { get; set; } = 0;
     public string TotalAmountStr { get; set; } = String.Empty;
+    public virtual Dictionary<DateOnly, DayInByWeek> TransactionsByDay { get; set; } = null!;
+}
+
+public class DayInByWeek
+{
+    public DayDetail DayDetail { get; set; } = null!;
     public virtual List<TransactionInList_VM_DTO> Transactions { get; set; } = null!;
 }
 

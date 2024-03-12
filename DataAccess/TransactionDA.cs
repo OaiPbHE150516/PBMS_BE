@@ -627,7 +627,7 @@ namespace pbms_be.DataAccess
                         EndDateStrFull = toDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT),
                         DayOfWeekEndStr = LConvertVariable.ConvertDayInWeekToVN_SHORT_4(toDateTime.DayOfWeek)
                     },
-                    Transactions = new List<TransactionInList_VM_DTO>()
+                    TransactionsByDay = new Dictionary<DateOnly, DayInByWeek>()
                 };
                 if (mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var transactions = GetTransactionsByDateTimeRange(accountID, fromDateTime, toDateTime);
@@ -644,75 +644,47 @@ namespace pbms_be.DataAccess
                         result.NumberOfTransactionOut++;
                     }
                     var tran = mapper.Map<TransactionInList_VM_DTO>(transaction);
-                    result.Transactions.Add(tran);
+                    var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
+                    if (result.TransactionsByDay.ContainsKey(dateonly))
+                    {
+                        result.TransactionsByDay[dateonly].DayDetail = new DayDetail
+                        {
+                            DayOfWeek = dateonly.DayOfWeek,
+                            Short_EN = dateonly.DayOfWeek.ToString().Substring(0, 3),
+                            Full_EN = dateonly.DayOfWeek.ToString(),
+                            Short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                            Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                            ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
+                            FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                        };
+                        result.TransactionsByDay[dateonly].Transactions.Add(tran);
+                    }
+                    else
+                    {
+                        result.TransactionsByDay.Add(dateonly, new DayInByWeek
+                        {
+                            DayDetail = new DayDetail
+                            {
+                                DayOfWeek = dateonly.DayOfWeek,
+                                Short_EN = dateonly.DayOfWeek.ToString().Substring(0, 3),
+                                Full_EN = dateonly.DayOfWeek.ToString(),
+                                Short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                                Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                                ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
+                                FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                            },
+                            Transactions = new List<TransactionInList_VM_DTO> { tran }
+                        });
+                    }
                 }
                 result.TotalAmount = result.TotalAmountIn - result.TotalAmountOut;
                 result.TransactionCount = result.NumberOfTransactionIn + result.NumberOfTransactionOut;
                 result.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(result.TotalAmount);
                 result.TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(result.TotalAmountIn);
                 result.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(result.TotalAmountOut);
+
+                result.TransactionsByDay = result.TransactionsByDay.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
                 return result;
-
-
-                //var transactions = GetTransactionsByDateTimeRange(accountID, fromDateTime, toDateTime);
-                //var transactionsDict = new Dictionary<string, TransactionWeekByWeek>();
-                //if (mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
-
-                //foreach (var transaction in transactions)
-                //{
-                //    var weekstr = fromDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT) + " - " + toDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT);
-                //    if (transactionsDict.ContainsKey(weekstr))
-                //    {
-                //        transactionsDict[weekstr].Transactions.Add(mapper.Map<TransactionInList_VM_DTO>(transaction));
-                //        if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
-                //        {
-                //            transactionsDict[weekstr].TotalAmountIn += transaction.TotalAmount;
-                //            transactionsDict[weekstr].NumberOfTransactionIn++;
-                //        }
-                //        else
-                //        {
-                //            transactionsDict[weekstr].TotalAmountOut += transaction.TotalAmount;
-                //            transactionsDict[weekstr].NumberOfTransactionOut++;
-                //        }
-                //    }
-                //    else
-                //    {
-                //        var transin = new TransactionWeekByWeek
-                //        {
-                //            WeekDetail = new WeekDetail
-                //            {
-                //                StartDate = new DateOnly(fromDateTime.Year, fromDateTime.Month, fromDateTime.Day),
-                //                StartDateStrShort = fromDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT_SHORT),
-                //                StartDateStrFull = fromDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT),
-                //                DayOfWeekStartStr = LConvertVariable.ConvertDayInWeekToVN_SHORT_4(fromDateTime.DayOfWeek),
-                //                EndDate = new DateOnly(toDateTime.Year, toDateTime.Month, toDateTime.Day),
-                //                EndDateStrShort = toDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT_SHORT),
-                //                EndDateStrFull = toDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT),
-                //                DayOfWeekEndStr = LConvertVariable.ConvertDayInWeekToVN_SHORT_4(toDateTime.DayOfWeek)
-                //            }
-                //        };
-                //        if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
-                //        {
-                //            transin.TotalAmountIn += transaction.TotalAmount;
-                //            transin.NumberOfTransactionIn++;
-                //        }
-                //        else
-                //        {
-                //            transin.TotalAmountOut += transaction.TotalAmount;
-                //            transin.NumberOfTransactionOut++;
-                //        }
-                //        transin.Transactions = new List<TransactionInList_VM_DTO> { mapper.Map<TransactionInList_VM_DTO>(transaction) };
-                //        transactionsDict.Add(weekstr, transin);
-                //    }
-                //    foreach (var item in transactionsDict)
-                //    {
-                //        item.Value.TotalAmount = item.Value.TotalAmountIn - item.Value.TotalAmountOut;
-                //        item.Value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmount);
-                //        item.Value.TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountIn);
-                //        item.Value.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountOut);
-                //    }
-
-                //}
             }
             catch (Exception e)
             {
