@@ -705,6 +705,8 @@ namespace pbms_be.DataAccess
 
                 result.TransactionsByDay = result.TransactionsByDay.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
 
+                var listTran = result.TransactionsByDay.Values.ToList();
+
                 var result2 = new TransactionWeekByWeek2
                 {
                     WeekDetail = result.WeekDetail,
@@ -719,6 +721,11 @@ namespace pbms_be.DataAccess
                     TotalAmountStr = result.TotalAmountStr,
                     TransactionByDayW = result.TransactionsByDay.Values.ToList()
                 };
+
+                foreach (var tran in listTran)
+                {
+                    tran.Transactions = tran.Transactions.OrderBy(t => t.TransactionDate.TimeOfDay).ToList();
+                }
                 return result2;
             }
             catch (Exception e)
