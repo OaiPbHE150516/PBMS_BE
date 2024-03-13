@@ -130,6 +130,8 @@ public class DayInByWeek
     public string TotalAmountInStr { get; set; } = String.Empty;
     public long TotalAmountOut { get; set; } = 0;
     public string TotalAmountOutStr { get; set; } = String.Empty;
+    public long TotalAmount { get; set; } = 0;
+    public string TotalAmountStr { get; set; } = String.Empty;
     public virtual List<TransactionInList_VM_DTO> Transactions { get; set; } = null!;
 }
 

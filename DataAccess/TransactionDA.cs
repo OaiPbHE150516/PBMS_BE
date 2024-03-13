@@ -688,7 +688,6 @@ namespace pbms_be.DataAccess
                     if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
                     {
                         result.TransactionsByDay[dateonly].TotalAmountIn += transaction.TotalAmount;
-                        // LConvertVariable.ConvertToMoneyFormat
                         result.TransactionsByDay[dateonly].TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(result.TransactionsByDay[dateonly].TotalAmountIn);
                     }
                     else
@@ -696,6 +695,8 @@ namespace pbms_be.DataAccess
                         result.TransactionsByDay[dateonly].TotalAmountOut += transaction.TotalAmount;
                         result.TransactionsByDay[dateonly].TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(result.TransactionsByDay[dateonly].TotalAmountOut);
                     }
+                    result.TransactionsByDay[dateonly].TotalAmount = result.TransactionsByDay[dateonly].TotalAmountIn - result.TransactionsByDay[dateonly].TotalAmountOut;
+                    result.TransactionsByDay[dateonly].TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(result.TransactionsByDay[dateonly].TotalAmount);
                 }
                 result.TotalAmount = result.TotalAmountIn - result.TotalAmountOut;
                 result.TransactionCount = result.NumberOfTransactionIn + result.NumberOfTransactionOut;
@@ -705,7 +706,7 @@ namespace pbms_be.DataAccess
 
                 result.TransactionsByDay = result.TransactionsByDay.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
 
-                var listTran = result.TransactionsByDay.Values.ToList();
+                // var listTran = result.TransactionsByDay.Values.ToList();
 
                 var result2 = new TransactionWeekByWeek2
                 {
@@ -722,7 +723,7 @@ namespace pbms_be.DataAccess
                     TransactionByDayW = result.TransactionsByDay.Values.ToList()
                 };
 
-                foreach (var tran in listTran)
+                foreach (var tran in result2.TransactionByDayW)
                 {
                     tran.Transactions = tran.Transactions.OrderBy(t => t.TransactionDate.TimeOfDay).ToList();
                 }
