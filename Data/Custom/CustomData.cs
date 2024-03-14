@@ -105,6 +105,33 @@ public class TransactionWeekByWeek
     public int TransactionCount { get; set; } = 0;
     public long TotalAmount { get; set; } = 0;
     public string TotalAmountStr { get; set; } = String.Empty;
+    public virtual Dictionary<DateOnly, DayInByWeek> TransactionsByDay { get; set; } = null!;
+}
+
+public class TransactionWeekByWeek2
+{
+    public WeekDetail WeekDetail { get; set; } = null!;
+    public int NumberOfTransactionIn { get; set; } = 0;
+    public long TotalAmountIn { get; set; } = 0;
+    public string TotalAmountInStr { get; set; } = String.Empty;
+    public int NumberOfTransactionOut { get; set; } = 0;
+    public long TotalAmountOut { get; set; } = 0;
+    public string TotalAmountOutStr { get; set; } = String.Empty;
+    public int TransactionCount { get; set; } = 0;
+    public long TotalAmount { get; set; } = 0;
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public virtual List<DayInByWeek> TransactionByDayW { get; set; } = null!;
+}
+
+public class DayInByWeek
+{
+    public DayDetail DayDetail { get; set; } = null!;
+    public long TotalAmountIn { get; set; } = 0;
+    public string TotalAmountInStr { get; set; } = String.Empty;
+    public long TotalAmountOut { get; set; } = 0;
+    public string TotalAmountOutStr { get; set; } = String.Empty;
+    public long TotalAmount { get; set; } = 0;
+    public string TotalAmountStr { get; set; } = String.Empty;
     public virtual List<TransactionInList_VM_DTO> Transactions { get; set; } = null!;
 }
 
@@ -117,6 +144,9 @@ public class DayDetail
     public string Full_VN { get; set; } = String.Empty;
     public string ShortDate { get; set; } = String.Empty;
     public string FullDate { get; set; } = String.Empty;
+
+    public string DayStr { get; set; } = String.Empty;
+    public string MonthYearStr { get; set; } = String.Empty;
 }
 
 public class WeekDetail

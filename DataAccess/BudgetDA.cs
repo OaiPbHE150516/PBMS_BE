@@ -43,7 +43,7 @@ namespace pbms_be.DataAccess
         }
 
         //Get all budget
-        internal List<Budget> GetBudgets(string accountID)
+        internal List<BudgetWithCategoryDTO> GetBudgets(string accountID, AutoMapper.IMapper _mapper)
         {
             try
             {
@@ -59,7 +59,16 @@ namespace pbms_be.DataAccess
                     if (btype is null) throw new Exception();
                     item.BudgetType = btype;
                 }
-                return result;
+                var listBudgetDTO = _mapper.Map<List<BudgetWithCategoryDTO>>(result);
+                foreach (var item in listBudgetDTO)
+                {
+                    var categoriesResult = new List<Category>();
+                    var budget = new Budget();
+                    GetBudgetDetail(accountID, item.BudgetID, out categoriesResult, out budget);
+                    item.Categories = categoriesResult;
+                }
+                return listBudgetDTO;
+                //return result;
             }
             catch (Exception e)
             {
@@ -195,7 +204,7 @@ namespace pbms_be.DataAccess
             return exist;
         }
 
-        internal object DeleteBudget(DeleteBudgetDTO budget)
+        internal object DeleteBudget(DeleteBudgetDTO budget, AutoMapper.IMapper? _mapper)
         {
             try
             {
@@ -204,7 +213,7 @@ namespace pbms_be.DataAccess
                 if (result.AccountID != budget.AccountID) throw new Exception(Message.BUDGET_NOT_FOUND);
                 result.ActiveStateID = ActiveStateConst.DELETED;
                 _context.SaveChanges();
-                return GetBudgets(budget.AccountID);
+                return GetBudgets(budget.AccountID, _mapper);
             }
             catch (Exception e)
             {
