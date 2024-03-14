@@ -246,5 +246,106 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+
+        internal object GetCategoriesTypeByType(string accountID, AutoMapper.IMapper? _mapper)
+        {
+            try
+            {
+                //var categoriesDict = new Dictionary<string, List<Category>>();
+                var categories = GetCategories(accountID);
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var categoriesDTO = _mapper.Map<List<CategoryTree_VM_DTO>>(categories);
+
+                var categoryMap = categoriesDTO.ToDictionary(c => c.CategoryID, c => c);
+                var rootCategories = new List<CategoryTree_VM_DTO>();
+
+                // add children to parent category
+                foreach (var category in categoriesDTO)
+                {
+                    if (category.ParentCategoryID == 0)
+                    {
+                        rootCategories.Add(category);
+                    }
+                    else
+                    {
+                        if (categoryMap.ContainsKey(category.ParentCategoryID))
+                        {
+                            categoryMap[category.ParentCategoryID].Children.Add(category);
+                        }
+                    }
+                }
+                return rootCategories;
+
+
+
+
+                //var categoryTypes = GetCategoryTypes();
+                //foreach (var categoryType in categoryTypes)
+                //{
+                //    var list = categories.Where(c => c.CategoryTypeID == categoryType.CategoryTypeID).ToList();
+                //    categoriesDict.Add(categoryType.Name, list);
+                //}
+
+                //var newCateDict = new Dictionary<string, List<CategoryTree_VM_DTO>>();
+                //foreach (var categoryType in categoryTypes)
+                //{
+                //    var list = categories.Where(c => c.CategoryTypeID == categoryType.CategoryTypeID).ToList();
+                //    var listTree = new List<CategoryTree_VM_DTO>();
+                //    foreach (var category in list)
+                //    {
+                //        //var categoryTree = new CategoryTree_VM_DTO
+                //        //{
+                //        //    CategoryID = category.CategoryID,
+                //        //    NameVN = category.NameVN,
+                //        //    ParentCategoryID = category.ParentCategoryID,
+                //        //    IsRoot = category.IsRoot
+                //        //};
+                //        //listTree.Add(categoryTree);
+
+                //        // if category have parent category id in list, add to parent category children
+                //        if (listTree.Any(c => c.CategoryID == category.ParentCategoryID))
+                //        {
+                //            var parentCategory = listTree.FirstOrDefault(c => c.CategoryID == category.ParentCategoryID);
+                //            var categoryTree = new CategoryTree_VM_DTO
+                //            {
+                //                CategoryID = category.CategoryID,
+                //                NameVN = category.NameVN,
+                //                ParentCategoryID = category.ParentCategoryID,
+                //                IsRoot = category.IsRoot
+                //            };
+                //            parentCategory.Children.Add(categoryTree);
+                //        }
+                //        else
+                //        {
+                //            var categoryTree = new CategoryTree_VM_DTO
+                //            {
+                //                CategoryID = category.CategoryID,
+                //                NameVN = category.NameVN,
+                //                ParentCategoryID = category.ParentCategoryID,
+                //                IsRoot = category.IsRoot
+                //            };
+                //            listTree.Add(categoryTree);
+                //        }
+                //    }
+                //    newCateDict.Add(categoryType.Name, listTree);
+                //}
+                //return newCateDict;
+
+
+
+
+
+
+
+
+
+
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }

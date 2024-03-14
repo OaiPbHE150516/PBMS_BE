@@ -40,4 +40,13 @@ namespace pbms_be.DTOs
         public string NameEN { get; set; } = String.Empty;
         public int ParentCategoryID { get; set; }
     }
+
+    public class CategoryTree_VM_DTO
+    {
+        public int CategoryID { get; set; }
+        public string NameVN { get; set; } = String.Empty;
+        public int ParentCategoryID { get; set; }
+        public bool IsRoot { get; set; }
+        public virtual List<CategoryTree_VM_DTO> Children { get; set; } = new List<CategoryTree_VM_DTO>();
+    }
 }

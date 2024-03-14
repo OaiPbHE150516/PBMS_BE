@@ -6,7 +6,7 @@ namespace pbms_be.Configurations
 {
     public class MapperConfig : Profile
     {
-        public MapperConfig ()
+        public MapperConfig()
         {
             //Account
             CreateMap<Data.Auth.Account, DTOs.AccountDTO>().ReverseMap();
@@ -52,6 +52,9 @@ namespace pbms_be.Configurations
             CreateMap<Data.Filter.Category, DTOs.CategoryInTransaction_VM_DTO>().ReverseMap();
             CreateMap<Data.Filter.Category, DTOs.CategoryCreateDTO>().ReverseMap();
             CreateMap<Data.Filter.Category, DTOs.CategoryUpdateDTO>().ReverseMap();
+
+            // CategoryTree_VM_DTO
+            CreateMap<Data.Filter.Category, DTOs.CategoryTree_VM_DTO>().ReverseMap();
 
 
             // Transaction
