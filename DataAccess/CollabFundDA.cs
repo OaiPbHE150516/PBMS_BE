@@ -23,7 +23,7 @@ namespace pbms_be.DataAccess
             _context = context;
         }
 
-        internal CollabFund CreateCollabFund(CollabFund collabFund, string accountID)
+        internal CollabFund CreateCollabFund(CollabFund collabFund, string accountID, List<string> accountIDs)
         {
             try
             {
@@ -31,21 +31,6 @@ namespace pbms_be.DataAccess
                 {
                     throw new Exception(Message.COLLAB_FUND_ALREADY_EXIST);
                 }
-
-                //if (fileImageCover != null)
-                //{
-                //    var fileName = GCP_BucketDA.UploadFileCustom(
-                //                    fileImageCover, 
-                //                    CloudStorageConfig.PBMS_BUCKET_NAME, 
-                //                    CloudStorageConfig.COLLAB_FUND_FOLDER,
-                //                    accountID,
-                //                    collabFund.Name,
-                //                    "imagecover",
-                //                    true
-                //                    );
-                //    collabFund.ImageURL = fileName;
-                //}
-
                 collabFund.ActiveStateID = ActiveStateConst.ACTIVE;
                 _context.CollabFund.Add(collabFund);
                 _context.SaveChanges();
@@ -58,6 +43,21 @@ namespace pbms_be.DataAccess
                     ActiveStateID = ActiveStateConst.ACTIVE
                 };
                 _context.AccountCollab.Add(collabAccount);
+                var accountCollabs = new List<AccountCollab>();
+                foreach (var item in accountIDs)
+                {
+                    // continue if accountID is fundholder
+                    if (item == accountID) continue;
+                    var accountCollab = new AccountCollab
+                    {
+                        AccountID = item,
+                        CollabFundID = result.CollabFundID,
+                        IsFundholder = false,
+                        ActiveStateID = ActiveStateConst.ACTIVE
+                    };
+                    accountCollabs.Add(accountCollab);
+                }
+                _context.AccountCollab.AddRange(accountCollabs);
                 _context.SaveChanges();
                 return result;
             }

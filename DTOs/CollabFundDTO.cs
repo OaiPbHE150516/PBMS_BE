@@ -42,10 +42,10 @@ namespace pbms_be.DTOs
     public class CreateCollabFundDTO
     {
         public string AccountID { get; set; } = String.Empty;
-
         public string Name { get; set; } = String.Empty;
         public string Description { get; set; } = String.Empty;
         public string ImageURL { get; set; } = String.Empty;
+        public List<string> AccountIDs { get; set; } = null!;
     }
 
     // UpdateCollabFundDTO
