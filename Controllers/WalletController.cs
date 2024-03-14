@@ -172,8 +172,6 @@ namespace pbms_be.Controllers
 
                 if (_walletDA.IsWalletExist(changeActiveStateDTO.AccountID, changeActiveStateDTO.WalletID))
                     return BadRequest(Message.WALLET_NOT_FOUND);
-
-
                 var result = _walletDA.ChangeWalletActiveState(changeActiveStateDTO);
                 return Ok(result);
             }
@@ -193,7 +191,7 @@ namespace pbms_be.Controllers
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
-                if (_walletDA.IsWalletExist(deleteDTO.AccountID, deleteDTO.WalletID)) return BadRequest(Message.WALLET_NOT_FOUND);
+                if (!_walletDA.IsWalletExist(deleteDTO.AccountID, deleteDTO.WalletID)) return BadRequest(Message.WALLET_NOT_FOUND);
                 var authDA = new AuthDA(_context);
                 if (!authDA.IsAccountExist(deleteDTO.AccountID)) return BadRequest(Message.ACCOUNT_NOT_FOUND);
                 var result = _walletDA.DeleteWallet(deleteDTO);

@@ -51,19 +51,20 @@ namespace pbms_be.Controllers
                 var authDA = new AuthDA(_context);
                 if (!authDA.IsAccountExist(accountID)) return BadRequest(Message.ACCOUNT_NOT_FOUND);
                 if ( _mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
-                var listBudget = new List<BudgetWithCategoryDTO>();
-                var result = _budgetDA.GetBudgets(accountID);
-                foreach (var item in result)
-                {
-                    var categoriesResult = new List<Category>();
-                    var budget = new Budget();
+                //var listBudget = new List<BudgetWithCategoryDTO>();
+                var result = _budgetDA.GetBudgets(accountID, _mapper);
+                //foreach (var item in result)
+                //{
+                //    var categoriesResult = new List<Category>();
+                //    var budget = new Budget();
 
-                    _budgetDA.GetBudgetDetail(accountID, item.BudgetID, out categoriesResult, out budget);
-                    var budgetDTO = _mapper.Map<BudgetWithCategoryDTO>(budget);
-                    budgetDTO.Categories = categoriesResult;
-                    listBudget.Add(budgetDTO);
-                }
-                return Ok(listBudget);
+                //    //_budgetDA.GetBudgetDetail(accountID, item.BudgetID, out categoriesResult, out budget);
+                //    var budgetDTO = _mapper.Map<BudgetWithCategoryDTO>(budget);
+                //    budgetDTO.Categories = categoriesResult;
+                //    listBudget.Add(budgetDTO);
+                //}
+                //return Ok(listBudget);
+                return Ok(result);
             }
             catch (System.Exception e)
             {
@@ -147,7 +148,7 @@ namespace pbms_be.Controllers
                 var authDA = new AuthDA(_context);
                 if (!authDA.IsAccountExist(budget.AccountID)) return BadRequest(Message.ACCOUNT_NOT_FOUND);
                 if (!_budgetDA.IsBudgetExist(budget.AccountID, budget.BudgetID)) return BadRequest(Message.BUDGET_NOT_FOUND);
-                var result = _budgetDA.DeleteBudget(budget);
+                var result = _budgetDA.DeleteBudget(budget, _mapper);
                 return Ok(result);
             }
             catch (System.Exception e)

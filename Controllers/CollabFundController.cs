@@ -228,7 +228,7 @@ namespace pbms_be.Controllers
                 var collabFundEntity = _mapper.Map<CollabFund>(collabFundDTO);
                 if (_collabFundDA.IsCollabFundExist(collabFundEntity))
                     return BadRequest(Message.COLLAB_FUND_ALREADY_EXIST);
-                var result = _collabFundDA.CreateCollabFund(collabFundEntity, collabFundDTO.AccountID);
+                var result = _collabFundDA.CreateCollabFund(collabFundEntity, collabFundDTO.AccountID, collabFundDTO.AccountIDs);
                 return Ok(result);
             }
             catch (System.Exception e)

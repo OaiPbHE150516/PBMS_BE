@@ -1,9 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using pbms_be.Configurations;
 using pbms_be.Data;
+using pbms_be.Data.Custom;
 using pbms_be.Data.Invo;
 using pbms_be.Data.Trans;
 using pbms_be.DTOs;
+using pbms_be.Library;
+using System.Collections.Generic;
 
 namespace pbms_be.DataAccess
 {
@@ -19,43 +23,25 @@ namespace pbms_be.DataAccess
         {
             try
             {
-
-                // get transactions by account id with paging and sorting ascending or descending by using Skip and Take
+                var now = DateTime.UtcNow;
                 int skip = (pageNumber - 1) * pageSize;
                 var result = _context.Transaction
-                            .Where(t => t.AccountID == AccountID)
+                            .Where(t => t.AccountID == AccountID && t.TransactionDate <= now)
                             .Include(t => t.ActiveState)
                             .Include(t => t.Category)
                             .Include(t => t.Wallet)
-                            .OrderBy(t => t.TransactionID)
-                            .Skip(skip)
-                            .Take(pageSize)
+                            .OrderByDescending(t => t.TransactionDate)
                             .ToList();
-                sortType = sortType ?? ConstantConfig.ASCENDING_SORT;
-                switch (sortType.ToLower())
-                {
-                    case ConstantConfig.ASCENDING_SORT:
-                        result = result.OrderBy(t => t.TransactionDate).ToList();
-                        break;
-                    case ConstantConfig.DESCENDING_SORT:
-                        result = result.OrderByDescending(t => t.TransactionDate).ToList();
-                        break;
-                    default:
-                        result = result.OrderBy(t => t.TransactionDate).ToList();
-                        break;
-                }
-                //var result = _context.Transaction
-                //            .Where(t => t.AccountID == AccountID)
-                //            .Include(t => t.ActiveState)
-                //            .Include(t => t.Category)
-                //            .Include(t => t.Wallet)
-                //            .ToList();
                 if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
                 var cateDA = new CategoryDA(_context);
+                var cates = cateDA.GetCategoryTypes();
                 foreach (var transaction in result)
                 {
-                    transaction.Category.CategoryType = cateDA.GetCategoryType(transaction.Category.CategoryTypeID);
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
+                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    transaction.Category.CategoryType = cateType;
                 }
+                result = result.Skip(skip).Take(pageSize).ToList();
                 return result;
             }
             catch (Exception e)
@@ -159,6 +145,36 @@ namespace pbms_be.DataAccess
             }
         }
 
+        internal Transaction CreateTransactionRaw(Transaction transaction)
+        {
+            try
+            {
+                transaction.ActiveStateID = ActiveStateConst.ACTIVE;
+                _context.Transaction.Add(transaction);
+                _context.SaveChanges();
+                return transaction;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        // create transaction by list of transactions raw
+        internal List<Transaction> CreateTransactionsRaw(List<Transaction> transactions)
+        {
+            try
+            {
+                _context.Transaction.AddRange(transactions);
+                _context.SaveChanges();
+                return transactions;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
         internal bool IsTransactionExist(Transaction transaction)
         {
             try
@@ -181,6 +197,543 @@ namespace pbms_be.DataAccess
             {
                 throw new Exception(e.Message);
             }
+        }
+
+        internal List<Transaction> GetTransactionsByMonth(string accountID, int month, int year)
+        {
+            try
+            {
+                var result = _context.Transaction
+                                    .Where(t => t.AccountID == accountID
+                                    && t.TransactionDate.Month == month
+                                    && t.TransactionDate.Year == year)
+                                    .Include(t => t.ActiveState)
+                                    .Include(t => t.Category)
+                                    .Include(t => t.Wallet)
+                                    .ToList();
+                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                var cateDA = new CategoryDA(_context);
+                var cates = cateDA.GetCategoryTypes();
+                foreach (var transaction in result)
+                {
+                    transaction.TransactionDate = LConvertVariable.ConvertUtcToLocalTime(transaction.TransactionDate);
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
+                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    transaction.Category.CategoryType = cateType;
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal List<Transaction> GetTransactionsByDay(string accountID, int day, int month, int year)
+        {
+            try
+            {
+                var result = _context.Transaction
+                                    .Where(t => t.AccountID == accountID
+                                    && t.TransactionDate.Day == day
+                                    && t.TransactionDate.Month == month
+                                    && t.TransactionDate.Year == year)
+                                    .Include(t => t.ActiveState)
+                                    .Include(t => t.Category)
+                                    .Include(t => t.Wallet)
+                                    .ToList();
+                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                var cateDA = new CategoryDA(_context);
+                var cates = cateDA.GetCategoryTypes();
+                foreach (var transaction in result)
+                {
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
+                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    transaction.Category.CategoryType = cateType;
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal List<Transaction> GetTransactionsByDateTimeRange(string accountID, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var result = _context.Transaction
+                                    .Where(t => t.AccountID == accountID
+                                    && t.TransactionDate >= fromDate
+                                    && t.TransactionDate <= toDate)
+                                    .Include(t => t.ActiveState)
+                                    .Include(t => t.Category)
+                                    .Include(t => t.Wallet)
+                                    .ToList();
+                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                var cateDA = new CategoryDA(_context);
+                var cates = cateDA.GetCategoryTypes();
+                foreach (var transaction in result)
+                {
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
+                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    transaction.Category.CategoryType = cateType;
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal Dictionary<int, TransactionInDayCalendar> GetTransactionsByMonthCalendar(string accountID, int month, int year, IMapper? _mapper)
+        {
+            try
+            {
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var transactions = GetTransactionsByMonth(accountID, month, year);
+                var transactionsByDay = new Dictionary<int, TransactionInDayCalendar>();
+                var daysInMonth = DateTime.DaysInMonth(year, month);
+                foreach (var transaction in transactions)
+                {
+                    var day = transaction.TransactionDate.Day;
+                    if (transactionsByDay.ContainsKey(day))
+                    {
+                        transactionsByDay[day].TotalAmount += transaction.TotalAmount;
+                        transactionsByDay[day].TransactionCount++;
+                        transactionsByDay[day].Transactions.Add(_mapper.Map<TransactionDetail_VM_DTO>(transaction));
+                    }
+                    else
+                    {
+                        TransactionInDayCalendar transactionInDayCalendar = new TransactionInDayCalendar
+                        {
+                            Date = new DateOnly(transaction.TransactionDate.Year, transaction.TransactionDate.Month, transaction.TransactionDate.Day),
+                            isHasTransaction = true,
+                            TransactionCount = 1,
+                            Transactions = new List<TransactionDetail_VM_DTO> { _mapper.Map<TransactionDetail_VM_DTO>(transaction) }
+                        };
+                        transactionsByDay.Add(day, transactionInDayCalendar);
+                    }
+                    if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                    {
+                        transactionsByDay[day].isHasTransactionIn = true;
+                        transactionsByDay[day].TotalAmountIn += transaction.TotalAmount;
+                    }
+                    else
+                    {
+                        transactionsByDay[day].isHasTransactionOut = true;
+                        transactionsByDay[day].TotalAmountOut += transaction.TotalAmount;
+                    }
+                }
+                foreach (var item in transactionsByDay)
+                {
+                    item.Value.TotalAmount = item.Value.TotalAmountIn - item.Value.TotalAmountOut;
+                    item.Value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmount);
+                    item.Value.TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountIn);
+                    item.Value.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountOut);
+                }
+                transactionsByDay = transactionsByDay.OrderBy(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
+
+                return transactionsByDay;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetRecentlyTransactions(string accountID, int number)
+        {
+            try
+            {
+                var now = DateTime.UtcNow;
+                var result = _context.Transaction
+                            .Where(t => t.AccountID == accountID && t.TransactionDate <= now)
+                            .Include(t => t.ActiveState)
+                            .Include(t => t.Category)
+                            .Include(t => t.Wallet)
+                            .OrderByDescending(t => t.TransactionDate)
+                            .Take(number)
+                            .ToList();
+                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                var cateDA = new CategoryDA(_context);
+
+                var cates = cateDA.GetCategoryTypes();
+                foreach (var transaction in result)
+                {
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
+                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    transaction.Category.CategoryType = cateType;
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetTotalAmountInAndOutByMonth(string accountID, int month, int year)
+        {
+            try
+            {
+                var transactions = GetTransactionsByMonth(accountID, month, year);
+                long totalAmountIn = 0;
+                int numberTransIn = 0;
+                long totalAmountOut = 0;
+                int numberTransOut = 0;
+                foreach (var transaction in transactions)
+                {
+                    if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                    {
+                        totalAmountIn += transaction.TotalAmount;
+                        numberTransIn++;
+                    }
+                    else
+                    {
+                        totalAmountOut += transaction.TotalAmount;
+                        numberTransOut++;
+                    }
+                }
+                var totalAmount = totalAmountIn - totalAmountOut;
+                return new
+                {
+                    numberTransIn,
+                    totalAmountIn,
+                    totalAmountInStr = LConvertVariable.ConvertToMoneyFormat(totalAmountIn),
+                    numberTransOut,
+                    totalAmountOut,
+                    totalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOut),
+                    totalAmount,
+                    totalNumberTrans = numberTransIn + numberTransOut,
+                    totalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount)
+                };
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetTotalAmountInAndOutByLastDays(string accountID)
+        {
+            try
+            {
+                var fromDate = DateTime.UtcNow.AddDays(-ConstantConfig.NUMBER_LAST_DAYS);
+                var toDate = DateTime.UtcNow;
+                var transactions = GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
+                var transactionsDict = new Dictionary<DateOnly, TransactionInLastDays>();
+
+                foreach (var tran in transactions)
+                {
+                    var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
+                    if (transactionsDict.ContainsKey(dateonly))
+                    {
+                        if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                        {
+                            transactionsDict[dateonly].TotalAmountIn += tran.TotalAmount;
+                            transactionsDict[dateonly].NumberOfTransactionIn++;
+                        }
+                        else
+                        {
+                            transactionsDict[dateonly].TotalAmountOut += tran.TotalAmount;
+                            transactionsDict[dateonly].NumberOfTransactionOut++;
+                        }
+                    }
+                    else
+                    {
+                        var transin = new TransactionInLastDays
+                        {
+                            DayDetail = new DayDetail
+                            {
+                                DayOfWeek = dateonly.DayOfWeek,
+                                Short_EN = dateonly.DayOfWeek.ToString().Substring(0, 3),
+                                Full_EN = dateonly.DayOfWeek.ToString(),
+                                Short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                                Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                                ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
+                                FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                                DayStr = dateonly.Day.ToString(),
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+                            }
+                        };
+                        if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                        {
+                            transin.TotalAmountIn += tran.TotalAmount;
+                            transin.NumberOfTransactionIn++;
+                        }
+                        else
+                        {
+                            transin.TotalAmountOut += tran.TotalAmount;
+                            transin.NumberOfTransactionOut++;
+                        }
+                        transactionsDict.Add(dateonly, transin);
+                    }
+                }
+                foreach (var item in transactionsDict)
+                {
+                    item.Value.TotalAmount = item.Value.TotalAmountIn - item.Value.TotalAmountOut;
+                    item.Value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmount);
+                    item.Value.TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountIn);
+                    item.Value.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountOut);
+                }
+
+                var listValue = new List<long>() {
+                    transactionsDict.Values.Max(t => t.TotalAmountIn),
+                    transactionsDict.Values.Max(t => t.TotalAmountOut),
+                    transactionsDict.Values.Min(t => t.TotalAmountIn),
+                    transactionsDict.Values.Min(t => t.TotalAmountOut)
+                };
+
+                // loop from fromDate to toDate, if not exist in transactionsDict, add new TransactionInLastDays with TotalAmount = 0
+                for (var date = fromDate; date <= toDate; date = date.AddDays(1))
+                {
+                    var dateonly = new DateOnly(date.Year, date.Month, date.Day);
+                    if (!transactionsDict.ContainsKey(dateonly))
+                    {
+                        var transin = new TransactionInLastDays
+                        {
+                            DayDetail = new DayDetail
+                            {
+                                DayOfWeek = dateonly.DayOfWeek,
+                                Short_EN = dateonly.DayOfWeek.ToString().Substring(0, 3),
+                                Full_EN = dateonly.DayOfWeek.ToString(),
+                                Short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                                Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                                ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
+                                FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                                DayStr = dateonly.Day.ToString(),
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+                            }
+                        };
+                        transactionsDict.Add(dateonly, transin);
+                    }
+                }
+                transactionsDict = transactionsDict.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
+
+                return new
+                {
+                    minValue = listValue.Min() == 0 ? listValue.OrderBy(v => v).Skip(1).First() : listValue.Min(),
+                    maxValue = listValue.Max(),
+                    transactionsDict
+                };
+
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
+            /*
+              dayInWeekShortTypeVN = date.DayOfWeek.ToString().Substring(0, 3) switch
+                        {
+                            "Mon" => "T2",
+                            "Tue" => "T3",
+                            "Wed" => "T4",
+                            "Thu" => "T5",
+                            "Fri" => "T6",
+                            "Sat" => "T7",
+                            "Sun" => "CN",
+                            _ => "CN"
+                        },
+             */
+        }
+
+        internal object GetTransactionsDayByDay(string accountID, DateTime fromDateTime, DateTime toDateTime, IMapper? _mapper)
+        {
+            try
+            {
+                var transactions = GetTransactionsByDateTimeRange(accountID, fromDateTime, toDateTime);
+                var transactionsDict = new Dictionary<DateOnly, TransactionDayByDay>();
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+
+                foreach (var tran in transactions)
+                {
+                    var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
+                    if (transactionsDict.ContainsKey(dateonly))
+                    {
+                        // add transaction to list of transactions
+                        transactionsDict[dateonly].Transactions.Add(_mapper.Map<TransactionInList_VM_DTO>(tran));
+                        if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                        {
+                            transactionsDict[dateonly].TotalAmountIn += tran.TotalAmount;
+                            transactionsDict[dateonly].NumberOfTransactionIn++;
+                        }
+                        else
+                        {
+                            transactionsDict[dateonly].TotalAmountOut += tran.TotalAmount;
+                            transactionsDict[dateonly].NumberOfTransactionOut++;
+                        }
+                    }
+                    else
+                    {
+                        var transin = new TransactionDayByDay
+                        {
+                            DayDetail = new DayDetail
+                            {
+                                DayOfWeek = dateonly.DayOfWeek,
+                                Short_EN = dateonly.DayOfWeek.ToString().Substring(0, 3),
+                                Full_EN = dateonly.DayOfWeek.ToString(),
+                                Short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                                Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                                ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
+                                FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                                DayStr = dateonly.Day.ToString(),
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+                            }
+                        };
+                        if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                        {
+                            transin.TotalAmountIn += tran.TotalAmount;
+                            transin.NumberOfTransactionIn++;
+                        }
+                        else
+                        {
+                            transin.TotalAmountOut += tran.TotalAmount;
+                            transin.NumberOfTransactionOut++;
+                        }
+                        transin.Transactions = new List<TransactionInList_VM_DTO> { _mapper.Map<TransactionInList_VM_DTO>(tran) };
+                        transactionsDict.Add(dateonly, transin);
+                    }
+                }
+                foreach (var item in transactionsDict)
+                {
+                    item.Value.TotalAmount = item.Value.TotalAmountIn - item.Value.TotalAmountOut;
+                    item.Value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmount);
+                    item.Value.TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountIn);
+                    item.Value.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(item.Value.TotalAmountOut);
+                }
+                transactionsDict = transactionsDict.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
+                return transactionsDict;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetTransactionsWeekByWeek(string accountID, DateTime fromDateTime, DateTime toDateTime, IMapper? mapper)
+        {
+            try
+            {
+                var result = new TransactionWeekByWeek
+                {
+                    WeekDetail = new WeekDetail
+                    {
+                        StartDate = new DateOnly(fromDateTime.Year, fromDateTime.Month, fromDateTime.Day),
+                        StartDateStrShort = LConvertVariable.ConvertDateToShortStr(fromDateTime),
+                        StartDateStrFull = fromDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT),
+                        DayOfWeekStartStr = LConvertVariable.ConvertDayInWeekToVN_SHORT_4(fromDateTime.DayOfWeek),
+                        EndDate = new DateOnly(toDateTime.Year, toDateTime.Month, toDateTime.Day),
+                        EndDateStrShort = LConvertVariable.ConvertDateToShortStr(toDateTime),
+                        EndDateStrFull = toDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT),
+                        DayOfWeekEndStr = LConvertVariable.ConvertDayInWeekToVN_SHORT_4(toDateTime.DayOfWeek)
+                    },
+                    TransactionsByDay = new Dictionary<DateOnly, DayInByWeek>()
+                };
+                if (mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var transactions = GetTransactionsByDateTimeRange(accountID, fromDateTime, toDateTime);
+                foreach (var transaction in transactions)
+                {
+                    if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                    {
+                        result.TotalAmountIn += transaction.TotalAmount;
+                        result.NumberOfTransactionIn++;
+                    }
+                    else
+                    {
+                        result.TotalAmountOut += transaction.TotalAmount;
+                        result.NumberOfTransactionOut++;
+                    }
+                    var tran = mapper.Map<TransactionInList_VM_DTO>(transaction);
+                    var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
+                    if (result.TransactionsByDay.ContainsKey(dateonly))
+                    {
+                        result.TransactionsByDay[dateonly].DayDetail = new DayDetail
+                        {
+                            DayOfWeek = dateonly.DayOfWeek,
+                            Short_EN = dateonly.DayOfWeek.ToString().Substring(0, 3),
+                            Full_EN = dateonly.DayOfWeek.ToString(),
+                            Short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                            Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                            ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
+                            FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                            DayStr = dateonly.Day.ToString(),
+                            MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+                        };
+                        result.TransactionsByDay[dateonly].Transactions.Add(tran);
+                    }
+                    else
+                    {
+                        result.TransactionsByDay.Add(dateonly, new DayInByWeek
+                        {
+                            DayDetail = new DayDetail
+                            {
+                                DayOfWeek = dateonly.DayOfWeek,
+                                Short_EN = dateonly.DayOfWeek.ToString().Substring(0, 3),
+                                Full_EN = dateonly.DayOfWeek.ToString(),
+                                Short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                                Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                                ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
+                                FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
+                                DayStr = dateonly.Day.ToString(),
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+                            },
+                            Transactions = new List<TransactionInList_VM_DTO> { tran }
+                        });
+                    }
+                    if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
+                    {
+                        result.TransactionsByDay[dateonly].TotalAmountIn += transaction.TotalAmount;
+                        result.TransactionsByDay[dateonly].TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(result.TransactionsByDay[dateonly].TotalAmountIn);
+                    }
+                    else
+                    {
+                        result.TransactionsByDay[dateonly].TotalAmountOut += transaction.TotalAmount;
+                        result.TransactionsByDay[dateonly].TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(result.TransactionsByDay[dateonly].TotalAmountOut);
+                    }
+                    result.TransactionsByDay[dateonly].TotalAmount = result.TransactionsByDay[dateonly].TotalAmountIn - result.TransactionsByDay[dateonly].TotalAmountOut;
+                    result.TransactionsByDay[dateonly].TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(result.TransactionsByDay[dateonly].TotalAmount);
+                }
+                result.TotalAmount = result.TotalAmountIn - result.TotalAmountOut;
+                result.TransactionCount = result.NumberOfTransactionIn + result.NumberOfTransactionOut;
+                result.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(result.TotalAmount);
+                result.TotalAmountInStr = LConvertVariable.ConvertToMoneyFormat(result.TotalAmountIn);
+                result.TotalAmountOutStr = LConvertVariable.ConvertToMoneyFormat(result.TotalAmountOut);
+
+                result.TransactionsByDay = result.TransactionsByDay.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
+
+                // var listTran = result.TransactionsByDay.Values.ToList();
+
+                var result2 = new TransactionWeekByWeek2
+                {
+                    WeekDetail = result.WeekDetail,
+                    NumberOfTransactionIn = result.NumberOfTransactionIn,
+                    TotalAmountIn = result.TotalAmountIn,
+                    TotalAmountInStr = result.TotalAmountInStr,
+                    NumberOfTransactionOut = result.NumberOfTransactionOut,
+                    TotalAmountOut = result.TotalAmountOut,
+                    TotalAmountOutStr = result.TotalAmountOutStr,
+                    TransactionCount = result.TransactionCount,
+                    TotalAmount = result.TotalAmount,
+                    TotalAmountStr = result.TotalAmountStr,
+                    TransactionByDayW = result.TransactionsByDay.Values.ToList()
+                };
+
+                foreach (var tran in result2.TransactionByDayW)
+                {
+                    tran.Transactions = tran.Transactions.OrderBy(t => t.TransactionDate.TimeOfDay).ToList();
+                }
+                return result2;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+            throw new NotImplementedException();
         }
     }
 }
