@@ -144,7 +144,7 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
-        internal Transaction CreateTransactionV2(Transaction transaction)
+        internal Transaction CreateTransactionV2(Transaction transaction, DateTime transactionDate)
         {
             try
             {
@@ -158,7 +158,8 @@ namespace pbms_be.DataAccess
                             .Include(c => c.ActiveState)
                             .Include(c => c.CategoryType)
                             .FirstOrDefault() ?? throw new Exception(Message.CATEGORY_NOT_BELONG_ACCOUNT + ": " + transaction.AccountID);
-                //transaction.TransactionDate = DateTime.UtcNow;
+
+                transaction.TransactionDate = transactionDate;
                 transaction.ActiveStateID = ActiveStateConst.ACTIVE;
                 _context.Transaction.Add(transaction);
                 _context.SaveChanges();

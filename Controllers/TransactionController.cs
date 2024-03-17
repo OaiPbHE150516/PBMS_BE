@@ -314,7 +314,8 @@ namespace pbms_be.Controllers
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var transaction = _mapper.Map<Data.Trans.Transaction>(transactionDTO);
                 if(_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
-                var resultTransaction = _transactionDA.CreateTransactionV2(transaction);
+                var transDate = DateTime.UtcNow;
+                var resultTransaction = _transactionDA.CreateTransactionV2(transaction, transDate);
                 var invoiceDA = new InvoiceDA(_context);
                 var resultInvoice = invoiceDA.CreateInvoice(_mapper.Map<Invoice>(transactionDTO.Invoice), resultTransaction.TransactionID);
                 if (resultTransaction is null || resultInvoice is null) return BadRequest(Message.TRANSACTION_CREATE_FAILED);
@@ -338,8 +339,8 @@ namespace pbms_be.Controllers
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var transaction = _mapper.Map<Data.Trans.Transaction>(transactionDTO);
-                if(_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
-                var result = _transactionDA.CreateTransactionV2(transaction);
+                if (_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
+                var result = _transactionDA.CreateTransactionV2(transaction, transactionDTO.TransactionDate);
                 if (result is null) return BadRequest(Message.TRANSACTION_CREATE_FAILED);       
                 return Ok(result);
             } catch (System.Exception e)
