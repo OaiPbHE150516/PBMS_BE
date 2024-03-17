@@ -81,6 +81,8 @@ namespace pbms_be.Configurations
                .ForMember(dest => dest.TransactionTimeStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate), ConstantConfig.DEFAULT_TIME_FORMAT)))
                .ReverseMap();
             CreateMap<Data.Trans.Transaction, DTOs.TransactionCreateDTO>().ReverseMap();
+            CreateMap<Data.Trans.Transaction, DTOs.TransactionWithoutInvoiceCreateDTO>().ReverseMap();
+
 
             // Invoice
             CreateMap<Data.Invo.Invoice, DTOs.InvoiceCreateDTO>().ReverseMap();

@@ -131,7 +131,9 @@
         public const string YEAR_REQUIRED = " Year is required";
         public const string FROM_DATE_REQUIRED = " From date is required";
         public const string TO_DATE_REQUIRED = " To date is required";
-
+        public const string TRANSACTION_IS_NULL = " Transaction is null";
+        public const string WALLET_NOT_BELONG_ACCOUNT = " Wallet not belong to account";
+        public const string CATEGORY_NOT_BELONG_ACCOUNT = " Category not belong to account";
 
 
         // Budget

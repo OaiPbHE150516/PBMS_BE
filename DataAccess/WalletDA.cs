@@ -271,5 +271,26 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+
+        internal void UpdateWalletAmount(int walletID, long totalAmount, int categoryTypeID)
+        {
+            try
+            {
+                var wallet = GetWallet(walletID) ?? throw new Exception(Message.WALLET_NOT_FOUND);
+                if (categoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_EXPENSE)
+                {
+                    wallet.Balance -= totalAmount;
+                }
+                else
+                {
+                    wallet.Balance += totalAmount;
+                }
+                _context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }

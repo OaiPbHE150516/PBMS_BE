@@ -144,6 +144,35 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+        internal Transaction CreateTransactionV2(Transaction transaction)
+        {
+            try
+            {
+                if (transaction is null) throw new Exception(Message.TRANSACTION_IS_NULL);
+                var isValidWallet = _context.Wallet
+                            .Any(w => w.WalletID == transaction.WalletID && w.AccountID == transaction.AccountID);
+                if (!isValidWallet) throw new Exception(Message.WALLET_NOT_BELONG_ACCOUNT + ": " + transaction.AccountID);
+
+                var category = _context.Category
+                            .Where(c => c.CategoryID == transaction.CategoryID && c.AccountID == transaction.AccountID && c.ActiveStateID == ActiveStateConst.ACTIVE)
+                            .Include(c => c.ActiveState)
+                            .Include(c => c.CategoryType)
+                            .FirstOrDefault() ?? throw new Exception(Message.CATEGORY_NOT_BELONG_ACCOUNT + ": " + transaction.AccountID);
+                transaction.TransactionDate = DateTime.UtcNow;
+                transaction.ActiveStateID = ActiveStateConst.ACTIVE;
+                _context.Transaction.Add(transaction);
+                _context.SaveChanges();
+
+                var walletDA = new WalletDA(_context);
+                walletDA.UpdateWalletAmount(transaction.WalletID, transaction.TotalAmount, category.CategoryTypeID);
+
+                return transaction;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
 
         internal Transaction CreateTransactionRaw(Transaction transaction)
         {
@@ -187,7 +216,7 @@ namespace pbms_be.DataAccess
                              && t.CategoryID == transaction.CategoryID
                              && t.TotalAmount == transaction.TotalAmount
                              && t.Note == transaction.Note
-                             && t.TransactionDate == transaction.TransactionDate
+                             && t.TransactionDate.Minute == transaction.TransactionDate.Minute
                              && t.FromPerson == transaction.FromPerson
                              && t.ToPerson == transaction.ToPerson
                              && t.ImageURL == transaction.ImageURL);

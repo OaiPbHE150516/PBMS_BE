@@ -77,4 +77,16 @@ namespace pbms_be.DTOs
         public string ImageURL { get; set; } = String.Empty;
         public virtual InvoiceCreateDTO Invoice { get; set; } = null!;
     }
+
+    public class TransactionWithoutInvoiceCreateDTO
+    {
+        public string AccountID { get; set; } = String.Empty;
+        public int WalletID { get; set; }
+        public int CategoryID { get; set; }
+        public long TotalAmount { get; set; }
+        public string Note { get; set; } = String.Empty;
+        public string FromPerson { get; set; } = String.Empty;
+        public string ToPerson { get; set; } = String.Empty;
+        public string ImageURL { get; set; } = String.Empty;
+    }
 }

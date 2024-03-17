@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Invo;
+using pbms_be.Data.Trans;
 using pbms_be.DataAccess;
 using pbms_be.DTOs;
 using System.Transactions;
@@ -303,7 +304,7 @@ namespace pbms_be.Controllers
 
         #region Post Methods
 
-        // add new transaction
+        // create transaction with invoice and products
         [HttpPost("create")]
         public IActionResult CreateTransaction([FromBody] TransactionCreateDTO transactionDTO)
         {
@@ -313,7 +314,7 @@ namespace pbms_be.Controllers
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var transaction = _mapper.Map<Data.Trans.Transaction>(transactionDTO);
                 if(_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
-                var resultTransaction = _transactionDA.CreateTransaction(transaction);
+                var resultTransaction = _transactionDA.CreateTransactionV2(transaction);
                 var invoiceDA = new InvoiceDA(_context);
                 var resultInvoice = invoiceDA.CreateInvoice(_mapper.Map<Invoice>(transactionDTO.Invoice), resultTransaction.TransactionID);
                 if (resultTransaction is null || resultInvoice is null) return BadRequest(Message.TRANSACTION_CREATE_FAILED);
@@ -326,6 +327,26 @@ namespace pbms_be.Controllers
             {
                 return BadRequest(e.Message);
             }
+        }
+
+        // create transaction without invoice and products
+        [HttpPost("create/withoutinvoice")]
+        public IActionResult CreateTransactionWithoutInvoice([FromBody] TransactionWithoutInvoiceCreateDTO transactionDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var transaction = _mapper.Map<Data.Trans.Transaction>(transactionDTO);
+                if(_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
+                var result = _transactionDA.CreateTransactionV2(transaction);
+                if (result is null) return BadRequest(Message.TRANSACTION_CREATE_FAILED);       
+                return Ok(result);
+            } catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+            throw new NotImplementedException();
         }
 
         #endregion
