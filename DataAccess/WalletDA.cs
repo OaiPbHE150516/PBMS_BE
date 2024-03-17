@@ -280,12 +280,15 @@ namespace pbms_be.DataAccess
                 if (categoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_EXPENSE)
                 {
                     wallet.Balance -= totalAmount;
+                    Console.WriteLine("Expense: " + totalAmount);
                 }
                 else
                 {
                     wallet.Balance += totalAmount;
+                    Console.WriteLine("Income: " + totalAmount);
                 }
                 _context.SaveChanges();
+                // check save changes success or not
             }
             catch (Exception e)
             {
