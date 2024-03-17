@@ -663,7 +663,7 @@ namespace pbms_be.DataAccess
                         EndDateStrFull = toDateTime.ToString(ConstantConfig.DEFAULT_DATE_FORMAT),
                         DayOfWeekEndStr = LConvertVariable.ConvertDayInWeekToVN_SHORT_4(toDateTime.DayOfWeek)
                     },
-                    TransactionsByDay = new Dictionary<DateOnly, DayInByWeek>()
+                    TransactionsByDay = []
                 };
                 if (mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var transactions = GetTransactionsByDateTimeRange(accountID, fromDateTime, toDateTime);
@@ -681,9 +681,9 @@ namespace pbms_be.DataAccess
                     }
                     var tran = mapper.Map<TransactionInList_VM_DTO>(transaction);
                     var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
-                    if (result.TransactionsByDay.ContainsKey(dateonly))
+                    if (result.TransactionsByDay.TryGetValue(dateonly, out DayInByWeek? value))
                     {
-                        result.TransactionsByDay[dateonly].DayDetail = new DayDetail
+                        value.DayDetail = new DayDetail
                         {
                             DayOfWeek = dateonly.DayOfWeek,
                             Short_EN = dateonly.DayOfWeek.ToString().Substring(0, 3),
@@ -695,7 +695,7 @@ namespace pbms_be.DataAccess
                             DayStr = dateonly.Day.ToString(),
                             MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
                         };
-                        result.TransactionsByDay[dateonly].Transactions.Add(tran);
+                        value.Transactions.Add(tran);
                     }
                     else
                     {
@@ -713,7 +713,7 @@ namespace pbms_be.DataAccess
                                 DayStr = dateonly.Day.ToString(),
                                 MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
                             },
-                            Transactions = new List<TransactionInList_VM_DTO> { tran }
+                            Transactions = [tran]
                         });
                     }
                     if (transaction.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
@@ -756,7 +756,7 @@ namespace pbms_be.DataAccess
 
                 foreach (var tran in result2.TransactionByDayW)
                 {
-                    tran.Transactions = tran.Transactions.OrderBy(t => t.TransactionDate.TimeOfDay).ToList();
+                    tran.Transactions = [.. tran.Transactions.OrderByDescending(t => t.TransactionDate.TimeOfDay)];
                 }
                 return result2;
             }
