@@ -5,6 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Transactions;
 using pbms_be.Data.Trans;
+using Microsoft.EntityFrameworkCore;
+using pbms_be.Data.Filter;
+using pbms_be.Data.WalletF;
+using pbms_be.Data.Balance;
 
 namespace pbms_be.Library
 {
@@ -74,7 +78,7 @@ namespace pbms_be.Library
                 result.Append(" ");
             }
             return result.ToString();
-        }        
+        }
         private static string GenerateRandomParagraphLorem(int length)
         {
             var lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
@@ -241,16 +245,14 @@ namespace pbms_be.Library
                 var minDateTime = new DateTime(data.minYear, data.minMonth, data.minDay);
                 var maxDateTime = new DateTime(data.maxYear, data.maxMonth, data.maxDay);
 
-                var wallets = new List<int>();
-                wallets = _context.Wallet
-                    .Where(w => w.AccountID == data.AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE)
-                    .Select(w => w.WalletID).ToList();
+                var wallets = _context.Wallet
+                    .Where(w => w.AccountID == data.AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE).ToList();
                 if (wallets.Count == 0) throw new Exception("No wallet found for account " + data.AccountID);
 
-                var categories = new List<int>();
+                var categories = new List<Category>();
                 categories = _context.Category
                     .Where(c => c.AccountID == data.AccountID && c.ActiveStateID == ActiveStateConst.ACTIVE)
-                    .Select(c => c.CategoryID).ToList();
+                    .Include(c => c.CategoryType).ToList();
                 if (categories.Count == 0) throw new Exception("No category found for account " + data.AccountID);
 
                 for (int i = 0; i < data.numberOfTransactions; i++)
@@ -259,9 +261,14 @@ namespace pbms_be.Library
                     {
                         AccountID = data.AccountID
                     };
+                    //var cate = /*categories[random.Next(0, categories.Count)];*/
+                    var cate = categories[random.Next(0, categories.Count)];
+                    var wallet = wallets[random.Next(0, wallets.Count)];
                     transaction.AccountID = data.AccountID;
-                    transaction.WalletID = wallets[random.Next(0, wallets.Count)];
-                    transaction.CategoryID = categories[random.Next(0, categories.Count)];
+                    transaction.WalletID = wallet.WalletID;
+                    transaction.Wallet = wallet;
+                    transaction.CategoryID = cate.CategoryID;
+                    transaction.Category = cate;
                     transaction.TotalAmount = GenerateRandomMoneyAmountInRange(data.minAmount, data.maxAmount, data.isRoundAmount);
                     transaction.Note = GenerateRandomParagraphLorem(20);
                     transaction.TransactionDate = GenerateRandomDateTimeInRange(minDateTime, maxDateTime);
@@ -271,9 +278,49 @@ namespace pbms_be.Library
                     transaction.ActiveStateID = ActiveStateConst.ACTIVE;
                     transactions.Add(transaction);
                 }
-                _context.Transaction.AddRange(transactions);
-                _context.SaveChanges();
 
+                var listCateType = _context.CategoryType.ToList();
+
+                foreach (var tran in transactions)
+                {
+                    _context.Transaction.Add(tran);
+
+                    var threadW = new Thread(() =>
+                    {
+                        var wallet = _context.Wallet.FirstOrDefault(a => a.WalletID == tran.WalletID) ?? throw new Exception(Message.WALLET_NOT_FOUND);
+                        if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_EXPENSE)
+                        {
+                            wallet.Balance -= tran.TotalAmount;
+                        }
+                        else
+                        {
+                            wallet.Balance += tran.TotalAmount;
+                        }
+                        _context.SaveChanges();
+                    });
+                    threadW.Start();
+                    threadW.Join();
+
+                    var threadB = new Thread(() =>
+                    { // get wallet balance
+                        var walletBalance = _context.Wallet.FirstOrDefault(w => w.WalletID == tran.WalletID) ?? throw new Exception(Message.WALLET_NOT_FOUND);
+                        var balanceHistoryLog = new BalanceHistoryLog
+                        {
+                            AccountID = tran.AccountID,
+                            WalletID = tran.WalletID,
+                            Balance = walletBalance.Balance,
+                            TransactionID = tran.TransactionID,
+                            HisLogDate = tran.TransactionDate,
+                            ActiveStateID = ActiveStateConst.ACTIVE
+                        };
+                        _context.BalanceHistoryLogs.Add(balanceHistoryLog);
+                        _context.SaveChanges();
+                    });
+                    threadB.Start();
+                    threadB.Join();
+                }
+                //_context.Transaction.AddRange(transactions);
+                //_context.SaveChanges();
                 var after = _context.Transaction
                     .Where(t => t.AccountID == data.AccountID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                     .Count();

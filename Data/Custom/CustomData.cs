@@ -1,4 +1,5 @@
-﻿using pbms_be.DTOs;
+﻿using pbms_be.Data.Balance;
+using pbms_be.DTOs;
 using pbms_be.Library;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -187,5 +188,15 @@ public class GenerateRandomTransactions
     [Range(1000, 100000000)]
     public long maxAmount { get; set; } = 5000000;
     public bool isRoundAmount { get; set; } = true;
+
+}
+
+public class CustomBalanceHisLogByDate
+{
+    public DateOnly Date { get; set; }
+    public long TotalAmount { get; set; }
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public int TransactionCount { get; set; }
+    public virtual List<BalanceHisLog_VM_DTO> BalanceHistoryLogs { get; set; } = null!;
 
 }

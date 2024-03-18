@@ -276,6 +276,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
+                
                 var wallet = GetWallet(walletID) ?? throw new Exception(Message.WALLET_NOT_FOUND);
                 if (categoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_EXPENSE)
                 {
@@ -287,6 +288,8 @@ namespace pbms_be.DataAccess
                     wallet.Balance += totalAmount;
                     Console.WriteLine("Income: " + totalAmount);
                 }
+                // save changes that wallet
+                wallet.ActiveStateID = ActiveStateConst.ACTIVE;
                 _context.SaveChanges();
                 // check save changes success or not
             }

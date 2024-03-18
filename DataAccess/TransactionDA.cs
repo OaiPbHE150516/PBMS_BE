@@ -150,7 +150,6 @@ namespace pbms_be.DataAccess
             try
             {
                 if (transaction is null) throw new Exception(Message.TRANSACTION_IS_NULL);
-
                 var wallet = _context.Wallet
                             .Where(w => w.WalletID == transaction.WalletID && w.AccountID == transaction.AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(w => w.ActiveState)
@@ -170,7 +169,10 @@ namespace pbms_be.DataAccess
                 _context.SaveChanges();
 
                 var walletDA = new WalletDA(_context);
-                walletDA.UpdateWalletAmount(transaction.WalletID, transaction.TotalAmount, category.CategoryTypeID);
+                var threadW = new Thread(() => walletDA.UpdateWalletAmount(transaction.WalletID, transaction.TotalAmount, category.CategoryTypeID));
+                threadW.Start();
+                threadW.Join();
+
 
                 var balanceHisLogDA = new BalanceHisLogDA(_context);
                 var balancehislog = new BalanceHistoryLog
@@ -182,8 +184,9 @@ namespace pbms_be.DataAccess
                     HisLogDate = DateTime.UtcNow,
                     ActiveStateID = ActiveStateConst.ACTIVE
                 };
-                var balhislogResult = balanceHisLogDA.CreateBalanceHistoryLog(balancehislog);
-                Console.WriteLine("balhislogResult: " + balhislogResult);
+                var threadB = new Thread(() => balanceHisLogDA.CreateBalanceHistoryLog(balancehislog));
+                threadB.Start();
+                threadB.Join();
                 return transaction;
             }
             catch (Exception e)

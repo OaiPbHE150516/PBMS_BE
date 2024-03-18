@@ -46,6 +46,12 @@ namespace pbms_be.Configurations
                 .ForMember(dest => dest.PercentProgress, opt => opt.MapFrom(src => LConvertVariable.CalculatePercentProgress(src.CurrentAmount, src.TargetAmount, 2)))
                 .ReverseMap();
 
+            // BalanceHisLog
+            CreateMap<Data.Balance.BalanceHistoryLog, DTOs.BalanceHisLog_VM_DTO>()
+                .ForMember(dest => dest.BalanceStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.Balance)))
+                .ForMember(dest => dest.HisLogDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.HisLogDate)))
+                .ReverseMap();
+
             // Category
             CreateMap<Data.Filter.Category, DTOs.Category_VM_DTO>().ReverseMap();
             CreateMap<Data.Filter.Category, DTOs.CategoryDTO>().ReverseMap();
