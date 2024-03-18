@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using pbms_be.Configurations;
 using pbms_be.Data;
+using pbms_be.Data.Balance;
 using pbms_be.Data.Custom;
 using pbms_be.Data.Invo;
 using pbms_be.Data.Trans;
@@ -149,9 +150,12 @@ namespace pbms_be.DataAccess
             try
             {
                 if (transaction is null) throw new Exception(Message.TRANSACTION_IS_NULL);
-                var isValidWallet = _context.Wallet
-                            .Any(w => w.WalletID == transaction.WalletID && w.AccountID == transaction.AccountID);
-                if (!isValidWallet) throw new Exception(Message.WALLET_NOT_BELONG_ACCOUNT + ": " + transaction.AccountID);
+
+                var wallet = _context.Wallet
+                            .Where(w => w.WalletID == transaction.WalletID && w.AccountID == transaction.AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE)
+                            .Include(w => w.ActiveState)
+                            .FirstOrDefault();
+                if (wallet is null) throw new Exception(Message.WALLET_NOT_BELONG_ACCOUNT + ": " + transaction.AccountID);
 
                 var category = _context.Category
                             .Where(c => c.CategoryID == transaction.CategoryID && c.AccountID == transaction.AccountID && c.ActiveStateID == ActiveStateConst.ACTIVE)
@@ -168,6 +172,18 @@ namespace pbms_be.DataAccess
                 var walletDA = new WalletDA(_context);
                 walletDA.UpdateWalletAmount(transaction.WalletID, transaction.TotalAmount, category.CategoryTypeID);
 
+                var balanceHisLogDA = new BalanceHisLogDA(_context);
+                var balancehislog = new BalanceHistoryLog
+                {
+                    AccountID = transaction.AccountID,
+                    WalletID = transaction.WalletID,
+                    Balance = wallet.Balance,
+                    TransactionID = transaction.TransactionID,
+                    HisLogDate = DateTime.UtcNow,
+                    ActiveStateID = ActiveStateConst.ACTIVE
+                };
+                var balhislogResult = balanceHisLogDA.CreateBalanceHistoryLog(balancehislog);
+                Console.WriteLine("balhislogResult: " + balhislogResult);
                 return transaction;
             }
             catch (Exception e)

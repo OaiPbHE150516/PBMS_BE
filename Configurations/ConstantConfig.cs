@@ -142,6 +142,10 @@
         public const string BUDGET_NOT_FOUND = " Budget not found";
         public const string BUDGET_TYPE_NOT_FOUND = " Budget type not found";
 
+        // Balance
+        public const string BALANCE_HISTORY_LOG_NOT_FOUND = "No balance history log found for this account";
+        public const string BALANCE_HISTORY_LOG_INVALID = "Balance history log is invalid";
+
         // Category
         public const string CATEGORY_ALREADY_EXIST = " Category already exist";
         public const string CATEGORY_ID_REQUIRED = " CategoryID is required";
