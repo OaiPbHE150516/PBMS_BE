@@ -138,7 +138,9 @@ namespace pbms_be.DataAccess
                 if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var listLogDTO = _mapper.Map<List<BalanceHisLog_VM_DTO>>(listlog);
                 var listAfter = FilterData(listLogDTO);
-                return listAfter;
+                var minBalance = listLogDTO.Min(x => x.Balance);
+                var maxBalance = listLogDTO.Max(x => x.Balance);
+                return new { minBalance, maxBalance, listAfter };
             }
             catch (Exception ex)
             {
@@ -161,7 +163,10 @@ namespace pbms_be.DataAccess
                 if (mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var listLogDTO = mapper.Map<List<BalanceHisLog_VM_DTO>>(listLog);
                 var listAfter = FilterData(listLogDTO);
-                return listAfter;
+                // get min balance and max balance in list after
+                var minBalance = listLogDTO.Min(x => x.Balance);
+                var maxBalance = listLogDTO.Max(x => x.Balance);
+                return new { minBalance, maxBalance, listAfter };
             }
             catch (Exception ex)
             {
@@ -200,7 +205,8 @@ namespace pbms_be.DataAccess
                 var result = balanceLogDict.Values.ToList();
                 result.Sort((x, y) => x.Date.CompareTo(y.Date));
                 return result;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
