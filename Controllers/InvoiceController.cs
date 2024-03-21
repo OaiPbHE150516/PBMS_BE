@@ -88,7 +88,7 @@ namespace pbms_be.Controllers
                                 {
                                   "productID": 0,
                                   "invoiceID": 0,
-                                  "productName": "Bánh bao nhân khoai\nmôn Malai",
+                                  "productName": "Bánh bao nhân khoai môn Malai",
                                   "quanity": 1,
                                   "unitPrice": 26500,
                                   "totalAmount": 26500,
