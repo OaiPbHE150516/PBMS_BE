@@ -29,6 +29,8 @@
         public const string MINE_TYPE_JPEG = "image/jpeg";
         public const string MINE_TYPE_PNG = "image/png";
         public const string MINE_TYPE_JPG = "image/jpg";
+        // heic
+        public const string MINE_TYPE_HEIC = "image/heic";
 
         // NUMBER_LAST_DAYS
         public const int NUMBER_LAST_DAYS = 7;

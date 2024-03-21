@@ -11,7 +11,8 @@ namespace pbms_be.Library
                 var result = file.ContentType != ConstantConfig.MINE_TYPE_PDF
                                && file.ContentType != ConstantConfig.MINE_TYPE_JPEG
                                && file.ContentType != ConstantConfig.MINE_TYPE_JPG
-                               && file.ContentType != ConstantConfig.MINE_TYPE_PNG;
+                               && file.ContentType != ConstantConfig.MINE_TYPE_PNG
+                               && file.ContentType != ConstantConfig.MINE_TYPE_HEIC;
                 return result;
             }
             catch (Exception e)
@@ -27,7 +28,8 @@ namespace pbms_be.Library
             {
                 var result = file.ContentType != ConstantConfig.MINE_TYPE_JPEG
                                && file.ContentType != ConstantConfig.MINE_TYPE_JPG
-                               && file.ContentType != ConstantConfig.MINE_TYPE_PNG;
+                               && file.ContentType != ConstantConfig.MINE_TYPE_PNG
+                               && file.ContentType != ConstantConfig.MINE_TYPE_HEIC;
                 return result;
             }
             catch (Exception e)

@@ -38,8 +38,111 @@ namespace pbms_be.Controllers
             var result = DocumentAiApi.ProcessDocument(file);
             //var imageURL = GCP_BucketDA.UploadFile(file);
             Invoice invoice = DocumentAiApi.GetInvoiceFromDocument(result);
-           // invoice.InvoiceImageURL = imageURL;
+            // invoice.InvoiceImageURL = imageURL;
             return Ok(invoice);
+        }
+
+        [HttpPost("scantest")]
+        public IActionResult ScanInvoiceTest(IFormFile file)
+        {
+            if (file == null) return BadRequest(Message.FILE_IS_NULL_);
+            if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
+            var result = """
+                            {
+                              "invoiceID": 0,
+                              "transactionID": 0,
+                              "supplierAddress": "Thôn Cánh Chú, Bình Yên - Thạch Thất",
+                              "supplierEmail": "",
+                              "supplierName": "SIÊU THỊ ĐỨC THÀNH",
+                              "supplierPhone": "0865 90 9598 /",
+                              "receiverAddress": "",
+                              "receiverEmail": "",
+                              "receiverName": "",
+                              "idOfInvoice": "HDX070124-38",
+                              "invoiceDate": "2024-07-01T00:00:00",
+                              "invoiceType": "",
+                              "paymentTerms": "",
+                              "currencyID": 0,
+                              "currency": null,
+                              "netAmount": 0,
+                              "totalAmount": 347,
+                              "taxAmount": 0,
+                              "discount": 0,
+                              "invoiceImageURL": "url",
+                              "note": "",
+                              "activeStateID": 1,
+                              "activeState": null,
+                              "productInInvoices": [
+                                {
+                                  "productID": 0,
+                                  "invoiceID": 0,
+                                  "productName": "",
+                                  "quanity": 1,
+                                  "unitPrice": 198000,
+                                  "totalAmount": 198000,
+                                  "note": "",
+                                  "tagID": 1,
+                                  "activeStateID": 0,
+                                  "activeState": null
+                                },
+                                {
+                                  "productID": 0,
+                                  "invoiceID": 0,
+                                  "productName": "Bánh bao nhân khoai\nmôn Malai",
+                                  "quanity": 1,
+                                  "unitPrice": 26500,
+                                  "totalAmount": 26500,
+                                  "note": "",
+                                  "tagID": 1,
+                                  "activeStateID": 0,
+                                  "activeState": null
+                                },
+                                {
+                                  "productID": 0,
+                                  "invoiceID": 0,
+                                  "productName": "Thit san vai CP",
+                                  "quanity": 1,
+                                  "unitPrice": 105000,
+                                  "totalAmount": 108150,
+                                  "note": "",
+                                  "tagID": 1,
+                                  "activeStateID": 0,
+                                  "activeState": null
+                                },
+                                {
+                                  "productID": 0,
+                                  "invoiceID": 0,
+                                  "productName": "Phiều quà tặng (",
+                                  "quanity": 1,
+                                  "unitPrice": 0,
+                                  "totalAmount": 0,
+                                  "note": "",
+                                  "tagID": 1,
+                                  "activeStateID": 0,
+                                  "activeState": null
+                                },
+                                {
+                                  "productID": 0,
+                                  "invoiceID": 0,
+                                  "productName": "NN Sting vang pet 330ml",
+                                  "quanity": 1,
+                                  "unitPrice": 7000,
+                                  "totalAmount": 14000,
+                                  "note": "",
+                                  "tagID": 1,
+                                  "activeStateID": 0,
+                                  "activeState": null
+                                }
+                              ],
+                            "invoiceRawDatalog": "rawdata"
+                            }
+                            """;
+            return Ok(result);
+            //var result = DocumentAiApi.ProcessDocument(file);
+            //var imageURL = GCP_BucketDA.UploadFile(file);
+            //Invoice invoice = DocumentAiApi.GetInvoiceFromDocument(result);
+            // invoice.InvoiceImageURL = imageURL;
+            //return Ok(invoice);
         }
 
 
