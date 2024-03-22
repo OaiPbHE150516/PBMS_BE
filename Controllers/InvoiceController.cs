@@ -65,7 +65,7 @@ namespace pbms_be.Controllers
                               "currencyID": 0,
                               "currency": null,
                               "netAmount": 0,
-                              "totalAmount": 347,
+                              "totalAmount": 347.000,
                               "taxAmount": 0,
                               "discount": 0,
                               "invoiceImageURL": "url",
