@@ -74,7 +74,7 @@ namespace pbms_be.Controllers
                               "activeState": null,
                               "productInInvoices": [
                                 {
-                                  "productID": 0,
+                                  "productID": 1,
                                   "invoiceID": 0,
                                   "productName": "",
                                   "quanity": 1,
@@ -86,7 +86,7 @@ namespace pbms_be.Controllers
                                   "activeState": null
                                 },
                                 {
-                                  "productID": 0,
+                                  "productID": 2,
                                   "invoiceID": 0,
                                   "productName": "Bánh bao nhân khoai môn Malai",
                                   "quanity": 1,
@@ -98,7 +98,7 @@ namespace pbms_be.Controllers
                                   "activeState": null
                                 },
                                 {
-                                  "productID": 0,
+                                  "productID": 3,
                                   "invoiceID": 0,
                                   "productName": "Thit san vai CP",
                                   "quanity": 1,
@@ -110,7 +110,7 @@ namespace pbms_be.Controllers
                                   "activeState": null
                                 },
                                 {
-                                  "productID": 0,
+                                  "productID": 4,
                                   "invoiceID": 0,
                                   "productName": "Phiều quà tặng (",
                                   "quanity": 1,
@@ -122,7 +122,7 @@ namespace pbms_be.Controllers
                                   "activeState": null
                                 },
                                 {
-                                  "productID": 0,
+                                  "productID": 5,
                                   "invoiceID": 0,
                                   "productName": "NN Sting vang pet 330ml",
                                   "quanity": 1,
