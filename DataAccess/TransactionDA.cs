@@ -163,7 +163,7 @@ namespace pbms_be.DataAccess
                             .FirstOrDefault() ?? throw new Exception(Message.CATEGORY_NOT_BELONG_ACCOUNT + ": " + transaction.AccountID);
 
                 // transactionDate - 7 hours to get correct date
-                transaction.TransactionDate = transactionDate.AddHours(-7);
+                //transaction.TransactionDate = transactionDate.AddHours(-7);
                 transaction.ActiveStateID = ActiveStateConst.ACTIVE;
                 _context.Transaction.Add(transaction);
                 _context.SaveChanges();
