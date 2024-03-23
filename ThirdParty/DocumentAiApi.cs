@@ -46,11 +46,15 @@ namespace pbms_be.ThirdParty
                 var entities = document.Entities;
                 Invoice invoice = new Invoice();
                 // loop through entities
+                var countProduct = 0;
                 foreach (var entity in entities)
                 {
                     if (entity.Properties.Count > 0)
                     {
-                        invoice.ProductInInvoices.Add(GetProductInInvoice(entity.Properties));
+                        countProduct++;
+                        var productInInvoice = GetProductInInvoice(entity.Properties);
+                        productInInvoice.ProductID = countProduct;
+                        invoice.ProductInInvoices.Add(productInInvoice);
                         continue;
                     }
                     var type = entity.Type;
