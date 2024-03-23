@@ -59,6 +59,18 @@ namespace pbms_be.Controllers
             var fileURL = GCP_BucketDA.UploadFileCustom(file, CloudStorageConfig.PBMS_BUCKET_NAME, CloudStorageConfig.INVOICE_FOLDER,
                                                         "invoice", filename, "file", true);
             return Ok(fileURL);
+        }       
+        [HttpPost("upload/transaction/invoice/filename")]
+        public IActionResult UploadInvoiceFileWithName(IFormFile file, string filename)
+        {
+            // only accept image, pdf, doc, docx, xls, xlsx, ppt, pptx, txt
+            if (file is null) return BadRequest(Message.FILE_IS_NULL_);
+            if (filename is null) return BadRequest(Message.FILE_NAME_IS_NULL);
+            if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
+            //var filename = LConvertVariable.GenerateRandomString(CloudStorageConfig.DEFAULT_FILE_NAME_LENGTH, Path.GetFileNameWithoutExtension(file.FileName));
+            var fileURL = GCP_BucketDA.UploadFileCustom(file, CloudStorageConfig.PBMS_BUCKET_NAME, CloudStorageConfig.INVOICE_FOLDER,
+                                                        "invoice", filename, "file", true);
+            return Ok(fileURL);
         }
 
         // generate data

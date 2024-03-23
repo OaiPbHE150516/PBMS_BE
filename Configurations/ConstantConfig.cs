@@ -207,6 +207,7 @@
         public const string FILE_IS_NULL_ = " File is null";
         public const string FILE_IS_TOO_LARGE = " File is too large";
         public const string FILE_IS_NOT_JPG_PNG = " File is not of type jpg or png";
+        public const string FILE_NAME_IS_NULL = " File name is null";
 
         // Datetime
         public const string FROM_DATE_GREATER_THAN_TO_DATE = " From date greater than to date";

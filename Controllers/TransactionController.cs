@@ -7,6 +7,7 @@ using pbms_be.Data.Invo;
 using pbms_be.Data.Trans;
 using pbms_be.DataAccess;
 using pbms_be.DTOs;
+using pbms_be.Library;
 using System.Transactions;
 
 namespace pbms_be.Controllers
@@ -221,8 +222,8 @@ namespace pbms_be.Controllers
 
 
 
-       // get trasactions week by week by account id, from date string, to date string
-       [HttpGet("get/weekbyweek/custom/{accountID}/{fromDateStr}/{toDateStr}")]
+        // get trasactions week by week by account id, from date string, to date string
+        [HttpGet("get/weekbyweek/custom/{accountID}/{fromDateStr}/{toDateStr}")]
         public IActionResult GetTransactionsWeekByWeekCustom(string accountID, string fromDateStr, string toDateStr)
         {
             try
@@ -313,7 +314,7 @@ namespace pbms_be.Controllers
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var transaction = _mapper.Map<Data.Trans.Transaction>(transactionDTO);
-                if(_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
+                if (_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
                 var transDate = DateTime.UtcNow;
                 var resultTransaction = _transactionDA.CreateTransactionV2(transaction, transDate);
                 var invoiceDA = new InvoiceDA(_context);
@@ -341,14 +342,36 @@ namespace pbms_be.Controllers
                 var transaction = _mapper.Map<Data.Trans.Transaction>(transactionDTO);
                 if (_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
                 var result = _transactionDA.CreateTransactionV2(transaction, transactionDTO.TransactionDate);
-                if (result is null) return BadRequest(Message.TRANSACTION_CREATE_FAILED);       
+                if (result is null) return BadRequest(Message.TRANSACTION_CREATE_FAILED);
                 return Ok(result);
-            } catch (System.Exception e)
+            }
+            catch (System.Exception e)
             {
                 return BadRequest(e.Message);
             }
-            throw new NotImplementedException();
         }
+
+        //// create transaction with invoice and products, have image of them
+        //[HttpPost("create/withimage")]
+        //public async Task<IActionResult> CreateTransactionWithImage([FromForm] TransactionCreateWithImageDTO transactionDTO)
+        //{
+        //    try
+        //    {
+        //        return Ok(transactionDTO.AccountID);
+        //        //if (!ModelState.IsValid) return BadRequest(ModelState);
+        //        //if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+        //        //if (LValidation.IsCorrectPDFJPGPNG(image)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
+        //        //var transaction = _mapper.Map<Data.Trans.Transaction>(transactionDTO);
+        //        //if (_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
+        //        //var result = _transactionDA.CreateTransactionWithImage(transaction, transactionDTO, image);
+        //        //if (result is null) return BadRequest(Message.TRANSACTION_CREATE_FAILED);
+        //        //return Ok(result);
+        //    }
+        //    catch (System.Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
         #endregion
     }

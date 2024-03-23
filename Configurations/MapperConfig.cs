@@ -89,6 +89,8 @@ namespace pbms_be.Configurations
             CreateMap<Data.Trans.Transaction, DTOs.TransactionCreateDTO>().ReverseMap();
             CreateMap<Data.Trans.Transaction, DTOs.TransactionWithoutInvoiceCreateDTO>().ReverseMap();
 
+            // TransactionCreateWithImageDTO
+            CreateMap<Data.Trans.Transaction, DTOs.TransactionCreateWithImageDTO>().ReverseMap();
 
             // Invoice
             CreateMap<Data.Invo.Invoice, DTOs.InvoiceCreateDTO>().ReverseMap();

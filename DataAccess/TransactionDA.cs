@@ -786,5 +786,26 @@ namespace pbms_be.DataAccess
             }
             throw new NotImplementedException();
         }
+
+        //         internal Transaction CreateTransactionV2(Transaction transaction, DateTime transactionDate)
+        internal object CreateTransactionWithImage(Transaction transaction, TransactionCreateWithImageDTO transactionDTO, IFormFile image)
+        {
+            try
+            {
+                var filename = LConvertVariable.GenerateRandomString(CloudStorageConfig.DEFAULT_FILE_NAME_LENGTH, Path.GetFileNameWithoutExtension(image.FileName));
+                var fileURL = GCP_BucketDA.UploadFileCustom(image, CloudStorageConfig.PBMS_BUCKET_NAME, CloudStorageConfig.INVOICE_FOLDER,
+                                                                               "invoice", filename, "file", true);
+                transaction.ImageURL = fileURL;
+                transaction.TransactionDate = transactionDTO.TransactionDate;
+                transaction.ActiveStateID = ActiveStateConst.ACTIVE;
+                CreateTransactionV2(transaction, transaction.TransactionDate);
+                return transaction;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+            throw new NotImplementedException();
+        }
     }
 }
