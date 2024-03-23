@@ -69,7 +69,7 @@ namespace pbms_be.Controllers
             if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
             //var filename = LConvertVariable.GenerateRandomString(CloudStorageConfig.DEFAULT_FILE_NAME_LENGTH, Path.GetFileNameWithoutExtension(file.FileName));
             var fileURL = GCP_BucketDA.UploadFileCustom(file, CloudStorageConfig.PBMS_BUCKET_NAME, CloudStorageConfig.INVOICE_FOLDER,
-                                                        "invoice", filename, "file", true);
+                                                        "invoice", filename, "file", false);
             return Ok(fileURL);
         }
 
