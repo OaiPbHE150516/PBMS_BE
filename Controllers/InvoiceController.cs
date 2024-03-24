@@ -152,6 +152,8 @@ namespace pbms_be.Controllers
             var result = await VertextAiMultimodalApi.GenerateContent(file, textprompt);
             // remove '```json' if it exists in the result
             if (result.Contains("```json")) result = result.Replace("```json", "");
+            // if first line is empty, remove it
+            if (result[0] == '\n') result = result.Substring(1);
             return Ok(result);
         }
 
