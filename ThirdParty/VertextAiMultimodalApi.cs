@@ -20,7 +20,7 @@ namespace pbms_be.ThirdParty
             // Create client
             var predictionServiceClient = new PredictionServiceClientBuilder
             {
-                Endpoint = $"{ConstantConfig.LOCATION}-aiplatform.googleapis.com"
+                Endpoint = $"{location}-aiplatform.googleapis.com"
             }.Build();
             // Prompt
             string prompt = "What's in this photo";
