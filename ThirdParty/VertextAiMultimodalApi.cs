@@ -11,7 +11,7 @@ namespace pbms_be.ThirdParty
 {
     public class VertextAiMultimodalApi
     {
-        public static async Task<string> GenerateContent(IFormFile file)
+        public static async Task<string> GenerateContent(IFormFile file, string textprompt)
         {
             string projectId = "lexical-aileron-410114";
             string location = "asia-southeast1";
@@ -37,9 +37,9 @@ namespace pbms_be.ThirdParty
             ByteString colosseum = ByteString.FromStream(file.OpenReadStream());
             // Initialize request argument(s)
             var content = new Content
-                            {
-                                Role = "USER"
-                            };
+            {
+                Role = "USER"
+            };
             content.Parts.AddRange(new List<Part>()
             {
                 new()
@@ -53,7 +53,7 @@ namespace pbms_be.ThirdParty
                 },
                 new()
                 {
-                    Text = "Extract the name, phone number, address of the sales unit, id number and date of the order, item name, quantity, unit price and total price of the items with it tag - which is kind of product, total amount of the invoice from the invoice image and export them as JSON with the key as below:\r\n{\r\n\"supplierAddress\": \"\",\r\n\"supplierName\": \"\",\r\n\"supplierPhone\": \"\",\r\n\"invoice_date\": \"\",\r\n\"invoice_id\": \"\",\r\n\"netAmount\": 0,\r\n\"totalAmount\": 0,\r\n\"taxAmount\": 0,\r\n\"line_item\": [\r\n    {\r\n      \"line_item/description\": \"\",\r\n      \"line_item/quanity\": 1,\r\n      \"line_item/unitPrice\": 0,\r\n      \"line_item/amount\": 3000,\r\n      \"line_item/tag\": \"\",\r\n    },...\r\n]"
+                    Text = textprompt
                 },
                 //new()
                 //{

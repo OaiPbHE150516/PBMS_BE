@@ -147,9 +147,9 @@ namespace pbms_be.Controllers
 
 
         [HttpPost("scan/v2/gemini")]
-        public async Task<IActionResult> ScanInvoiceTestV2(IFormFile file)
+        public async Task<IActionResult> ScanInvoiceTestV2(IFormFile file, string textprompt)
         {
-            var result = await VertextAiMultimodalApi.GenerateContent(file);
+            var result = await VertextAiMultimodalApi.GenerateContent(file, textprompt);
             // remove before '{' and after '}'
             //result = result.Substring(result.IndexOf('{'));
             //result = result.Substring(0, result.LastIndexOf('}') + 1);
