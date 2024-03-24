@@ -150,6 +150,9 @@ namespace pbms_be.Controllers
         public async Task<IActionResult> ScanInvoiceTestV2(IFormFile file)
         {
             var result = await VertextAiMultimodalApi.GenerateContent(file);
+            // remove before '{' and after '}'
+            result = result.Substring(result.IndexOf('{'));
+            result = result.Substring(0, result.LastIndexOf('}') + 1);
             return Ok(result);
         }
 
