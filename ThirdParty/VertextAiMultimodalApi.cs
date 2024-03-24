@@ -52,7 +52,7 @@ namespace pbms_be.ThirdParty
                 },
                 new()
                 {
-                    Text = "what is total amount of this invoice"
+                    Text = "Extract the name, phone number, address of the sales unit, id number and date of the order, item name, quantity, unit price and total price of the items with it tag - which is kind of product, total amount of the invoice from the invoice image and export them as JSON"
                 },
                 //new()
                 //{
