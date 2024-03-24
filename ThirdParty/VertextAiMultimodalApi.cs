@@ -25,11 +25,11 @@ namespace pbms_be.ThirdParty
             }.Build();
 
             // Images
-            ByteString colosseum = await ReadImageFileAsync(
-                "https://storage.googleapis.com/pbms-user/invoice/2024-03-09%2016.24.53.jpeg");
+            //ByteString colosseum = await ReadImageFileAsync(
+            //    "https://storage.googleapis.com/pbms-user/invoice/2024-03-09%2016.24.53.jpeg");
 
-            //ByteString forbiddenCity = await ReadImageFileAsync(
-            //    "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png");
+            ByteString forbiddenCity = await ReadImageFileAsync(
+                "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png");
 
             //ByteString christRedeemer = await ReadImageFileAsync(
             //    "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark3.png");
@@ -41,31 +41,31 @@ namespace pbms_be.ThirdParty
                             };
             content.Parts.AddRange(new List<Part>()
             {
-                new()
-                {
-                    InlineData = new()
-                    {
-                        MimeType = "image/jpeg",
-                        Data = colosseum
-
-                    }
-                },
-                new()
-                {
-                    Text = "Extract the name, phone number, address of the sales unit, id number and date of the order, item name, quantity, unit price and total price of the items with it tag by vietnamese - which is kind of product, total amount of the invoice from the invoice image and export them as JSON"
-                },
                 //new()
                 //{
                 //    InlineData = new()
                 //    {
-                //        MimeType = "image/png",
-                //        Data = forbiddenCity
+                //        MimeType = "image/jpeg",
+                //        Data = colosseum
+
                 //    }
                 //},
                 //new()
                 //{
-                //    Text = "city: Beijing, Landmark: Forbidden City"
+                //    Text = "Extract the name, phone number, address of the sales unit, id number and date of the order, item name, quantity, unit price and total price of the items with it tag by vietnamese - which is kind of product, total amount of the invoice from the invoice image and export them as JSON"
                 //},
+                new()
+                {
+                    InlineData = new()
+                    {
+                        MimeType = "image/png",
+                        Data = forbiddenCity
+                    }
+                },
+                new()
+                {
+                    Text = "city: Beijing, Landmark: Forbidden City"
+                },
                 //new()
                 //{
                 //    InlineData = new()
