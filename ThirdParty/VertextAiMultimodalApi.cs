@@ -11,7 +11,7 @@ namespace pbms_be.ThirdParty
 {
     public class VertextAiMultimodalApi
     {
-        public static async Task<string> GenerateContent()
+        public static async Task<string> GenerateContent(IFormFile file)
         {
             string projectId = "lexical-aileron-410114";
             string location = "asia-southeast1";
@@ -25,15 +25,16 @@ namespace pbms_be.ThirdParty
             }.Build();
 
             // Images
-            ByteString colosseum = await ReadImageFileAsync(
-                "https://storage.googleapis.com/pbms-user/invoice/2024-03-09%2016.24.53.jpeg");
+            //ByteString colosseum = await ReadImageFileAsync(
+            //    "https://storage.googleapis.com/pbms-user/invoice/2024-03-09%2016.24.53.jpeg");
 
-            ByteString forbiddenCity = await ReadImageFileAsync(
-                "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png");
+            //ByteString forbiddenCity = await ReadImageFileAsync(
+            //    "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png");
 
             //ByteString christRedeemer = await ReadImageFileAsync(
             //    "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark3.png");
 
+            ByteString colosseum = ByteString.FromStream(file.OpenReadStream());
             // Initialize request argument(s)
             var content = new Content
                             {
