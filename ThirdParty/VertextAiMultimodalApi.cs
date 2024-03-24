@@ -24,107 +24,57 @@ namespace pbms_be.ThirdParty
                 Endpoint = $"{location}-aiplatform.googleapis.com"
             }.Build();
 
-            //    // Prompt
-            //    string prompt = "What's in this photo";
-            //    string imageUri = "gs://generativeai-downloads/images/scones.jpg";
-
-            //    // Initialize request argument(s)
-            //    var content = new Content
-            //    {
-            //        Role = "USER"
-            //    };
-            //    content.Parts.AddRange(new List<Part>()
-            //{
-            //    new() {
-            //        Text = prompt
-            //    },
-            //    new() {
-            //        FileData = new() {
-            //            MimeType = "image/png",
-            //            FileUri = imageUri
-            //        }
-            //    }
-            //});
-
-            //    var generateContentRequest = new GenerateContentRequest
-            //    {
-            //        Model = $"projects/{projectId}/locations/{location}/publishers/{publisher}/models/{model}",
-            //        GenerationConfig = new GenerationConfig
-            //        {
-            //            Temperature = 0.4f,
-            //            TopP = 1,
-            //            TopK = 32,
-            //            MaxOutputTokens = 2048
-            //        }
-            //    };
-            //    generateContentRequest.Contents.Add(content);
-
-            //    // Make the request, returning a streaming response
-            //    using PredictionServiceClient.StreamGenerateContentStream response = predictionServiceClient.StreamGenerateContent(generateContentRequest);
-
-            //    StringBuilder fullText = new();
-
-            //    // Read streaming responses from server until complete
-            //    AsyncResponseStream<GenerateContentResponse> responseStream = response.GetResponseStream();
-            //    await foreach (GenerateContentResponse responseItem in responseStream)
-            //    {
-            //        fullText.Append(responseItem.Candidates[0].Content.Parts[0].Text);
-            //    }
-
-            //    return fullText.ToString();
-            //}
-
             // Images
             ByteString colosseum = await ReadImageFileAsync(
-                "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark1.png");
+                "https://storage.googleapis.com/pbms-user/invoice/2024-03-09%2016.24.53.jpeg");
 
-            ByteString forbiddenCity = await ReadImageFileAsync(
-                "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png");
+            //ByteString forbiddenCity = await ReadImageFileAsync(
+            //    "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png");
 
-            ByteString christRedeemer = await ReadImageFileAsync(
-                "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark3.png");
+            //ByteString christRedeemer = await ReadImageFileAsync(
+            //    "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark3.png");
 
             // Initialize request argument(s)
             var content = new Content
-            {
-                Role = "USER"
-            };
+                            {
+                                Role = "USER"
+                            };
             content.Parts.AddRange(new List<Part>()
-        {
-            new()
             {
-                InlineData = new()
+                new()
                 {
-                    MimeType = "image/png",
-                    Data = colosseum
+                    InlineData = new()
+                    {
+                        MimeType = "image/jpeg",
+                        Data = colosseum
 
-                }
-            },
-            new()
-            {
-                Text = "city: Rome, Landmark: the Colosseum"
-            },
-            new()
-            {
-                InlineData = new()
+                    }
+                },
+                new()
                 {
-                    MimeType = "image/png",
-                    Data = forbiddenCity
-                }
-            },
-            new()
-            {
-                Text = "city: Beijing, Landmark: Forbidden City"
-            },
-            new()
-            {
-                InlineData = new()
-                {
-                    MimeType = "image/png",
-                    Data = christRedeemer
-                }
-            }
-        });
+                    Text = "Extract the name, phone number, address of the sales unit, id number and date of the order, item name, quantity, unit price and total price of the items with it tag - which is kind of product, total amount of the invoice from the invoice image and export them as JSON with the key as below:\r\n{\r\n\"supplierAddress\": \"\",\r\n\"supplierName\": \"\",\r\n\"supplierPhone\": \"\",\r\n\"invoice_date\": \"\",\r\n\"invoice_id\": \"\",\r\n\"netAmount\": 0,\r\n\"totalAmount\": 0,\r\n\"taxAmount\": 0,\r\n\"line_item\": [\r\n    {\r\n      \"line_item/description\": \"\",\r\n      \"line_item/quanity\": 1,\r\n      \"line_item/unitPrice\": 0,\r\n      \"line_item/amount\": 3000,\r\n      \"line_item/tag\": \"\",\r\n    },...\r\n]"
+                },
+                //new()
+                //{
+                //    InlineData = new()
+                //    {
+                //        MimeType = "image/png",
+                //        Data = forbiddenCity
+                //    }
+                //},
+                //new()
+                //{
+                //    Text = "city: Beijing, Landmark: Forbidden City"
+                //},
+                //new()
+                //{
+                //    InlineData = new()
+                //    {
+                //        MimeType = "image/png",
+                //        Data = christRedeemer
+                //    }
+                //}
+            });
 
             var generateContentRequest = new GenerateContentRequest
             {

@@ -147,7 +147,7 @@ namespace pbms_be.Controllers
 
 
         [HttpPost("scan/v2/gemini")]
-        public async Task<IActionResult> ScanInvoiceTestV2(IFormFile file)
+        public async Task<IActionResult> ScanInvoiceTestV2()
         {
             var result = await VertextAiMultimodalApi.GenerateContent();
             return Ok(result);
