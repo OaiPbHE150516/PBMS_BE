@@ -145,22 +145,11 @@ namespace pbms_be.Controllers
             //return Ok(invoice);
         }
 
-        //[HttpPost("scantestv2")]
-        //public IActionResult ScanInvoiceTestV2(IFormFile file, string data)
-        //{
-        //    if (file == null) return BadRequest(Message.FILE_IS_NULL_);
-        //    if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
-        //    var result = data;
-        //    return Ok(result);
-        //}
-
 
         [HttpPost("scan/v2/gemini")]
-        public IActionResult ScanInvoiceTestV2(IFormFile file, string data)
+        public async Task<IActionResult> ScanInvoiceTestV2(IFormFile file)
         {
-            if (file == null) return BadRequest(Message.FILE_IS_NULL_);
-            if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
-            var result = data;
+            var result = await VertextAiMultimodalApi.GenerateContent();
             return Ok(result);
         }
 

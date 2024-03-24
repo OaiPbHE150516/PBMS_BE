@@ -1,6 +1,7 @@
 ﻿using Google.Api.Gax.Grpc;
 using Google.Cloud.AIPlatform.V1;
 using Google.Protobuf;
+using pbms_be.Configurations;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -10,17 +11,16 @@ namespace pbms_be.ThirdParty
 {
     public class VertextAiMultimodalApi
     {
-        public async Task<string> GenerateContent(
-        string projectId = "your-project-id",
-        string location = "us-central1",
-        string publisher = "google",
-        string model = "gemini-1.0-pro-vision"
-    )
+        public static async Task<string> GenerateContent()
         {
+            string projectId = "lexical-aileron-410114";
+            string location = "us-central1";
+            string publisher = "google";
+            string model = "gemini-1.0-pro-vision";
             // Create client
             var predictionServiceClient = new PredictionServiceClientBuilder
             {
-                Endpoint = $"{location}-aiplatform.googleapis.com"
+                Endpoint = $"{ConstantConfig.LOCATION}-aiplatform.googleapis.com"
             }.Build();
 
             // Images
@@ -77,7 +77,7 @@ namespace pbms_be.ThirdParty
 
             var generateContentRequest = new GenerateContentRequest
             {
-                Model = $"projects/{projectId}/locations/{location}/publishers/{publisher}/models/{model}"
+                Model = $"projects/{projectId}/locations/{ConstantConfig.LOCATION}/publishers/{publisher}/models/{model}"
             };
             generateContentRequest.Contents.Add(content);
 
