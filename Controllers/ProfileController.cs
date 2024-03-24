@@ -63,5 +63,23 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        // search account by a part of email or username
+        [HttpGet("search/{keyword}")]
+        public IActionResult SearchAccount(string keyword)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(keyword)) return BadRequest(Message.KEYWORD_REQUIRED);
+                var result = _authDA.SearchAccount(keyword);
+                if (result is null) return NotFound();
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
     }
 }
