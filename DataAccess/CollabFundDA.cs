@@ -781,7 +781,7 @@ namespace pbms_be.DataAccess
         //    }
         //}
 
-        internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result)
+        internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result, out List<DivideMoneyInfo> divideMoneyInfos)
         {
             try
             {
@@ -804,6 +804,7 @@ namespace pbms_be.DataAccess
                 var listDividingMoneyDetail = CalculateTheDividingMoneyDetail(divideMoneyInfor, listDetailResult);
                 cfdividingmoney_result = cf_dividingmoney;
                 cfdm_detail_result = listDividingMoneyDetail;
+                divideMoneyInfos = divideMoneyInfor;
             }
             catch (Exception e)
             {
@@ -817,7 +818,8 @@ namespace pbms_be.DataAccess
             {
                 var dividingmoney = new CF_DividingMoney();
                 var dividingmoneydetail = new List<CF_DividingMoneyDetail>();
-                GetDivideMoneyInfo(collabAccountDTO.CollabFundID, collabAccountDTO.AccountID, out dividingmoney, out dividingmoneydetail);
+                var divideMoneyInfor = new List<DivideMoneyInfo>();
+                GetDivideMoneyInfo(collabAccountDTO.CollabFundID, collabAccountDTO.AccountID, out dividingmoney, out dividingmoneydetail, out divideMoneyInfor);
 
                 var cf_activity = new CollabFundActivity
                 {

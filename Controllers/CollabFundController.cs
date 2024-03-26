@@ -9,6 +9,7 @@ using pbms_be.Data.CollabFund;
 using pbms_be.Data.WalletF;
 using pbms_be.DataAccess;
 using pbms_be.DTOs;
+using pbms_be.Data.Custom;
 
 namespace pbms_be.Controllers
 {
@@ -168,13 +169,14 @@ namespace pbms_be.Controllers
                 //out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result
                 var cfdividingmoney_result = new CF_DividingMoney();
                 var cfdm_detail_result = new List<CF_DividingMoneyDetail>();
-                _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID, out cfdividingmoney_result, out cfdm_detail_result);
+                var listDVMI = new List<DivideMoneyInfo>();
+                _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID, out cfdividingmoney_result, out cfdm_detail_result, out listDVMI);
 
                 if (cfdividingmoney_result is null || cfdm_detail_result is null) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 // convert property in dividemoneyinfor to string
                 //var cf_dividing_moneyEntity = _mapper.Map<CF_DividingMoney_MV_DTO>(dividemoneyinfor);
-                return Ok(new { cfdividingmoney_result, cfdm_detail_result });
+                return Ok(new { listDVMI, cfdividingmoney_result, cfdm_detail_result });
             }
             catch (System.Exception e)
             {
