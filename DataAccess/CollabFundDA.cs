@@ -811,12 +811,19 @@ namespace pbms_be.DataAccess
                 foreach (var item in divideMoneyInfor)
                 {
                     var account = authDA.GetAccount(item.AccountID);
+                    var remain = item.TotalAmount - averageAmount;
                     var divideMoneyInfoWithAccount = new DivideMoneyInfoWithAccount
                     {
                         AccountID = item.AccountID,
                         Account = account,
                         TotalAmount = item.TotalAmount,
-                        TransactionCount = item.TransactionCount
+                        TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(item.TotalAmount),
+                        RemainAmount = remain,
+                        RemainAmountStr = LConvertVariable.ConvertToMoneyFormat(remain),
+                        TransactionCount = item.TransactionCount,
+                        MoneyActionStr = LConvertVariable.ConvertToMoneyFormat(item.TotalAmount) +
+                        " - " + LConvertVariable.ConvertToMoneyFormat(averageAmount) +
+                        " = " + LConvertVariable.ConvertToMoneyFormat(remain),
                     };
                     divideMoneyInforWithAccount.Add(divideMoneyInfoWithAccount);
                 }

@@ -26,6 +26,10 @@ public class DivideMoneyInfo
 public class DivideMoneyInfoWithAccount : DivideMoneyInfo
 {
     public virtual Account Account { get; set; } = null!;
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public long RemainAmount { get; set; }
+    public string RemainAmountStr { get; set; } = String.Empty;
+    public string MoneyActionStr { get; set; } = String.Empty;
 }
 
 public class DivideMoneyExecute
