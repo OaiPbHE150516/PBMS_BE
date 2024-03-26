@@ -1,4 +1,5 @@
-﻿using pbms_be.Data.Balance;
+﻿using pbms_be.Data.Auth;
+using pbms_be.Data.Balance;
 using pbms_be.DTOs;
 using pbms_be.Library;
 using System.ComponentModel.DataAnnotations;
@@ -12,12 +13,19 @@ public class DivideMoneyInfo
     [Column("account_id")]
     [Key]
     public string AccountID { get; set; } = String.Empty;
+    //public virtual Account Account { get; set; } = null!;
 
     [Column("total_amount")]
     public long TotalAmount { get; set; }
 
     [Column("transaction_count")]
     public int TransactionCount { get; set; }
+
+}
+
+public class DivideMoneyInfoWithAccount : DivideMoneyInfo
+{
+    public virtual Account Account { get; set; } = null!;
 }
 
 public class DivideMoneyExecute

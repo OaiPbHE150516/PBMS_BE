@@ -781,7 +781,7 @@ namespace pbms_be.DataAccess
         //    }
         //}
 
-        internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result, out List<DivideMoneyInfo> divideMoneyInfos)
+        internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result, out List<DivideMoneyInfoWithAccount> divideMoneyInfos)
         {
             try
             {
@@ -804,7 +804,24 @@ namespace pbms_be.DataAccess
                 var listDividingMoneyDetail = CalculateTheDividingMoneyDetail(divideMoneyInfor, listDetailResult);
                 cfdividingmoney_result = cf_dividingmoney;
                 cfdm_detail_result = listDividingMoneyDetail;
-                divideMoneyInfos = divideMoneyInfor;
+
+                var divideMoneyInforWithAccount = new List<DivideMoneyInfoWithAccount>();
+
+                var authDA = new AuthDA(_context);
+                foreach (var item in divideMoneyInfor)
+                {
+                    var account = authDA.GetAccount(item.AccountID);
+                    var divideMoneyInfoWithAccount = new DivideMoneyInfoWithAccount
+                    {
+                        AccountID = item.AccountID,
+                        Account = account,
+                        TotalAmount = item.TotalAmount,
+                        TransactionCount = item.TransactionCount
+                    };
+                    divideMoneyInforWithAccount.Add(divideMoneyInfoWithAccount);
+                }
+                divideMoneyInfos = divideMoneyInforWithAccount;
+
             }
             catch (Exception e)
             {
@@ -818,7 +835,7 @@ namespace pbms_be.DataAccess
             {
                 var dividingmoney = new CF_DividingMoney();
                 var dividingmoneydetail = new List<CF_DividingMoneyDetail>();
-                var divideMoneyInfor = new List<DivideMoneyInfo>();
+                var divideMoneyInfor = new List<DivideMoneyInfoWithAccount>();
                 GetDivideMoneyInfo(collabAccountDTO.CollabFundID, collabAccountDTO.AccountID, out dividingmoney, out dividingmoneydetail, out divideMoneyInfor);
 
                 var cf_activity = new CollabFundActivity

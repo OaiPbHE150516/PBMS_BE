@@ -169,7 +169,7 @@ namespace pbms_be.Controllers
                 //out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result
                 var cfdividingmoney_result = new CF_DividingMoney();
                 var cfdm_detail_result = new List<CF_DividingMoneyDetail>();
-                var listDVMI = new List<DivideMoneyInfo>();
+                var listDVMI = new List<DivideMoneyInfoWithAccount>();
                 _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID, out cfdividingmoney_result, out cfdm_detail_result, out listDVMI);
 
                 if (cfdividingmoney_result is null || cfdm_detail_result is null) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
