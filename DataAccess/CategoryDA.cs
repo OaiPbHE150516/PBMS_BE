@@ -220,7 +220,8 @@ namespace pbms_be.DataAccess
                 categoryUpdate.CategoryTypeID = parent.CategoryTypeID;
                 _context.SaveChanges();
                 return GetCategory(category.CategoryID, category.AccountID);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
@@ -269,72 +270,6 @@ namespace pbms_be.DataAccess
                     }
                 }
                 return rootCategories;
-
-
-
-
-                //var categoryTypes = GetCategoryTypes();
-                //foreach (var categoryType in categoryTypes)
-                //{
-                //    var list = categories.Where(c => c.CategoryTypeID == categoryType.CategoryTypeID).ToList();
-                //    categoriesDict.Add(categoryType.Name, list);
-                //}
-
-                //var newCateDict = new Dictionary<string, List<CategoryTree_VM_DTO>>();
-                //foreach (var categoryType in categoryTypes)
-                //{
-                //    var list = categories.Where(c => c.CategoryTypeID == categoryType.CategoryTypeID).ToList();
-                //    var listTree = new List<CategoryTree_VM_DTO>();
-                //    foreach (var category in list)
-                //    {
-                //        //var categoryTree = new CategoryTree_VM_DTO
-                //        //{
-                //        //    CategoryID = category.CategoryID,
-                //        //    NameVN = category.NameVN,
-                //        //    ParentCategoryID = category.ParentCategoryID,
-                //        //    IsRoot = category.IsRoot
-                //        //};
-                //        //listTree.Add(categoryTree);
-
-                //        // if category have parent category id in list, add to parent category children
-                //        if (listTree.Any(c => c.CategoryID == category.ParentCategoryID))
-                //        {
-                //            var parentCategory = listTree.FirstOrDefault(c => c.CategoryID == category.ParentCategoryID);
-                //            var categoryTree = new CategoryTree_VM_DTO
-                //            {
-                //                CategoryID = category.CategoryID,
-                //                NameVN = category.NameVN,
-                //                ParentCategoryID = category.ParentCategoryID,
-                //                IsRoot = category.IsRoot
-                //            };
-                //            parentCategory.Children.Add(categoryTree);
-                //        }
-                //        else
-                //        {
-                //            var categoryTree = new CategoryTree_VM_DTO
-                //            {
-                //                CategoryID = category.CategoryID,
-                //                NameVN = category.NameVN,
-                //                ParentCategoryID = category.ParentCategoryID,
-                //                IsRoot = category.IsRoot
-                //            };
-                //            listTree.Add(categoryTree);
-                //        }
-                //    }
-                //    newCateDict.Add(categoryType.Name, listTree);
-                //}
-                //return newCateDict;
-
-
-
-
-
-
-
-
-
-
-
             }
             catch (Exception e)
             {
