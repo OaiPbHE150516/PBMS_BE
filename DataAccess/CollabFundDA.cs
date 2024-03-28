@@ -1211,6 +1211,7 @@ namespace pbms_be.DataAccess
                         AccountID = account.AccountID,
                         AccountName = account.AccountName,
                         EmailAddress = account.EmailAddress,
+                        PictureURL = account.PictureURL,
                     };
                     listAccount.Add(accountInCollabFund);
                 }

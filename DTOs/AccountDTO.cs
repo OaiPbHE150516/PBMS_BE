@@ -37,6 +37,7 @@ namespace pbms_be.DTOs
         public string AccountID { get; set; } = String.Empty;
         public string EmailAddress { get; set; } = String.Empty;
         public string AccountName { get; set; } = String.Empty;
+        public string PictureURL { get; set; } = String.Empty;
     }
 
     public class AccountDetailInCollabFundDTO
