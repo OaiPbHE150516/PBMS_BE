@@ -15,6 +15,7 @@ namespace pbms_be.DTOs
         public int TransactionID { get; set; }
         public Category_VM_DTO Category { get; set; } = null!;
         public long TotalAmount { get; set; }
+        public string TotalAmountStr { get; set; } = String.Empty;
         public string Note { get; set; } = String.Empty;
         public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
         public string FromPerson { get; set; } = String.Empty;

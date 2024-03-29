@@ -1,5 +1,5 @@
 ﻿using pbms_be.Configurations;
-using static Google.Cloud.DocumentAI.V1.Document.Types.Provenance.Types;
+using System.Globalization;
 
 namespace pbms_be.Library
 {
@@ -64,7 +64,8 @@ namespace pbms_be.Library
         public static string ConvertToMoneyFormat(long number)
         {
             var result = number.ToString("N0");
-            result = result.Replace(",", ".") + " đ";
+            RegionInfo vietnamRegion = new RegionInfo("vi-VN");
+            result = result.Replace(",", ".") + " " + vietnamRegion.CurrencySymbol;
             return result;
         }
 

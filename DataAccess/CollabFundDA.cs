@@ -247,6 +247,8 @@ namespace pbms_be.DataAccess
                     }
 
                 }
+                // sort result by createTime
+                result.Sort((x, y) => y.CreateTime.CompareTo(x.CreateTime));
                 return result;
             }
             catch (Exception e)
