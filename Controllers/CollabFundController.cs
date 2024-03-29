@@ -273,6 +273,8 @@ namespace pbms_be.Controllers
                 // if collabFundActivityDTO have file, then upload file to GCP
                 if (collabFundActivityDTO.File is not null)
                 {
+                    // get filename of file without extension
+                    var filenamewithoutextension = Path.GetFileNameWithoutExtension(collabFundActivityDTO.File.FileName);
                     var foldername = CloudStorageConfig.COLLAB_FUND_FOLDER + "/" + collabFundActivityDTO.CollabFundID.ToString();
                     var filename = collabFundActivityDTO.File.FileName + "_" + collabFundActivityDTO.CollabFundID.ToString() + "_" + collabFundActivityDTO.AccountID;
                     var fileURL = GCP_BucketDA.UploadFileCustom(collabFundActivityDTO.File, CloudStorageConfig.PBMS_BUCKET_NAME, foldername,
