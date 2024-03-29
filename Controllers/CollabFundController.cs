@@ -69,7 +69,7 @@ namespace pbms_be.Controllers
                 bool isExist = false;
                 _collabFundDA.GetDetailCollabFund(collabFundID, accountID, out isExist, out collabfund);
                 if (!isExist) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
-                if( _mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var collabfundEntity = _mapper.Map<CollabFundDetail_VM_DTO>(collabfund);
                 collabfundEntity.AccountInCollabFunds = _collabFundDA.GetAccountInCollabFunds(collabfund.CollabFundID);
                 return Ok(collabfundEntity);
@@ -258,6 +258,40 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        // create collab fund activity 
+        [HttpPost("create/activity/notrans/form")]
+        public IActionResult CreateCollabFundActivityForm([FromForm] CreateCfaNoTransactionHaveFileDTO collabFundActivityDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var collabFundActivityEntity = _mapper.Map<CollabFundActivity>(collabFundActivityDTO);
+                collabFundActivityEntity.TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID;
+                collabFundActivityEntity.ActiveStateID = ActiveStateConst.ACTIVE;
+                // if collabFundActivityDTO have file, then upload file to GCP
+                if (collabFundActivityDTO.File is not null)
+                {
+                    var foldername = CloudStorageConfig.COLLAB_FUND_FOLDER + "/" + collabFundActivityDTO.CollabFundID.ToString();
+                    var filename = collabFundActivityDTO.File.FileName + "_" + collabFundActivityDTO.CollabFundID.ToString() + "_" + collabFundActivityDTO.AccountID;
+                    var fileURL = GCP_BucketDA.UploadFileCustom(collabFundActivityDTO.File, CloudStorageConfig.PBMS_BUCKET_NAME, foldername,
+                                                                                       "activity", filename, "file", true);
+                    collabFundActivityEntity.Filename = fileURL;
+                } else
+                {
+                    collabFundActivityEntity.Filename = "";
+                }
+                var result = _collabFundDA.CreateCollabFundActivity(collabFundActivityEntity);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+
 
         // create collab fund activity with transaction id
         [HttpPost("create/activity/withtrans")]

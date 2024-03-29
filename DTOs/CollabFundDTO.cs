@@ -77,6 +77,14 @@ namespace pbms_be.DTOs
         public string Filename { get; set; } = String.Empty;
     }
 
+    public class CreateCfaNoTransactionHaveFileDTO
+    {
+        public int CollabFundID { get; set; }
+        public string AccountID { get; set; } = String.Empty;
+        public string Note { get; set; } = String.Empty;
+        public IFormFile File { get; set; } = null!;
+    }
+
     // CreateCfaWithTransactionDTO
     public class CreateCfaWithTransactionDTO
     {
