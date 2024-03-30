@@ -286,6 +286,8 @@ namespace pbms_be.Controllers
                 {
                     collabFundActivityEntity.Filename = "";
                 }
+                // log DTO File to check
+                Console.WriteLine(collabFundActivityDTO.File);
                 var result = _collabFundDA.CreateCollabFundActivity(collabFundActivityEntity);
                 return Ok(result);
             }
