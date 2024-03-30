@@ -270,6 +270,8 @@ namespace pbms_be.Controllers
                 var collabFundActivityEntity = _mapper.Map<CollabFundActivity>(collabFundActivityDTO);
                 collabFundActivityEntity.TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID;
                 collabFundActivityEntity.ActiveStateID = ActiveStateConst.ACTIVE;
+                //var datetimenow convert to universal time
+                collabFundActivityEntity.CreateTime = DateTime.Now.ToUniversalTime();
                 // if collabFundActivityDTO have file, then upload file to GCP
                 if (collabFundActivityDTO.File is not null)
                 {
