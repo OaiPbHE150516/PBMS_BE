@@ -126,6 +126,13 @@ namespace pbms_be.Configurations
                 .ForMember(dest => dest.RemainAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.RemainAmount)))
                 .ReverseMap();
 
+            // CF_DivideMoney_DTO_VM
+            CreateMap<Data.CollabFund.CF_DividingMoney, Data.Custom.CF_DivideMoney_DTO_VM>()
+                .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
+                .ForMember(dest => dest.AverageAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.AverageAmount)))
+                .ForMember(dest => dest.RemainAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.RemainAmount)))
+                .ReverseMap();
+
             // CF_DividingMoneyDetail and CF_DividingMoneyDetail_MV_DTO, convert long number to money format
             CreateMap<Data.CollabFund.CF_DividingMoneyDetail, DTOs.CF_DividingMoneyDetail_MV_DTO>()
                 .ForMember(dest => dest.DividingAmount, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.DividingAmount)))

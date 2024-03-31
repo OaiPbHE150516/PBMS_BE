@@ -193,7 +193,8 @@ namespace pbms_be.Controllers
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 // convert property in dividemoneyinfor to string
                 //var cf_dividing_moneyEntity = _mapper.Map<CF_DividingMoney_MV_DTO>(dividemoneyinfor);
-                return Ok(new { listDVMI, cfdividingmoney_result, cfdm_detail_result });
+                var cfdividingmoney_resultDTO = _mapper.Map<CF_DivideMoney_DTO_VM>(cfdividingmoney_result);
+                return Ok(new { listDVMI, cfdividingmoney_resultDTO, cfdm_detail_result });
             }
             catch (System.Exception e)
             {

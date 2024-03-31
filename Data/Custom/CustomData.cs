@@ -1,5 +1,6 @@
 ﻿using pbms_be.Data.Auth;
 using pbms_be.Data.Balance;
+using pbms_be.Data.CollabFund;
 using pbms_be.DTOs;
 using pbms_be.Library;
 using System.ComponentModel.DataAnnotations;
@@ -30,6 +31,13 @@ public class DivideMoneyInfoWithAccount : DivideMoneyInfo
     public long RemainAmount { get; set; }
     public string RemainAmountStr { get; set; } = String.Empty;
     public string MoneyActionStr { get; set; } = String.Empty;
+}
+
+public class CF_DivideMoney_DTO_VM : CF_DividingMoney
+{
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public string AverageAmountStr { get; set; } = String.Empty;
+    public string RemainAmountStr { get; set; } = String.Empty;
 }
 
 public class DivideMoneyExecute
