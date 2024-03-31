@@ -394,6 +394,54 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+        internal object GetAllMemberWithDetailCollabFundTypeByType(int collabFundID, string accountID)
+        {
+            try
+            {
+                if (!IsAccountInCollabFund(collabFundID, accountID)) throw new Exception(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+                var collabAccount = _context.AccountCollab
+                    .Where(ca => ca.CollabFundID == collabFundID)
+                    .Select(ca => ca.AccountID)
+                    .ToList();
+                var result = _context.Account
+                    .Where(a => collabAccount.Contains(a.AccountID))
+                    .ToList();
+                var accountDetailInCollabFundDTOs = new List<AccountDetailInCollabFundDTO>();
+                foreach (var item in result)
+                {
+                    var inCollab = _context.AccountCollab
+                                            .Where(ca => ca.CollabFundID == collabFundID
+                                             && ca.AccountID == item.AccountID)
+                                            .Include(ca => ca.ActiveState)
+                                            .FirstOrDefault();
+                    if (inCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                    var accountDetailInCollabFundDTO = new AccountDetailInCollabFundDTO
+                    {
+                        AccountID = item.AccountID,
+                        ClientID = item.ClientID,
+                        AccountName = item.AccountName,
+                        EmailAddress = item.EmailAddress,
+                        PictureURL = item.PictureURL,
+                        IsFundholder = inCollab.IsFundholder,
+                        ActiveStateID = inCollab.ActiveStateID,
+                        ActiveState = inCollab.ActiveState,
+                        LastTime = LConvertVariable.ConvertUtcToLocalTime(inCollab.LastTime)
+                    };
+                    accountDetailInCollabFundDTOs.Add(accountDetailInCollabFundDTO);
+                }
+
+                // split account by activeStateID (active, pending, inactive)
+                var active = accountDetailInCollabFundDTOs.FindAll(a => a.ActiveStateID == ActiveStateConst.ACTIVE);
+                var pending = accountDetailInCollabFundDTOs.FindAll(a => a.ActiveStateID == ActiveStateConst.PENDING);
+                var inactive = accountDetailInCollabFundDTOs.FindAll(a => a.ActiveStateID == ActiveStateConst.INACTIVE);
+
+                return new { active, pending, inactive };
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
 
         // invite member to collab fund
         internal List<AccountDetailInCollabFundDTO> InviteMemberCollabFund(MemberCollabFundDTO InviteMemberDTO)

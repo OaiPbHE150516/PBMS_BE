@@ -118,6 +118,23 @@ namespace pbms_be.Controllers
             }
         }
 
+        // get all accounts ( as parties) of collab fund by collab fund id and account id
+        [HttpGet("get/member/typebytype/{collabFundID}/{accountID}")]
+        public IActionResult GetAllMemberCollabFundTypeByType(int collabFundID, string accountID)
+        {
+            try
+            {
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                var result = _collabFundDA.GetAllMemberWithDetailCollabFundTypeByType(collabFundID, accountID);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         // get list account by contain email address and their state with collab fund
         [HttpGet("get/account/{collabfundID}/{email}")]
         public IActionResult GetAccountByEmail(int collabfundID, string email)
