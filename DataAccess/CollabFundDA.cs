@@ -354,7 +354,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                if (!IsMemberCollabFund(collabFundID, accountID)) throw new Exception(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+                if (!IsAccountInCollabFund(collabFundID, accountID)) throw new Exception(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 var collabAccount = _context.AccountCollab
                     .Where(ca => ca.CollabFundID == collabFundID
                         && ca.ActiveStateID == ActiveStateConst.ACTIVE)
@@ -520,6 +520,23 @@ namespace pbms_be.DataAccess
                     && ca.ActiveStateID == ActiveStateConst.ACTIVE)
                     .FirstOrDefault();
                 return isFundholder != null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        // check if account is in collab fund
+        private bool IsAccountInCollabFund(int collabFundID, string accountID)
+        {
+            try
+            {
+                var isMember = _context.AccountCollab
+                    .Any(ca => ca.CollabFundID == collabFundID
+                    && ca.AccountID == accountID
+                    && ca.ActiveStateID == ActiveStateConst.ACTIVE);
+                return isMember;
             }
             catch (Exception e)
             {
