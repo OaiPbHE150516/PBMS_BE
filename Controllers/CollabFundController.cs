@@ -185,15 +185,18 @@ namespace pbms_be.Controllers
                 if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 //out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result
                 var cfdividingmoney_resultEntity = new CF_DividingMoney();
-                var cfdm_detail_result = new List<CF_DividingMoneyDetail>();
+                var cfdm_detail_resultEntity = new List<CF_DividingMoneyDetail>();
                 var listDVMI = new List<DivideMoneyInfoWithAccount>();
-                _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID, out cfdividingmoney_resultEntity, out cfdm_detail_result, out listDVMI);
+                _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID, out cfdividingmoney_resultEntity, out cfdm_detail_resultEntity, out listDVMI);
 
-                if (cfdividingmoney_resultEntity is null || cfdm_detail_result is null) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
+                if (cfdividingmoney_resultEntity is null || cfdm_detail_resultEntity is null) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 // convert property in dividemoneyinfor to string
                 //var cf_dividing_moneyEntity = _mapper.Map<CF_DividingMoney_MV_DTO>(dividemoneyinfor);
                 var cfdividingmoney_result = _mapper.Map<CF_DivideMoney_DTO_VM>(cfdividingmoney_resultEntity);
+                // cfdm_detail_result
+                var cfdm_detail_result = _mapper.Map<List<CF_DividingMoneyDetail_DTO_VM>>(cfdm_detail_resultEntity);
+                // 
                 return Ok(new { listDVMI, cfdividingmoney_result, cfdm_detail_result });
             }
             catch (System.Exception e)

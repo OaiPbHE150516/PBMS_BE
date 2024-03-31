@@ -848,7 +848,8 @@ namespace pbms_be.DataAccess
         //    }
         //}
 
-        internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result, out List<DivideMoneyInfoWithAccount> divideMoneyInfos)
+        internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result, 
+            out List<CF_DividingMoneyDetail> cfdm_detail_result, out List<DivideMoneyInfoWithAccount> divideMoneyInfos)
         {
             try
             {
@@ -873,10 +874,12 @@ namespace pbms_be.DataAccess
                 cfdm_detail_result = listDividingMoneyDetail;
 
                 var divideMoneyInforWithAccount = new List<DivideMoneyInfoWithAccount>();
+                //var count_DMI_WithAccount = 1;
 
                 var authDA = new AuthDA(_context);
                 foreach (var item in divideMoneyInfor)
                 {
+                    //count_DMI_WithAccount++;
                     var account = authDA.GetAccount(item.AccountID);
                     var remain = item.TotalAmount - averageAmount;
                     var divideMoneyInfoWithAccount = new DivideMoneyInfoWithAccount
@@ -970,12 +973,14 @@ namespace pbms_be.DataAccess
         {
             var authDA = new AuthDA(_context);
             var listDividingMoneyDetail = new List<CF_DividingMoneyDetail>();
+            var count = 1;
             foreach (var item in listDetailResult)
             {
                 var dmInfor = divideMoneyInfor.Find(p => p.AccountID == item.FromAccountID);
                 if (dmInfor is null) continue;
                 var detail = new CF_DividingMoneyDetail
                 {
+                    CF_DividingMoneyDetailID = count,
                     FromAccountTotalAmount = dmInfor.TotalAmount,
                     FromAccountTransactionCount = dmInfor.TransactionCount,
                     FromAccountID = item.FromAccountID,
@@ -986,6 +991,7 @@ namespace pbms_be.DataAccess
                     LastTime = LConvertVariable.ConvertUtcToLocalTime(DateTime.UtcNow)
                 };
                 listDividingMoneyDetail.Add(detail);
+                count++;
             }
             return listDividingMoneyDetail;
         }
