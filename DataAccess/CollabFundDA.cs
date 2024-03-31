@@ -123,6 +123,11 @@ namespace pbms_be.DataAccess
                                     && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(cf => cf.ActiveState)
                             .FirstOrDefault();
+                if (result is not null )
+                {
+                    var divideMoneyInfor = GetDivideMoneyCollabFund(result.CollabFundID);
+                    result.TotalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                }
                 //if (result == null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 return result;
             }
@@ -147,6 +152,13 @@ namespace pbms_be.DataAccess
                                         && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(cf => cf.ActiveState)
                             .ToList();
+
+                foreach(var item in result)
+                {
+                    var divideMoneyInfor = GetDivideMoneyCollabFund(item.CollabFundID);
+                    item.TotalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                }
+
                 return result;
             }
             catch (Exception e)
