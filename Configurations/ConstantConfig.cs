@@ -182,7 +182,8 @@
         public const string ACCOUNT_FROM_NOT_FOUND = " Account from not found";
         public const string ACCOUNT_TO_NOT_FOUND = " Account to not found";
         public const string COLLAB_FUND_ACTIVITY_NOT_FOUND = " Collab fund activity not found";
-
+        public const string COLLAB_FUND_NOTFOUND_ANY_MONEY = " Collab fund not found any money";
+        public const string COLLAB_FUND_NOTFOUND_DATA = " Collab fund not found data";
         // cfdm detail not found
         public const string CFDM_DETAIL_NOT_FOUND = " Collab Fund dividing money detail not found";
 

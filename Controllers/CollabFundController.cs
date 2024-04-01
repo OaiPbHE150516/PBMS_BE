@@ -189,7 +189,7 @@ namespace pbms_be.Controllers
                 var listDVMI = new List<DivideMoneyInfoWithAccount>();
                 _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID, out cfdividingmoney_resultEntity, out cfdm_detail_resultEntity, out listDVMI);
 
-                if (cfdividingmoney_resultEntity is null || cfdm_detail_resultEntity is null) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
+                if (cfdividingmoney_resultEntity is null || cfdm_detail_resultEntity is null) return Ok(Message.COLLAB_FUND_NOTFOUND_DATA);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 // convert property in dividemoneyinfor to string
                 //var cf_dividing_moneyEntity = _mapper.Map<CF_DividingMoney_MV_DTO>(dividemoneyinfor);

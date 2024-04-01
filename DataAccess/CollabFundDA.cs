@@ -123,7 +123,7 @@ namespace pbms_be.DataAccess
                                     && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(cf => cf.ActiveState)
                             .FirstOrDefault();
-                if (result is not null )
+                if (result is not null)
                 {
                     var divideMoneyInfor = GetDivideMoneyCollabFund(result.CollabFundID);
                     result.TotalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
@@ -153,7 +153,7 @@ namespace pbms_be.DataAccess
                             .Include(cf => cf.ActiveState)
                             .ToList();
 
-                foreach(var item in result)
+                foreach (var item in result)
                 {
                     var divideMoneyInfor = GetDivideMoneyCollabFund(item.CollabFundID);
                     item.TotalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
@@ -860,12 +860,16 @@ namespace pbms_be.DataAccess
         //    }
         //}
 
-        internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result, 
-            out List<CF_DividingMoneyDetail> cfdm_detail_result, out List<DivideMoneyInfoWithAccount> divideMoneyInfos)
+        internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result,
+            out List<CF_DividingMoneyDetail>? cfdm_detail_result, out List<DivideMoneyInfoWithAccount>? divideMoneyInfos)
         {
             try
             {
                 var divideMoneyInfor = GetDivideMoneyCollabFund(collabFundID);
+                if (divideMoneyInfor is null || divideMoneyInfor.Count == 0)
+                {
+                    throw new Exception(Message.COLLAB_FUND_NOTFOUND_ANY_MONEY);
+                }
                 var totalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
                 var numberParticipant = divideMoneyInfor.Count;
                 var averageAmount = (totalAmount / ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR / numberParticipant) * ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR;
