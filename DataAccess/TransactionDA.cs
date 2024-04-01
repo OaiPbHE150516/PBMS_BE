@@ -4,6 +4,7 @@ using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Balance;
 using pbms_be.Data.Custom;
+using pbms_be.Data.Filter;
 using pbms_be.Data.Invo;
 using pbms_be.Data.Trans;
 using pbms_be.DTOs;
@@ -806,6 +807,53 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
             throw new NotImplementedException();
+        }
+
+        internal object GetExpensesByLastDays(string accountID, int numdays, IMapper? _mapper)
+        {
+            try
+            {
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var fromDate = DateTime.UtcNow.AddDays(-numdays);
+                var toDate = DateTime.UtcNow;
+                var transactions = GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
+                var transactionsExpenses = transactions.Where(t => t.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_EXPENSE).ToList();
+                // group by day
+                var transactionsDict = new Dictionary<DateOnly, List<TransactionInList_VM_DTO>>();
+                foreach (var tran in transactionsExpenses)
+                {
+                    var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
+                    var transDTO = _mapper.Map<TransactionInList_VM_DTO>(tran);
+                    if (transactionsDict.TryGetValue(dateonly, out List<TransactionInList_VM_DTO>? value))
+                    {
+                        value.Add(transDTO);
+                    }
+                    else
+                    {
+                        transactionsDict.Add(dateonly, [transDTO]);
+                    }
+                }
+                // sort by date
+                transactionsDict = transactionsDict.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
+
+                // new dictionary, key is int index, value is new object {DateOnlt, List<TransactionInList_VM_DTO>}
+                var transactionsDict2 = new Dictionary<int, object>();
+                var index = 0;
+                foreach (var item in transactionsDict)
+                {
+                    transactionsDict2.Add(index, new
+                    {
+                        DayDetail = LConvertVariable.ConvertDateOnlyToDayDetail(item.Key),
+                        Transactions = item.Value
+                    });
+                    index++;
+                }
+                return transactionsDict2;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
     }
 }

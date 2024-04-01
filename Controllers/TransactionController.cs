@@ -303,6 +303,23 @@ namespace pbms_be.Controllers
             }
         }
 
+        // get expenses by account id in last (number) days
+        [HttpGet("get/expenses/lastnumdays/{accountID}/{numdays}")]
+        public IActionResult GetExpensesByLastDays(string accountID, int numdays)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (numdays <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.NUMBER_REQUIRED);
+                var result = _transactionDA.GetExpensesByLastDays(accountID, numdays, _mapper);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         #region Post Methods
 
         // create transaction with invoice and products

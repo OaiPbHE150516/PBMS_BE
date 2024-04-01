@@ -1,4 +1,5 @@
 ﻿using pbms_be.Configurations;
+using pbms_be.Data.Custom;
 using System.Globalization;
 
 namespace pbms_be.Library
@@ -210,7 +211,7 @@ namespace pbms_be.Library
             var dayInWeek = ConvertDayInWeekToVN_SHORT_3(date.DayOfWeek);
             var day = date.Day;
             var month = date.Month;
-            var result = dayInWeek + ", " + Message.VN_DAY_SHORT + " " + day;
+            var result = dayInWeek + ", " + day;
             if (day == 1 || day == 2 || day == 3 || day == 28 || day == 29 || day == 30 || day == 31)
                 result += " " + Message.VN_MONTH_SHORT + " " + month;
             return result;
@@ -239,6 +240,23 @@ namespace pbms_be.Library
             var month = dateTime.ToString("MM");
             if (month[0] == '0') month = month.Remove(0, 1);
             return day + ConstantConfig.DEFAULT_DAY_THG_MONTH + month;
+        }
+
+        internal static DayDetail ConvertDateOnlyToDayDetail(DateOnly dateonly)
+        {
+            var dayDetail = new DayDetail
+            {
+                DayOfWeek = dateonly.DayOfWeek,
+                Short_EN = dateonly.DayOfWeek.ToString()[..3],
+                Full_EN = dateonly.DayOfWeek.ToString(),
+                Short_VN = ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                Full_VN = ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                ShortDate = ConvertDateOnlyToVN_ng_thg(dateonly),
+                FullDate = ConvertDateOnlyToVN_ngay_thang(dateonly),
+                DayStr = dateonly.Day.ToString(),
+                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+            };
+            return dayDetail;
         }
 
         //// get all week have inside from start date to end date

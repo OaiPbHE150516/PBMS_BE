@@ -1,6 +1,7 @@
 using AutoMapper;
 using pbms_be.DTOs;
 using pbms_be.Library;
+using System;
 
 namespace pbms_be.Configurations
 {
@@ -158,6 +159,20 @@ namespace pbms_be.Configurations
                 .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
                 .ForMember(dest => dest.TotalAmountInStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmountIn)))
                 .ForMember(dest => dest.TotalAmountOutStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmountOut)))
+                .ReverseMap();
+
+            // DayDetail and DateOnly
+            CreateMap<Data.Custom.ADateOnly, Data.Custom.DayDetail>()
+                .ForMember(dest => dest.DayOfWeek, opt => opt.MapFrom(src => src.Date.DayOfWeek))
+                .ForMember(dest => dest.Short_EN, opt => opt.MapFrom(src => src.Date.DayOfWeek.ToString().Substring(0, 3)))
+                // Full_EN, Short_VN, Full_VN, ShortDate, FullDate, DayStr, MonthYearStr
+                .ForMember(dest => dest.Full_EN, opt => opt.MapFrom(src => src.Date.DayOfWeek.ToString()))
+                .ForMember(dest => dest.Short_VN, opt => opt.MapFrom(src => LConvertVariable.ConvertDayInWeekToVN_SHORT_3(src.Date.DayOfWeek)))
+                .ForMember(dest => dest.Full_VN, opt => opt.MapFrom(src => LConvertVariable.ConvertDayInWeekToVN_FULL(src.Date.DayOfWeek)))
+                .ForMember(dest => dest.ShortDate, opt => opt.MapFrom(src => LConvertVariable.ConvertDateOnlyToVN_ng_thg(src.Date)))
+                .ForMember(dest => dest.FullDate, opt => opt.MapFrom(src => LConvertVariable.ConvertDateOnlyToVN_ngay_thang(src.Date)))
+                .ForMember(dest => dest.DayStr, opt => opt.MapFrom(src => src.Date.Day.ToString()))
+                .ForMember(dest => dest.MonthYearStr, opt => opt.MapFrom(src => $"tháng {src.Date.Month}, {src.Date.Year}"))
                 .ReverseMap();
 
         }

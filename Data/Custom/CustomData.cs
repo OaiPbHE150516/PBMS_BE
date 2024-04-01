@@ -226,3 +226,8 @@ public class CustomBalanceHisLogByDate
     public virtual List<BalanceHisLog_VM_DTO> BalanceHistoryLogs { get; set; } = null!;
 
 }
+
+public class ADateOnly
+{
+    public DateOnly Date { get; set; }
+}
