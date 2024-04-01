@@ -211,7 +211,7 @@ namespace pbms_be.Library
             var dayInWeek = ConvertDayInWeekToVN_SHORT_3(date.DayOfWeek);
             var day = date.Day;
             var month = date.Month;
-            var result = dayInWeek + ", " + day;
+            var result = dayInWeek + ", " + Message.VN_DAY_SHORT + " " + day;
             if (day == 1 || day == 2 || day == 3 || day == 28 || day == 29 || day == 30 || day == 31)
                 result += " " + Message.VN_MONTH_SHORT + " " + month;
             return result;
