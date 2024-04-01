@@ -863,6 +863,7 @@ namespace pbms_be.DataAccess
                         DayDetail = LConvertVariable.ConvertDateOnlyToDayDetail(item.Key),
                         Transactions = item.Value
                     });
+                    index++;
                 }
                 return listResult;
             }
