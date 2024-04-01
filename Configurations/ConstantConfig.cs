@@ -42,7 +42,7 @@
         public const long NEGATIVE_VALUE = -1;
         public const int DEFAULT_ACTIVE_STATE_VALUE = 1;
         // Dùng trong trường hợp không có transaction id
-        public const int DEFAULT_NULL_TRANSACTION_ID = 1;
+        public const int DEFAULT_NULL_TRANSACTION_ID = 14887;
         // default primary key
         public const int DEFAULT_PRIMARY_KEY = 1;
         // default value for zero
