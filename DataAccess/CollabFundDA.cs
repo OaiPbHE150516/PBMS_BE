@@ -1169,7 +1169,7 @@ namespace pbms_be.DataAccess
                     $"LEFT JOIN FirstTrue as ft ON cf.account_id = ft.account_id " +
                     $"WHERE cf.collabfund_id = {collabFundID} " +
                     $"AND cf.isBeforeDivide = false " +
-                    $"AND t.transaction_id != 1 " +
+                    $"AND t.transaction_id != {ConstantConfig.DEFAULT_NULL_TRANSACTION_ID} " +
                     $"AND (cf.collab_fun_activity_id > ft.min_id OR ft.min_id IS NULL) " +
                     $"GROUP BY cf.account_id;";
                 var result = _context.DivideMoneyInfo.FromSqlRaw(rawQuery).ToList();
