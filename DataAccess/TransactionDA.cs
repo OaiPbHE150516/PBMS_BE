@@ -837,18 +837,34 @@ namespace pbms_be.DataAccess
                 transactionsDict = transactionsDict.OrderByDescending(t => t.Key).ToDictionary(t => t.Key, t => t.Value);
 
                 // new dictionary, key is int index, value is new object {DateOnlt, List<TransactionInList_VM_DTO>}
-                var transactionsDict2 = new Dictionary<int, object>();
-                var index = 0;
+                //var transactionsDict2 = new Dictionary<KeyExtractor, object>();
+                //var index = 0;
+                //foreach (var item in transactionsDict)
+                //{
+                //    transactionsDict2.Add(new KeyExtractor
+                //    {
+                //        Key = index.ToString()
+                //    }, new
+                //    {
+                //        DayDetail = LConvertVariable.ConvertDateOnlyToDayDetail(item.Key),
+                //        Transactions = item.Value
+                //    });
+                //    index++;
+                //}
+                //return transactionsDict2;
+
+                var listResult = new List<object>();
+                var index = 1;
                 foreach (var item in transactionsDict)
                 {
-                    transactionsDict2.Add(index, new
+                    listResult.Add(new
                     {
+                        KeyExtractor = index,
                         DayDetail = LConvertVariable.ConvertDateOnlyToDayDetail(item.Key),
                         Transactions = item.Value
                     });
-                    index++;
                 }
-                return transactionsDict2;
+                return listResult;
             }
             catch (Exception e)
             {

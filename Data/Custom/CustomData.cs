@@ -231,3 +231,8 @@ public class ADateOnly
 {
     public DateOnly Date { get; set; }
 }
+
+public class KeyExtractor
+{
+    public string Key { get; set; } = String.Empty;
+}
