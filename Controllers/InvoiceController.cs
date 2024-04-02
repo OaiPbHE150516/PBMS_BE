@@ -137,6 +137,9 @@ namespace pbms_be.Controllers
                             "invoiceRawDatalog": "rawdata"
                             }
                             """;
+
+            // wait 5 seconds to simulate processing
+            System.Threading.Thread.Sleep(5000);
             return Ok(result);
             //var result = DocumentAiApi.ProcessDocument(file);
             //var imageURL = GCP_BucketDA.UploadFile(file);
