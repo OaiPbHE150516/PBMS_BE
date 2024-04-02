@@ -333,7 +333,7 @@ namespace pbms_be.Controllers
                 var transaction = _mapper.Map<Data.Trans.Transaction>(transactionDTO);
                 if (_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
                 var transDate = DateTime.UtcNow;
-                var imageurl = "https://storage.googleapis.com/pbms-user/invoice/invoice_" + transactionDTO.ImageURL + "_file.jpg";
+                var imageurl = "https://storage.googleapis.com/pbms-user/invoice/"+ transactionDTO.AccountID + "/" + "invoice_" + transactionDTO.ImageURL + "_file.jpg";
                 var resultTransaction = _transactionDA.CreateTransactionV2(transaction, transDate);
                 var invoiceDA = new InvoiceDA(_context);
                 var resultInvoice = invoiceDA.CreateInvoice(_mapper.Map<Invoice>(transactionDTO.Invoice), resultTransaction.TransactionID);
