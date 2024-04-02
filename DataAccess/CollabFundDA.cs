@@ -249,7 +249,7 @@ namespace pbms_be.DataAccess
 
                 foreach (var item in result)
                 {
-                    if (item.TransactionID > ConstantConfig.DEFAULT_NULL_TRANSACTION_ID)
+                    if (item.TransactionID is not ConstantConfig.DEFAULT_NULL_TRANSACTION_ID)
                     {
                         item.Transaction = transDA.GetTransaction(item.TransactionID);
                     }
@@ -257,7 +257,6 @@ namespace pbms_be.DataAccess
                     {
                         item.TransactionID = ConstantConfig.DEFAULT_ZERO_VALUE;
                     }
-
                 }
                 // sort result by createTime
                 result.Sort((x, y) => y.CreateTime.CompareTo(x.CreateTime));
