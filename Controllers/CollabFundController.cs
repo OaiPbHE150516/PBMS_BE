@@ -318,8 +318,6 @@ namespace pbms_be.Controllers
             }
         }
 
-
-
         // create collab fund activity with transaction id
         [HttpPost("create/activity/withtrans")]
         public IActionResult CreateCollabFundActivityWithTransaction([FromBody] CreateCfaWithTransactionDTO collabFundActivityDTO)
@@ -339,6 +337,46 @@ namespace pbms_be.Controllers
             }
         }
 
+        [HttpPost("create/activity/withtrans/form")]
+        public IActionResult CreateCollabFundActivityWithTransactionForm([FromForm] CreateCfaWithTransactionHaveFileDTO collabFundActivityDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var collabFundActivityEntity = _mapper.Map<CollabFundActivity>(collabFundActivityDTO);
+                collabFundActivityEntity.ActiveStateID = ActiveStateConst.ACTIVE;
+                collabFundActivityEntity.CreateTime = DateTime.UtcNow.AddHours(7);
+                if (collabFundActivityDTO.File is not null)
+                {
+                    // get filename of file without extension
+                    var filenamewithoutextension = Path.GetFileNameWithoutExtension(collabFundActivityDTO.File.FileName);
+                    var foldername = CloudStorageConfig.COLLAB_FUND_FOLDER + "/" + collabFundActivityDTO.CollabFundID.ToString();
+                    var filename = collabFundActivityDTO.File.FileName + "_" + collabFundActivityDTO.CollabFundID.ToString() + "_" + collabFundActivityDTO.AccountID;
+                    var fileURL = GCP_BucketDA.UploadFileCustom(collabFundActivityDTO.File, CloudStorageConfig.PBMS_BUCKET_NAME, foldername,
+                                                                                       "activity", filename, "file", true);
+                    collabFundActivityEntity.Filename = fileURL;
+                }
+                else
+                {
+                    collabFundActivityEntity.Filename = "";
+                }
+                if (collabFundActivityDTO.TransactionID is not null || collabFundActivityDTO.TransactionID > ConstantConfig.DEFAULT_ZERO_VALUE)
+                {
+                    collabFundActivityEntity.TransactionID = (int)collabFundActivityDTO.TransactionID;
+                }
+                else
+                {
+                    collabFundActivityEntity.TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID;
+                }
+                var result = _collabFundDA.CreateCollabFundActivity(collabFundActivityEntity);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
         // add member to collab fund by collab fund id and account id, only fundholder can add member
         [HttpPost("invite")]
         public IActionResult InviteMemberCollabFund([FromBody] MemberCollabFundDTO addMemberCollabFundDTO)

@@ -119,6 +119,7 @@ namespace pbms_be.Configurations
             //CollabFundActivity
             CreateMap<Data.CollabFund.CollabFundActivity, DTOs.CreateCfaNoTransactionDTO>().ReverseMap();
             CreateMap<Data.CollabFund.CollabFundActivity, DTOs.CreateCfaNoTransactionHaveFileDTO>().ReverseMap();
+            CreateMap<Data.CollabFund.CollabFundActivity, DTOs.CreateCfaWithTransactionHaveFileDTO>().ReverseMap();
 
             // CF_DividingMoney_MV_DTO and CF_DividingMoney, convert long number to money format
             CreateMap<Data.CollabFund.CF_DividingMoney, DTOs.CF_DividingMoney_MV_DTO>()
