@@ -24,7 +24,7 @@
         // projectid, location, processorid, mineType_PDF, mineType_JPEG
         public const string PROJECT_ID = "lexical-aileron-410114";
         public const string LOCATION = "us";
-        public const string PROCESSOR_ID = "6036d75c63c4564";
+        public const string PROCESSOR_ID = "ca34b7e1f2789935";
         public const string MINE_TYPE_PDF = "application/pdf";
         public const string MINE_TYPE_JPEG = "image/jpeg";
         public const string MINE_TYPE_PNG = "image/png";
