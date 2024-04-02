@@ -303,7 +303,8 @@ namespace pbms_be.Controllers
                     var fileURL = GCP_BucketDA.UploadFileCustom(collabFundActivityDTO.File, CloudStorageConfig.PBMS_BUCKET_NAME, foldername,
                                                                                        "activity", filename, "file", true);
                     collabFundActivityEntity.Filename = fileURL;
-                } else
+                }
+                else
                 {
                     collabFundActivityEntity.Filename = "";
                 }
@@ -361,7 +362,7 @@ namespace pbms_be.Controllers
                 {
                     collabFundActivityEntity.Filename = "";
                 }
-                if (collabFundActivityDTO.TransactionID is not null || collabFundActivityDTO.TransactionID > ConstantConfig.DEFAULT_ZERO_VALUE)
+                if (collabFundActivityDTO.TransactionID is not null && collabFundActivityDTO.TransactionID is not ConstantConfig.DEFAULT_ZERO_VALUE)
                 {
                     collabFundActivityEntity.TransactionID = (int)collabFundActivityDTO.TransactionID;
                 }
