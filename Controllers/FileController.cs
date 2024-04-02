@@ -59,17 +59,19 @@ namespace pbms_be.Controllers
             var fileURL = GCP_BucketDA.UploadFileCustom(file, CloudStorageConfig.PBMS_BUCKET_NAME, CloudStorageConfig.INVOICE_FOLDER,
                                                         "invoice", filename, "file", true);
             return Ok(fileURL);
-        }       
+        }
+
         [HttpPost("upload/transaction/invoice/filename")]
-        public IActionResult UploadInvoiceFileWithName(IFormFile file, string filename)
+        public IActionResult UploadInvoiceFileWithName([FromForm] FileWithAccountID fileWithAccountID)
         {
             // only accept image, pdf, doc, docx, xls, xlsx, ppt, pptx, txt
-            if (file is null) return BadRequest(Message.FILE_IS_NULL_);
-            if (filename is null) return BadRequest(Message.FILE_NAME_IS_NULL);
-            if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
+            if (fileWithAccountID.File is null) return BadRequest(Message.FILE_IS_NULL_);
+            if (fileWithAccountID.FileName is null) return BadRequest(Message.FILE_NAME_IS_NULL);
+            if (LValidation.IsCorrectPDFJPGPNG(fileWithAccountID.File)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
             //var filename = LConvertVariable.GenerateRandomString(CloudStorageConfig.DEFAULT_FILE_NAME_LENGTH, Path.GetFileNameWithoutExtension(file.FileName));
-            var fileURL = GCP_BucketDA.UploadFileCustom(file, CloudStorageConfig.PBMS_BUCKET_NAME, CloudStorageConfig.INVOICE_FOLDER,
-                                                        "invoice", filename, "file", false);
+            var folderName = CloudStorageConfig.INVOICE_FOLDER + "/" + fileWithAccountID.AccountID;
+            var fileURL = GCP_BucketDA.UploadFileCustom(fileWithAccountID.File, CloudStorageConfig.PBMS_BUCKET_NAME, folderName,
+                                                        "invoice", fileWithAccountID.FileName, "file", false);
             return Ok(fileURL);
         }
 

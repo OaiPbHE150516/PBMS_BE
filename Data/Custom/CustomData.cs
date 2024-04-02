@@ -236,3 +236,10 @@ public class KeyExtractor
 {
     public string Key { get; set; } = String.Empty;
 }
+
+public class FileWithAccountID
+{
+    public string AccountID { get; set; } = String.Empty;
+    public IFormFile File { get; set; } = null!;
+    public string FileName { get; set; } = String.Empty;
+}
