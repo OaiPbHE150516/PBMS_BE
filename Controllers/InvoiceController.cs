@@ -161,6 +161,24 @@ namespace pbms_be.Controllers
             return Ok(result);
         }
 
+        [HttpPost("scan/v3")]
+        public IActionResult ScanInvoiceV3(IFormFile file)
+        {
+            var money = DocumentAiApi.GetMoney(file);
+            var TextPromptDA = new TextPromptDA(_context);
+            var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
+            if (textPrompt == null) return BadRequest("TextPrompt is not found");
+            var rawData = VertextAiMultimodalApi.GenerateContent(file, textPrompt);
+            rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
+            var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
+            result.TotalAmount = money.TotalAmount;
+            result.NetAmount = money.NetAmount;
+            result.TaxAmount = money.TaxAmount;
+            return Ok(result);
+        }
+
+
+
         [HttpPost("scan/raw/v2/gemini")]
         public IActionResult ScanInvoiceTestV2(IFormFile file)
         {
@@ -171,7 +189,6 @@ namespace pbms_be.Controllers
             result = VertextAiMultimodalApi.ProcessRawDataGemini(result);
             return Ok(result);
         }
-
 
         [HttpPost("scan/v2/gemini/rawToObject")]
         public IActionResult ScanInvoiceV2Test(string data)

@@ -2,6 +2,7 @@
 using Google.Protobuf;
 using Google.Protobuf.Collections;
 using pbms_be.Configurations;
+using pbms_be.Data.Custom;
 using pbms_be.Data.Invo;
 
 namespace pbms_be.ThirdParty
@@ -242,6 +243,72 @@ namespace pbms_be.ThirdParty
                 Console.WriteLine(e.Message);
                 return false;
             }
+        }
+
+        internal static MoneyInvoice GetMoney(IFormFile file)
+        {
+            // create client
+            var client = new DocumentProcessorServiceClientBuilder
+            {
+                Endpoint = $"{ConstantConfig.LOCATION}-documentai.googleapis.com"
+            }.Build();
+            
+            // read file
+            var content = file.OpenReadStream();
+            var rawDocument = new RawDocument
+            {
+                Content = ByteString.FromStream(content),
+                MimeType = file.ContentType
+            };
+
+            // Initialize request argument(s)
+            var request = new ProcessRequest
+            {
+                Name = ProcessorName.FromProjectLocationProcessor(ConstantConfig.PROJECT_ID, ConstantConfig.LOCATION, ConstantConfig.PROCESSOR_ID).ToString(),
+                RawDocument = rawDocument
+            };
+
+            // Make the request
+            var response = client.ProcessDocument(request);
+
+            var moneyInvoice = new MoneyInvoice();
+            foreach (var entity in response.Document.Entities)
+            {
+                switch (entity.Type)
+                {
+                    case "net_amount":
+                        if (TryConvertStringToLong(entity.MentionText, out long resultNetAmount))
+                        {
+                            moneyInvoice.NetAmount = resultNetAmount;
+                        }
+                        else
+                        {
+                            moneyInvoice.NetAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
+                        }
+                        break;
+                    case "total_amount":
+                        if (TryConvertStringToLong(entity.MentionText, out long resultTotalAmount))
+                        {
+                            moneyInvoice.TotalAmount = resultTotalAmount;
+                        }
+                        else
+                        {
+                            moneyInvoice.TotalAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
+                        }
+                        break;
+                    case "total_tax_amount":
+                        if (TryConvertStringToLong(entity.MentionText, out long resultTaxAmount))
+                        {
+                            moneyInvoice.TaxAmount = resultTaxAmount;
+                        }
+                        else
+                        {
+                            moneyInvoice.TaxAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
+                        }
+                        break;
+                }
+            }
+            return moneyInvoice;
         }
     }
 }

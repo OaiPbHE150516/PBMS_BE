@@ -273,3 +273,10 @@ public class ProductInInvoice_VM_Scan
     public long TotalAmount { get; set; }
     public string Tag { get; set; } = String.Empty;
 }
+
+public class MoneyInvoice
+{
+    public long NetAmount { get; set; }
+    public long TaxAmount { get; set; }
+    public long TotalAmount { get; set; }
+}

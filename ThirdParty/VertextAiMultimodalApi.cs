@@ -88,7 +88,7 @@ namespace pbms_be.ThirdParty
             return result;
         }
 
-        internal static object ProcessDataGemini(string data)
+        internal static InvoiceCustom_VM_Scan ProcessDataGemini(string data)
         {
             try
             {
