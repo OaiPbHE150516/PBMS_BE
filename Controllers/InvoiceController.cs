@@ -169,9 +169,10 @@ namespace pbms_be.Controllers
             if (textPrompt == null) return BadRequest("TextPrompt is not found");
             var rawData = await VertextAiMultimodalApi.GenerateContent(filescan.File, textPrompt);
             // log the rawdata
-            Console.WriteLine("log the rawdata: ", rawData);
-            var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
-            return Ok(result);
+            //Console.WriteLine("log the rawdata: ", rawData);
+            //var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
+            //return Ok(result);
+            return Ok(rawData);
         }
 
         [HttpPost("scan/v2/gemini/test")]
