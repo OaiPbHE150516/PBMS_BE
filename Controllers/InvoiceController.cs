@@ -150,24 +150,24 @@ namespace pbms_be.Controllers
         }
 
         [HttpPost("scan/v2/gemini")]
-        public IActionResult ScanInvoiceV2(IFormFile filescan)
+        public IActionResult ScanInvoiceV2(IFormFile file)
         {
             var TextPromptDA = new TextPromptDA(_context);
             var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
             if (textPrompt == null) return BadRequest("TextPrompt is not found");
-            var rawData = VertextAiMultimodalApi.GenerateContent(filescan, textPrompt);
+            var rawData = VertextAiMultimodalApi.GenerateContent(file, textPrompt);
             rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
             var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
             return Ok(result);
         }
 
         [HttpPost("scan/raw/v2/gemini")]
-        public IActionResult ScanInvoiceTestV2(IFormFile filescan)
+        public IActionResult ScanInvoiceTestV2(IFormFile file)
         {
             var TextPromptDA = new TextPromptDA(_context);
             var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
             if (textPrompt == null) return BadRequest("TextPrompt is not found");
-            var result = VertextAiMultimodalApi.GenerateContent(filescan, textPrompt);
+            var result = VertextAiMultimodalApi.GenerateContent(file, textPrompt);
             result = VertextAiMultimodalApi.ProcessRawDataGemini(result);
             return Ok(result);
         }
