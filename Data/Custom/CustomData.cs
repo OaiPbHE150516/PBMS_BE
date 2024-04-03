@@ -249,3 +249,24 @@ public class FileWithTextPrompt
     public IFormFile File { get; set; } = null!;
     public string TextPrompt { get; set; } = String.Empty;
 }
+
+public class InvoiceCustom_VM_Scan
+{
+    public int InvoiceID { get; set; }
+    public string SupplierAddress { get; set; } = String.Empty;
+    public string SupplierPhone { get; set; } = String.Empty;
+    public string SupplierName { get; set; } = String.Empty;
+    public string IDOfInvoice { get; set; } = String.Empty;
+    public string InvoiceDate { get; set; } = String.Empty;
+    public List<ProductInInvoice_VM_Scan> Products { get; set; } = null!;
+}
+
+public class ProductInInvoice_VM_Scan
+{
+    public int ProductID { get; set; }
+    public string ProductName { get; set; } = String.Empty;
+    public int Quanity { get; set; } = 1;
+    public long UnitPrice { get; set; } = 1;
+    public long TotalAmount { get; set; }
+    public string Tag { get; set; } = String.Empty;
+}

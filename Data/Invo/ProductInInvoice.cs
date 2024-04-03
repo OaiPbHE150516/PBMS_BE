@@ -40,7 +40,7 @@ public class ProductInInvoice
     public int Quanity { get; set; } = 1;
 
     [Column("unit_price")]
-    public long UnitPrice { get; set; } = 0;
+    public long UnitPrice { get; set; } = 1;
 
     [Column("total_amount")]
     public long TotalAmount { get; set; }

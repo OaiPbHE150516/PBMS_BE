@@ -150,25 +150,35 @@ namespace pbms_be.Controllers
         }
 
 
-        [HttpPost("scan/v2/gemini")]
+        [HttpPost("scan/raw/v2/gemini")]
         public async Task<IActionResult> ScanInvoiceTestV2(FileWithTextPrompt filescan)
         {
             var TextPromptDA = new TextPromptDA(_context);
             var textPrompt = TextPromptDA.GetTextPrompt(filescan.TextPrompt);
             if (textPrompt == null) return BadRequest("TextPrompt is not found");
             var result = await VertextAiMultimodalApi.GenerateContent(filescan.File, textPrompt);
-            // remove '```json' if it exists in the result
-            if (result.Contains("```json")) result = result.Replace("```json", "");
-            // remove "```" if it exists in the result
-            if (result.Contains("```")) result = result.Replace("```", "");
-            // if first line is empty, remove it
-            if (result[0] == '\n') result = result[1..];
-            // remove empty lines
-            result = result.Replace("\n\n", "\n");
-            // remove first line
-            result = result.Substring(result.IndexOf('\n') + 1);
+            result = VertextAiMultimodalApi.ProcessRawDataGemini(result);
             return Ok(result);
         }
+
+        [HttpPost("scan/v2/gemini")]
+        public async Task<IActionResult> ScanInvoiceV2(FileWithTextPrompt filescan)
+        {
+            var TextPromptDA = new TextPromptDA(_context);
+            var textPrompt = TextPromptDA.GetTextPrompt(filescan.TextPrompt);
+            if (textPrompt == null) return BadRequest("TextPrompt is not found");
+            var rawData = await VertextAiMultimodalApi.GenerateContent(filescan.File, textPrompt);
+            var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
+            return Ok(result);
+        }
+
+        [HttpPost("scan/v2/gemini/test")]
+        public IActionResult ScanInvoiceV2Test(string data)
+        {
+            var result = VertextAiMultimodalApi.ProcessDataGemini(data);
+            return Ok(result);
+        }
+
 
 
         // get all invoice by account id

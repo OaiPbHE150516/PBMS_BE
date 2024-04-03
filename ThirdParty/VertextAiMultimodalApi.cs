@@ -1,7 +1,10 @@
 ﻿using Google.Api.Gax.Grpc;
 using Google.Cloud.AIPlatform.V1;
 using Google.Protobuf;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using pbms_be.Configurations;
+using pbms_be.Data.Custom;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -105,6 +108,74 @@ namespace pbms_be.ThirdParty
             using var response = await client.GetAsync(url);
             byte[] imageBytes = await response.Content.ReadAsByteArrayAsync();
             return ByteString.CopyFrom(imageBytes);
+        }
+
+        internal static string ProcessRawDataGemini(string rawData)
+        {
+            var result = rawData;
+            // remove '```json' if it exists in the result
+            if (result.Contains("```json")) result = result.Replace("```json", "");
+            // remove "```" if it exists in the result
+            if (result.Contains("```")) result = result.Replace("```", "");
+            // if first line is empty, remove it
+            if (result[0] == '\n') result = result[1..];
+            // remove empty lines
+            result = result.Replace("\n\n", "\n");
+            // remove first line
+            result = result[(result.IndexOf('\n') + 1)..];
+
+            return result;
+        }
+
+        internal static object ProcessDataGemini(string data)
+        {
+            try
+            {
+                if (data is null) throw new Exception("Data is null");
+                JObject? jsonOject = JsonConvert.DeserializeObject<JObject>(data) ?? throw new Exception("Json object is null");
+                var idOfInvoiceRaw = jsonOject["invoice_id"]?.ToString() ?? "";
+                var invoiceDateRaw = jsonOject["invoice_date"]?.ToString() ?? "";
+                var supplierNameRaw = jsonOject["supplierName"]?.ToString() ?? "";
+                var supplierAddressRaw = jsonOject["supplierAddress"]?.ToString() ?? "";
+                var supplierPhoneRaw = jsonOject["supplierPhone"]?.ToString() ?? "";
+
+                var invoiceResult = new InvoiceCustom_VM_Scan
+                {
+                    IDOfInvoice = idOfInvoiceRaw,
+                    InvoiceDate = invoiceDateRaw,
+                    SupplierName = supplierNameRaw,
+                    SupplierAddress = supplierAddressRaw,
+                    SupplierPhone = supplierPhoneRaw
+                };
+
+                var productsData = new List<ProductInInvoice_VM_Scan>();
+                var productsRaw = jsonOject["line_item"]?.ToObject<List<JObject>>();
+                if (productsRaw is null)  return invoiceResult;
+                foreach (var product in productsRaw)
+                {
+                    var productName = product["line_item/description"]?.ToString() ?? "";
+                    var quantity = product["line_item/quantity"]?.ToString() ?? "";
+                    var unitPrice = product["line_item/unitPrice"]?.ToString() ?? "";
+                    var totalAmount = product["line_item/amount"]?.ToString() ?? "";
+                    var tag = product["line_item/tag"]?.ToString() ?? "";
+
+                    var productResult = new ProductInInvoice_VM_Scan
+                    {
+                        ProductName = productName,
+                        Quanity = int.Parse(quantity),
+                        UnitPrice = long.Parse(unitPrice),
+                        TotalAmount = long.Parse(totalAmount),
+                        Tag = tag
+                    };
+                    productsData.Add(productResult);
+                }
+                invoiceResult.Products = productsData;
+                return invoiceResult;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
     }
 }
