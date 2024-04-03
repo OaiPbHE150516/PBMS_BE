@@ -1,6 +1,7 @@
 ﻿using Google.Api.Gax.Grpc;
 using Google.Cloud.AIPlatform.V1;
 using Google.Protobuf;
+using Microsoft.AspNetCore.StaticFiles;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using pbms_be.Configurations;
@@ -14,12 +15,15 @@ namespace pbms_be.ThirdParty
 {
     public class VertextAiMultimodalApi
     {
-        public static async Task<string> GenerateContent(IFormFile file, string textprompt)
+        public static string GenerateContent(IFormFile file, string textprompt)
         {
-            string projectId = "lexical-aileron-410114";
+            string projectId = ConstantConfig.PROJECT_ID;
             string location = "us-central1";
             string publisher = "google";
             string model = "gemini-1.0-pro-vision";
+
+            var fileMineType = GetMimeType(file.FileName);
+
 
             // Create client
             var predictionServiceClient = new PredictionServiceClientBuilder
@@ -31,11 +35,6 @@ namespace pbms_be.ThirdParty
             //ByteString colosseum = await ReadImageFileAsync(
             //    "https://storage.googleapis.com/pbms-user/invoice/2024-03-09%2016.24.53.jpeg");
 
-            //ByteString forbiddenCity = await ReadImageFileAsync(
-            //    "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png");
-
-            //ByteString christRedeemer = await ReadImageFileAsync(
-            //    "https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark3.png");
 
             ByteString colosseum = ByteString.FromStream(file.OpenReadStream());
             // Initialize request argument(s)
@@ -49,7 +48,7 @@ namespace pbms_be.ThirdParty
                 {
                     InlineData = new()
                     {
-                        MimeType = "image/jpeg",
+                        MimeType = fileMineType,
                         Data = colosseum
 
                     }
@@ -58,26 +57,6 @@ namespace pbms_be.ThirdParty
                 {
                     Text = textprompt
                 },
-                //new()
-                //{
-                //    InlineData = new()
-                //    {
-                //        MimeType = "image/png",
-                //        Data = forbiddenCity
-                //    }
-                //},
-                //new()
-                //{
-                //    Text = "city: Beijing, Landmark: Forbidden City"
-                //},
-                //new()
-                //{
-                //    InlineData = new()
-                //    {
-                //        MimeType = "image/png",
-                //        Data = christRedeemer
-                //    }
-                //}
             });
 
             var generateContentRequest = new GenerateContentRequest
@@ -85,19 +64,6 @@ namespace pbms_be.ThirdParty
                 Model = $"projects/{projectId}/locations/{location}/publishers/{publisher}/models/{model}"
             };
             generateContentRequest.Contents.Add(content);
-
-            //// Make the request, returning a streaming response
-            //using PredictionServiceClient.StreamGenerateContentStream response = predictionServiceClient.StreamGenerateContent(generateContentRequest);
-
-            //StringBuilder fullText = new();
-
-            //// Read streaming responses from server until complete
-            //AsyncResponseStream<GenerateContentResponse> responseStream = response.GetResponseStream();
-            //await foreach (GenerateContentResponse responseItem in responseStream)
-            //{
-            //    fullText.Append(responseItem.Candidates[0].Content.Parts[0].Text);
-            //}
-            //return fullText.ToString();
             GenerateContentResponse response = predictionServiceClient.GenerateContent(generateContentRequest);
             return response.Candidates[0].Content.Parts[0].Text;
         }
@@ -179,6 +145,18 @@ namespace pbms_be.ThirdParty
             {
                 throw new Exception(e.Message);
             }
+        }
+
+        // function to get mime type of a file
+        public static string GetMimeType(string fileName)
+        {
+            // get mine type of file
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(fileName, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
         }
     }
 }
