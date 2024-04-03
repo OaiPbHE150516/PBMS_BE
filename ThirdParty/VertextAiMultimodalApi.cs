@@ -79,17 +79,12 @@ namespace pbms_be.ThirdParty
         internal static string ProcessRawDataGemini(string rawData)
         {
             var result = rawData;
-            // remove '```json' if it exists in the result
             if (result.Contains("```json")) result = result.Replace("```json", "");
-            // remove "```" if it exists in the result
             if (result.Contains("```")) result = result.Replace("```", "");
-            // if first line is empty, remove it
+            if (result.Contains("json")) result = result.Replace("json", "");
             if (result[0] == '\n') result = result[1..];
-            // remove empty lines
             result = result.Replace("\n\n", "\n");
-            // remove first line
             result = result[(result.IndexOf('\n') + 1)..];
-
             return result;
         }
 
