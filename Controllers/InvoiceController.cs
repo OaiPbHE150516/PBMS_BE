@@ -154,7 +154,7 @@ namespace pbms_be.Controllers
         public async Task<IActionResult> ScanInvoiceTestV2(FileWithTextPrompt filescan)
         {
             var TextPromptDA = new TextPromptDA(_context);
-            var textPrompt = TextPromptDA.GetTextPrompt(filescan.TextPrompt);
+            var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
             if (textPrompt == null) return BadRequest("TextPrompt is not found");
             var result = await VertextAiMultimodalApi.GenerateContent(filescan.File, textPrompt);
             // remove '```json' if it exists in the result
