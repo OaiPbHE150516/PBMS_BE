@@ -86,18 +86,20 @@ namespace pbms_be.ThirdParty
             };
             generateContentRequest.Contents.Add(content);
 
-            // Make the request, returning a streaming response
-            using PredictionServiceClient.StreamGenerateContentStream response = predictionServiceClient.StreamGenerateContent(generateContentRequest);
+            //// Make the request, returning a streaming response
+            //using PredictionServiceClient.StreamGenerateContentStream response = predictionServiceClient.StreamGenerateContent(generateContentRequest);
 
-            StringBuilder fullText = new();
+            //StringBuilder fullText = new();
 
-            // Read streaming responses from server until complete
-            AsyncResponseStream<GenerateContentResponse> responseStream = response.GetResponseStream();
-            await foreach (GenerateContentResponse responseItem in responseStream)
-            {
-                fullText.Append(responseItem.Candidates[0].Content.Parts[0].Text);
-            }
-            return fullText.ToString();
+            //// Read streaming responses from server until complete
+            //AsyncResponseStream<GenerateContentResponse> responseStream = response.GetResponseStream();
+            //await foreach (GenerateContentResponse responseItem in responseStream)
+            //{
+            //    fullText.Append(responseItem.Candidates[0].Content.Parts[0].Text);
+            //}
+            //return fullText.ToString();
+            GenerateContentResponse response = predictionServiceClient.GenerateContent(generateContentRequest);
+            return response.Candidates[0].Content.Parts[0].Text;
         }
 
         private static async Task<ByteString> ReadImageFileAsync(string url)
