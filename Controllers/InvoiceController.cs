@@ -178,6 +178,30 @@ namespace pbms_be.Controllers
         }
 
 
+        [HttpPost("scan/v4")]
+        public async Task<IActionResult> ScanInvoiceV4(IFormFile file)
+        {
+            //var money = await DocumentAiApi.GetMoney(file);
+            var TextPromptDA = new TextPromptDA(_context);
+            var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
+            if (textPrompt == null) return BadRequest("TextPrompt is not found");
+
+            Task<MoneyInvoice> taskMoney = Task.Run(async () => await DocumentAiApi.GetMoney(file));
+            Task<string> taskProduct = Task.Run(() => VertextAiMultimodalApi.GenerateContent(file, textPrompt));
+
+            await Task.WhenAll(taskMoney, taskProduct);
+
+            var money = taskMoney.Result;
+            var rawData = taskProduct.Result;
+            rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
+            var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
+            result.TotalAmount = money.TotalAmount;
+            result.NetAmount = money.NetAmount;
+            result.TaxAmount = money.TaxAmount;
+            return Ok(result);
+        }
+
+
 
         [HttpPost("scan/raw/v2/gemini")]
         public IActionResult ScanInvoiceTestV2(IFormFile file)
