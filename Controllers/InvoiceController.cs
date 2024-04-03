@@ -162,9 +162,9 @@ namespace pbms_be.Controllers
         }
 
         [HttpPost("scan/v3")]
-        public IActionResult ScanInvoiceV3(IFormFile file)
+        public async Task<IActionResult> ScanInvoiceV3(IFormFile file)
         {
-            var money = DocumentAiApi.GetMoney(file);
+            var money = await DocumentAiApi.GetMoney(file);
             var TextPromptDA = new TextPromptDA(_context);
             var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
             if (textPrompt == null) return BadRequest("TextPrompt is not found");

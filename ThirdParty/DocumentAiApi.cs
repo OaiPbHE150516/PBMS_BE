@@ -245,14 +245,14 @@ namespace pbms_be.ThirdParty
             }
         }
 
-        internal static MoneyInvoice GetMoney(IFormFile file)
+        internal static async Task<MoneyInvoice> GetMoney(IFormFile file)
         {
             // create client
             var client = new DocumentProcessorServiceClientBuilder
             {
                 Endpoint = $"{ConstantConfig.LOCATION}-documentai.googleapis.com"
             }.Build();
-            
+
             // read file
             var content = file.OpenReadStream();
             var rawDocument = new RawDocument
@@ -269,7 +269,7 @@ namespace pbms_be.ThirdParty
             };
 
             // Make the request
-            var response = client.ProcessDocument(request);
+            var response = await client.ProcessDocumentAsync(request);
 
             var moneyInvoice = new MoneyInvoice();
             foreach (var entity in response.Document.Entities)
