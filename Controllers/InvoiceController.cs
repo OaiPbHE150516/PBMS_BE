@@ -149,33 +149,31 @@ namespace pbms_be.Controllers
             //return Ok(invoice);
         }
 
-
-        [HttpPost("scan/raw/v2/gemini")]
-        public async Task<IActionResult> ScanInvoiceTestV2(FileWithTextPrompt filescan)
+        [HttpPost("scan/v2/gemini")]
+        public async Task<IActionResult> ScanInvoiceV2(IFormFile filescan)
         {
             var TextPromptDA = new TextPromptDA(_context);
-            var textPrompt = TextPromptDA.GetTextPrompt(filescan.TextPrompt);
+            var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
             if (textPrompt == null) return BadRequest("TextPrompt is not found");
-            var result = await VertextAiMultimodalApi.GenerateContent(filescan.File, textPrompt);
+            var rawData = await VertextAiMultimodalApi.GenerateContent(filescan, textPrompt);
+            rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
+            var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
+            return Ok(result);
+        }
+
+        [HttpPost("scan/raw/v2/gemini")]
+        public async Task<IActionResult> ScanInvoiceTestV2(IFormFile filescan)
+        {
+            var TextPromptDA = new TextPromptDA(_context);
+            var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
+            if (textPrompt == null) return BadRequest("TextPrompt is not found");
+            var result = await VertextAiMultimodalApi.GenerateContent(filescan, textPrompt);
             result = VertextAiMultimodalApi.ProcessRawDataGemini(result);
             return Ok(result);
         }
 
-        [HttpPost("scan/v2/gemini")]
-        public async Task<IActionResult> ScanInvoiceV2(FileWithTextPrompt filescan)
-        {
-            var TextPromptDA = new TextPromptDA(_context);
-            var textPrompt = TextPromptDA.GetTextPrompt(filescan.TextPrompt);
-            if (textPrompt == null) return BadRequest("TextPrompt is not found");
-            var rawData = await VertextAiMultimodalApi.GenerateContent(filescan.File, textPrompt);
-            rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
-            // log the rawdata
-            var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
-            return Ok(result);
-            //return Ok(rawData);
-        }
 
-        [HttpPost("scan/v2/gemini/test")]
+        [HttpPost("scan/v2/gemini/rawToObject")]
         public IActionResult ScanInvoiceV2Test(string data)
         {
             var result = VertextAiMultimodalApi.ProcessDataGemini(data);
