@@ -168,6 +168,8 @@ namespace pbms_be.Controllers
             var textPrompt = TextPromptDA.GetTextPrompt(filescan.TextPrompt);
             if (textPrompt == null) return BadRequest("TextPrompt is not found");
             var rawData = await VertextAiMultimodalApi.GenerateContent(filescan.File, textPrompt);
+            // log the rawdata
+            Console.WriteLine("log the rawdata: ", rawData);
             var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
             return Ok(result);
         }
