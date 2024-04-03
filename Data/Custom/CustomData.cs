@@ -243,3 +243,9 @@ public class FileWithAccountID
     public IFormFile File { get; set; } = null!;
     public string FileName { get; set; } = String.Empty;
 }
+
+public class FileWithTextPrompt
+{
+    public IFormFile File { get; set; } = null!;
+    public string TextPrompt { get; set; } = String.Empty;
+}

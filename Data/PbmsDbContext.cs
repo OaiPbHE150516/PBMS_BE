@@ -48,6 +48,9 @@ namespace pbms_be.Data
 
         public DbSet<Custom.DivideMoneyInfo> DivideMoneyInfo { get; set; }
 
+        // TextPrompt
+        public DbSet<TextPro.TextPrompt> TextPrompt { get; set; }
+
 
         // end of collab fund
 

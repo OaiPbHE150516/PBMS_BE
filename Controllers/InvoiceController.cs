@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using pbms_be.Configurations;
 using pbms_be.Data;
+using pbms_be.Data.Custom;
 using pbms_be.Data.Invo;
 using pbms_be.Data.Material;
 using pbms_be.DataAccess;
@@ -150,15 +151,20 @@ namespace pbms_be.Controllers
 
 
         [HttpPost("scan/v2/gemini")]
-        public async Task<IActionResult> ScanInvoiceTestV2(IFormFile file, string textprompt)
+        public async Task<IActionResult> ScanInvoiceTestV2(FileWithTextPrompt filescan)
         {
-            var result = await VertextAiMultimodalApi.GenerateContent(file, textprompt);
+            var TextPromptDA = new TextPromptDA(_context);
+            var textPrompt = TextPromptDA.GetTextPrompt(filescan.TextPrompt);
+            if (textPrompt == null) return BadRequest("TextPrompt is not found");
+            var result = await VertextAiMultimodalApi.GenerateContent(filescan.File, textPrompt);
             // remove '```json' if it exists in the result
             if (result.Contains("```json")) result = result.Replace("```json", "");
             // remove "```" if it exists in the result
             if (result.Contains("```")) result = result.Replace("```", "");
             // if first line is empty, remove it
             if (result[0] == '\n') result = result[1..];
+            // remove empty lines
+            result = result.Replace("\n\n", "\n");
             return Ok(result);
         }
 
