@@ -97,8 +97,6 @@ namespace pbms_be.ThirdParty
             {
                 fullText.Append(responseItem.Candidates[0].Content.Parts[0].Text);
             }
-            // log the result
-            Console.WriteLine("log the result: ", fullText.ToString());
             return fullText.ToString();
         }
 

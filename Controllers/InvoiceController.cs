@@ -170,7 +170,6 @@ namespace pbms_be.Controllers
             var rawData = await VertextAiMultimodalApi.GenerateContent(filescan.File, textPrompt);
             rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
             // log the rawdata
-            Console.WriteLine("log the rawdata: ", rawData);
             var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
             return Ok(result);
             //return Ok(rawData);
