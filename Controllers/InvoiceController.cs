@@ -154,7 +154,7 @@ namespace pbms_be.Controllers
         public async Task<IActionResult> ScanInvoiceTestV2(FileWithTextPrompt filescan)
         {
             var TextPromptDA = new TextPromptDA(_context);
-            var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
+            var textPrompt = TextPromptDA.GetTextPrompt(filescan.TextPrompt);
             if (textPrompt == null) return BadRequest("TextPrompt is not found");
             var result = await VertextAiMultimodalApi.GenerateContent(filescan.File, textPrompt);
             // remove '```json' if it exists in the result
@@ -165,6 +165,8 @@ namespace pbms_be.Controllers
             if (result[0] == '\n') result = result[1..];
             // remove empty lines
             result = result.Replace("\n\n", "\n");
+            // remove first line
+            result = result.Substring(result.IndexOf('\n') + 1);
             return Ok(result);
         }
 
