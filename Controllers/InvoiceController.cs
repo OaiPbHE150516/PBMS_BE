@@ -198,6 +198,11 @@ namespace pbms_be.Controllers
             result.TotalAmount = money.TotalAmount;
             result.NetAmount = money.NetAmount;
             result.TaxAmount = money.TaxAmount;
+
+            // destroy 2 task if it success and return result
+            taskMoney.Dispose();
+            taskProduct.Dispose();
+
             return Ok(result);
         }
 
