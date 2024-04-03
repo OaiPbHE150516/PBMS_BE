@@ -261,7 +261,7 @@ public class InvoiceCustom_VM_Scan
     public long TaxAmount { get; set; }
     public string IDOfInvoice { get; set; } = String.Empty;
     public string InvoiceDate { get; set; } = String.Empty;
-    public List<ProductInInvoice_VM_Scan> Products { get; set; } = null!;
+    public List<ProductInInvoice_VM_Scan> ProductInInvoices { get; set; } = null!;
 }
 
 public class ProductInInvoice_VM_Scan

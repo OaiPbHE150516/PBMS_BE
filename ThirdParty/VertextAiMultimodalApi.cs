@@ -142,7 +142,7 @@ namespace pbms_be.ThirdParty
                     productsData.Add(productResult);
                     countProduct++;
                 }
-                invoiceResult.Products = productsData;
+                invoiceResult.ProductInInvoices = productsData;
                 return invoiceResult;
             }
             catch (Exception e)
