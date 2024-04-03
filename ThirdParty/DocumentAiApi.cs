@@ -245,7 +245,7 @@ namespace pbms_be.ThirdParty
             }
         }
 
-        internal static async Task<MoneyInvoice> GetMoney(IFormFile file)
+        internal static async Task<MoneyInvoice> GetMoney(ByteString fileByteString, string fileMineType)
         {
             // create client
             var client = new DocumentProcessorServiceClientBuilder
@@ -254,11 +254,11 @@ namespace pbms_be.ThirdParty
             }.Build();
 
             // read file
-            var content = file.OpenReadStream();
+            //var content = file.OpenReadStream();
             var rawDocument = new RawDocument
             {
-                Content = ByteString.FromStream(content),
-                MimeType = file.ContentType
+                Content = fileByteString,
+                MimeType = fileMineType
             };
 
             // Initialize request argument(s)

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Google.Cloud.Storage.V1;
+using Google.Protobuf;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -149,33 +150,33 @@ namespace pbms_be.Controllers
             //return Ok(invoice);
         }
 
-        [HttpPost("scan/v2/gemini")]
-        public IActionResult ScanInvoiceV2(IFormFile file)
-        {
-            var TextPromptDA = new TextPromptDA(_context);
-            var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
-            if (textPrompt == null) return BadRequest("TextPrompt is not found");
-            var rawData = VertextAiMultimodalApi.GenerateContent(file, textPrompt);
-            rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
-            var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
-            return Ok(result);
-        }
+        //[HttpPost("scan/v2/gemini")]
+        //public IActionResult ScanInvoiceV2(IFormFile file)
+        //{
+        //    var TextPromptDA = new TextPromptDA(_context);
+        //    var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
+        //    if (textPrompt == null) return BadRequest("TextPrompt is not found");
+        //    var rawData = VertextAiMultimodalApi.GenerateContent(file, textPrompt);
+        //    rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
+        //    var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
+        //    return Ok(result);
+        //}
 
-        [HttpPost("scan/v3")]
-        public async Task<IActionResult> ScanInvoiceV3(IFormFile file)
-        {
-            var money = await DocumentAiApi.GetMoney(file);
-            var TextPromptDA = new TextPromptDA(_context);
-            var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
-            if (textPrompt == null) return BadRequest("TextPrompt is not found");
-            var rawData = VertextAiMultimodalApi.GenerateContent(file, textPrompt);
-            rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
-            var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
-            result.TotalAmount = money.TotalAmount;
-            result.NetAmount = money.NetAmount;
-            result.TaxAmount = money.TaxAmount;
-            return Ok(result);
-        }
+        //[HttpPost("scan/v3")]
+        //public async Task<IActionResult> ScanInvoiceV3(IFormFile file)
+        //{
+        //    var money = await DocumentAiApi.GetMoney(file);
+        //    var TextPromptDA = new TextPromptDA(_context);
+        //    var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
+        //    if (textPrompt == null) return BadRequest("TextPrompt is not found");
+        //    var rawData = VertextAiMultimodalApi.GenerateContent(file, textPrompt);
+        //    rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
+        //    var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
+        //    result.TotalAmount = money.TotalAmount;
+        //    result.NetAmount = money.NetAmount;
+        //    result.TaxAmount = money.TaxAmount;
+        //    return Ok(result);
+        //}
 
 
         [HttpPost("scan/v4")]
@@ -186,8 +187,12 @@ namespace pbms_be.Controllers
             var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
             if (textPrompt == null) return BadRequest("TextPrompt is not found");
 
-            Task<MoneyInvoice> taskMoney = Task.Run(async () => await DocumentAiApi.GetMoney(file));
-            Task<string> taskProduct = Task.Run(() => VertextAiMultimodalApi.GenerateContent(file, textPrompt));
+            var fileByteString = ByteString.FromStream(file.OpenReadStream());
+            var fileMineType = GetMimeType(file.FileName);
+
+
+            Task<MoneyInvoice> taskMoney = Task.Run(async () => await DocumentAiApi.GetMoney(fileByteString, fileMineType));
+            Task<string> taskProduct = Task.Run(() => VertextAiMultimodalApi.GenerateContent(fileByteString, fileMineType, textPrompt));
 
             await Task.WhenAll(taskMoney, taskProduct);
 
@@ -205,26 +210,36 @@ namespace pbms_be.Controllers
 
             return Ok(result);
         }
-
-
-
-        [HttpPost("scan/raw/v2/gemini")]
-        public IActionResult ScanInvoiceTestV2(IFormFile file)
+        public static string GetMimeType(string fileName)
         {
-            var TextPromptDA = new TextPromptDA(_context);
-            var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
-            if (textPrompt == null) return BadRequest("TextPrompt is not found");
-            var result = VertextAiMultimodalApi.GenerateContent(file, textPrompt);
-            result = VertextAiMultimodalApi.ProcessRawDataGemini(result);
-            return Ok(result);
+            // get mine type of file
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(fileName, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
         }
 
-        [HttpPost("scan/v2/gemini/rawToObject")]
-        public IActionResult ScanInvoiceV2Test(string data)
-        {
-            var result = VertextAiMultimodalApi.ProcessDataGemini(data);
-            return Ok(result);
-        }
+
+
+        //[HttpPost("scan/raw/v2/gemini")]
+        //public IActionResult ScanInvoiceTestV2(IFormFile file)
+        //{
+        //    var TextPromptDA = new TextPromptDA(_context);
+        //    var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
+        //    if (textPrompt == null) return BadRequest("TextPrompt is not found");
+        //    var result = VertextAiMultimodalApi.GenerateContent(file, textPrompt);
+        //    result = VertextAiMultimodalApi.ProcessRawDataGemini(result);
+        //    return Ok(result);
+        //}
+
+        //[HttpPost("scan/v2/gemini/rawToObject")]
+        //public IActionResult ScanInvoiceV2Test(string data)
+        //{
+        //    var result = VertextAiMultimodalApi.ProcessDataGemini(data);
+        //    return Ok(result);
+        //}
 
 
 

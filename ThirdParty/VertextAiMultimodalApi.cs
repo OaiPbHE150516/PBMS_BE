@@ -15,14 +15,12 @@ namespace pbms_be.ThirdParty
 {
     public class VertextAiMultimodalApi
     {
-        public static string GenerateContent(IFormFile file, string textprompt)
+        public static string GenerateContent(ByteString fileByteString, string fileMineType,  string textprompt)
         {
             string projectId = ConstantConfig.PROJECT_ID;
             string location = "us-central1";
             string publisher = "google";
             string model = "gemini-1.0-pro-vision";
-
-            var fileMineType = GetMimeType(file.FileName);
 
 
             // Create client
@@ -35,8 +33,6 @@ namespace pbms_be.ThirdParty
             //ByteString colosseum = await ReadImageFileAsync(
             //    "https://storage.googleapis.com/pbms-user/invoice/2024-03-09%2016.24.53.jpeg");
 
-
-            ByteString colosseum = ByteString.FromStream(file.OpenReadStream());
             // Initialize request argument(s)
             var content = new Content
             {
@@ -49,7 +45,7 @@ namespace pbms_be.ThirdParty
                     InlineData = new()
                     {
                         MimeType = fileMineType,
-                        Data = colosseum
+                        Data = fileByteString
 
                     }
                 },
