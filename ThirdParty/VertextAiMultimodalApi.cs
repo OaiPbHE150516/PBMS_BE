@@ -104,6 +104,10 @@ namespace pbms_be.ThirdParty
                 var supplierNameRaw = jsonOject["supplierName"]?.ToString() ?? "";
                 var supplierAddressRaw = jsonOject["supplierAddress"]?.ToString() ?? "";
                 var supplierPhoneRaw = jsonOject["supplierPhone"]?.ToString() ?? "";
+                var totalAmountRaw = jsonOject["totalAmount"]?.ToString() ?? "";
+                var netAmountRaw = jsonOject["netAmount"]?.ToString() ?? "";
+                var taxAmountRaw = jsonOject["taxAmount"]?.ToString() ?? "";
+
 
                 var invoiceResult = new InvoiceCustom_VM_Scan
                 {

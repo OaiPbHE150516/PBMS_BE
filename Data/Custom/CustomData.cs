@@ -256,6 +256,9 @@ public class InvoiceCustom_VM_Scan
     public string SupplierAddress { get; set; } = String.Empty;
     public string SupplierPhone { get; set; } = String.Empty;
     public string SupplierName { get; set; } = String.Empty;
+    public long TotalAmount { get; set; }
+    public long NetAmount { get; set; }
+    public long TaxAmount { get; set; }
     public string IDOfInvoice { get; set; } = String.Empty;
     public string InvoiceDate { get; set; } = String.Empty;
     public List<ProductInInvoice_VM_Scan> Products { get; set; } = null!;
