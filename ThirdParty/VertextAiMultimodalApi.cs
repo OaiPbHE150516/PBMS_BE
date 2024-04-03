@@ -151,6 +151,7 @@ namespace pbms_be.ThirdParty
                 var productsData = new List<ProductInInvoice_VM_Scan>();
                 var productsRaw = jsonOject["line_item"]?.ToObject<List<JObject>>();
                 if (productsRaw is null)  return invoiceResult;
+                var countProduct = 1;
                 foreach (var product in productsRaw)
                 {
                     var productName = product["line_item/description"]?.ToString() ?? "";
@@ -161,6 +162,7 @@ namespace pbms_be.ThirdParty
 
                     var productResult = new ProductInInvoice_VM_Scan
                     {
+                        ProductID = countProduct,
                         ProductName = productName,
                         Quanity = int.Parse(quantity),
                         UnitPrice = long.Parse(unitPrice),
@@ -168,6 +170,7 @@ namespace pbms_be.ThirdParty
                         Tag = tag
                     };
                     productsData.Add(productResult);
+                    countProduct++;
                 }
                 invoiceResult.Products = productsData;
                 return invoiceResult;
