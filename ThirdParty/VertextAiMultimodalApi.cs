@@ -17,7 +17,7 @@ namespace pbms_be.ThirdParty
         public static async Task<string> GenerateContent(IFormFile file, string textprompt)
         {
             string projectId = "lexical-aileron-410114";
-            string location = "asia-southeast1";
+            string location = "us-central1";
             string publisher = "google";
             string model = "gemini-1.0-pro-vision";
 
@@ -82,7 +82,7 @@ namespace pbms_be.ThirdParty
 
             var generateContentRequest = new GenerateContentRequest
             {
-                Model = $"projects/{projectId}/locations/{ConstantConfig.LOCATION}/publishers/{publisher}/models/{model}"
+                Model = $"projects/{projectId}/locations/{location}/publishers/{publisher}/models/{model}"
             };
             generateContentRequest.Contents.Add(content);
 
