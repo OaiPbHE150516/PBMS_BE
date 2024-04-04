@@ -191,24 +191,35 @@ namespace pbms_be.Controllers
             var fileMineType = GetMimeType(file.FileName);
 
 
-            Task<MoneyInvoice> taskMoney = Task.Run(async () => await DocumentAiApi.GetMoney(fileByteString, fileMineType));
+            Task<InvoiceCustom_VM_Scan> taskMoney = Task.Run(async () => await DocumentAiApi.GetMoney(fileByteString, fileMineType));
             Task<string> taskProduct = Task.Run(() => VertextAiMultimodalApi.GenerateContent(fileByteString, fileMineType, textPrompt));
 
             await Task.WhenAll(taskMoney, taskProduct);
 
-            var money = taskMoney.Result;
+            var invoiceByDoc = taskMoney.Result;
             var rawData = taskProduct.Result;
             rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
-            var result = VertextAiMultimodalApi.ProcessDataGemini(rawData);
-            result.TotalAmount = money.TotalAmount;
-            result.NetAmount = money.NetAmount;
-            result.TaxAmount = money.TaxAmount;
-
+            var invoiceByGemi = VertextAiMultimodalApi.ProcessDataGemini(rawData);
+            invoiceByGemi.TotalAmount = invoiceByDoc.TotalAmount;
+            invoiceByGemi.NetAmount = invoiceByDoc.NetAmount;
+            invoiceByGemi.TaxAmount = invoiceByDoc.TaxAmount;
+            if (string.IsNullOrEmpty(invoiceByGemi.SupplierPhone))
+            {
+                invoiceByGemi.SupplierPhone = invoiceByDoc.SupplierPhone;
+            }
+            if (string.IsNullOrEmpty(invoiceByGemi.SupplierName))
+            {
+                invoiceByGemi.SupplierName = invoiceByDoc.SupplierName;
+            }
+            if (string.IsNullOrEmpty(invoiceByGemi.SupplierAddress))
+            {
+                invoiceByGemi.SupplierAddress = invoiceByDoc.SupplierAddress;
+            }
             // destroy 2 task if it success and return result
             taskMoney.Dispose();
             taskProduct.Dispose();
 
-            return Ok(result);
+            return Ok(invoiceByGemi);
         }
         public static string GetMimeType(string fileName)
         {

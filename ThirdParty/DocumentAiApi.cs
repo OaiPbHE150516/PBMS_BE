@@ -245,7 +245,7 @@ namespace pbms_be.ThirdParty
             }
         }
 
-        internal static async Task<MoneyInvoice> GetMoney(ByteString fileByteString, string fileMineType)
+        internal static async Task<InvoiceCustom_VM_Scan> GetMoney(ByteString fileByteString, string fileMineType)
         {
             // create client
             var client = new DocumentProcessorServiceClientBuilder
@@ -271,7 +271,7 @@ namespace pbms_be.ThirdParty
             // Make the request
             var response = await client.ProcessDocumentAsync(request);
 
-            var moneyInvoice = new MoneyInvoice();
+            var invoiceDocumentAI = new InvoiceCustom_VM_Scan();
             foreach (var entity in response.Document.Entities)
             {
                 switch (entity.Type)
@@ -279,36 +279,45 @@ namespace pbms_be.ThirdParty
                     case "net_amount":
                         if (TryConvertStringToLong(entity.MentionText, out long resultNetAmount))
                         {
-                            moneyInvoice.NetAmount = resultNetAmount;
+                            invoiceDocumentAI.NetAmount = resultNetAmount;
                         }
                         else
                         {
-                            moneyInvoice.NetAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
+                            invoiceDocumentAI.NetAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
                         }
                         break;
                     case "total_amount":
                         if (TryConvertStringToLong(entity.MentionText, out long resultTotalAmount))
                         {
-                            moneyInvoice.TotalAmount = resultTotalAmount;
+                            invoiceDocumentAI.TotalAmount = resultTotalAmount;
                         }
                         else
                         {
-                            moneyInvoice.TotalAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
+                            invoiceDocumentAI.TotalAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
                         }
                         break;
                     case "total_tax_amount":
                         if (TryConvertStringToLong(entity.MentionText, out long resultTaxAmount))
                         {
-                            moneyInvoice.TaxAmount = resultTaxAmount;
+                            invoiceDocumentAI.TaxAmount = resultTaxAmount;
                         }
                         else
                         {
-                            moneyInvoice.TaxAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
+                            invoiceDocumentAI.TaxAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
                         }
+                        break;
+                    case "supplier_name":
+                        invoiceDocumentAI.SupplierName = entity.MentionText;
+                        break;
+                    case "supplier_address":
+                        invoiceDocumentAI.SupplierAddress = entity.MentionText;
+                        break;
+                    case "supplier_phone":
+                        invoiceDocumentAI.SupplierPhone = entity.MentionText;
                         break;
                 }
             }
-            return moneyInvoice;
+            return invoiceDocumentAI;
         }
     }
 }
