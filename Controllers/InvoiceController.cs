@@ -4,8 +4,6 @@ using Google.Protobuf;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Custom;
@@ -265,11 +263,9 @@ namespace pbms_be.Controllers
             taskMoney.Dispose();
             taskProduct.Dispose();
 
-            var jsonOject = JsonConvert.DeserializeObject<JObject>(rawData);
-
             return Ok(new
             {
-                jsonOject,
+                rawData,
                 invoiceByGemi
             });
         }
