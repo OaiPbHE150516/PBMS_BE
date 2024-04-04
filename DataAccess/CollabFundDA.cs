@@ -969,6 +969,13 @@ namespace pbms_be.DataAccess
                 {
                     throw new Exception(Message.COLLAB_FUND_NOTFOUND_ANY_MONEY);
                 }
+
+                // change isbeforedivide to true of last collabFundActivity of account in collabFund
+                foreach (var account in divideMoneyInfor)
+                {
+                    ChangeIsBeforeDivide(collabAccountDTO.CollabFundID, account.AccountID);
+                }
+
                 var cf_activity = new CollabFundActivity
                 {
                     CollabFundID = collabAccountDTO.CollabFundID,
@@ -1044,7 +1051,7 @@ namespace pbms_be.DataAccess
                 if (lastDividingMoney is null)
                 {
                     lastActivity.IsBeforeDivide = true;
-                    //_context.SaveChanges();
+                    _context.SaveChanges();
                     return lastActivity;
                 } // if this lastActivity has CF_DividingMoney, get second lastActivity
                 var secondLastActivity = _context.CollabFundActivity
@@ -1056,7 +1063,7 @@ namespace pbms_be.DataAccess
                     .FirstOrDefault();
                 if (secondLastActivity is null) return false;
                 secondLastActivity.IsBeforeDivide = true;
-                //_context.SaveChanges();
+                _context.SaveChanges();
                 return secondLastActivity;
             }
             catch (Exception e)
