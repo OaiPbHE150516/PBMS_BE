@@ -1181,10 +1181,10 @@ namespace pbms_be.DataAccess
             try
             {
                 /* câu query lấy ra tất cả thông tin về số tiền đã đóng góp của mỗi thành viên trong collab fund
-                 * điều kiện: 
+                 * điều kiện:
                  * - kể từ lần chia tiền cuối cùng (isBeforeDivide = true) hoặc từ đầu nếu ko có lần chia tiền đầu tiên
                  * - id của các activity ghi lại transaction phải lớn hơn id của lần chia tiền cuối cùng
-                 * 
+                 *
                      WITH FirstTrue AS (
                          SELECT account_id, collab_fun_activity_id, MIN(collab_fun_activity_id) as min_id
                          FROM collab_fun_activity
@@ -1345,6 +1345,90 @@ namespace pbms_be.DataAccess
                     listAccount.Add(accountInCollabFund);
                 }
                 return listAccount;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetAllActivityCollabFundV2(int collabFundID, string accountID, AutoMapper.IMapper? _mapper)
+        {
+            try
+            {
+                var collabAccount = _context.AccountCollab
+                    .Where(ca => ca.AccountID == accountID
+                    && ca.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .Select(ca => ca.CollabFundID)
+                    .ToList();
+
+                var cfActivityList = _context.CollabFundActivity
+                    .Where(cfa => collabAccount.Contains(cfa.CollabFundID)
+                                    && cfa.CollabFundID == collabFundID
+                                    && cfa.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .Include(cfa => cfa.ActiveState)
+                    .Include(cfa => cfa.Account)
+                    .ToList();
+
+                var transDA = new TransactionDA(_context);
+
+                foreach (var item in cfActivityList)
+                {
+                    if (item.TransactionID is not ConstantConfig.DEFAULT_NULL_TRANSACTION_ID)
+                    {
+                        item.Transaction = transDA.GetTransaction(item.TransactionID);
+                    }
+                    else
+                    {
+                        item.TransactionID = ConstantConfig.DEFAULT_ZERO_VALUE;
+                    }
+                }
+
+                // get all CF_DividingMoney of collab fund activity in result
+                var listCFDividingMoney = new List<CF_DividingMoney>();
+                foreach (var item in cfActivityList)
+                {
+                    var cfdm = _context.CF_DividingMoney
+                        .Where(cfdm => cfdm.CollabFunActivityID == item.CollabFundActivityID)
+                        .Include(cfdm => cfdm.CF_DividingMoneyDetails)
+                        .FirstOrDefault();
+                    if (cfdm is not null)
+                    {
+                        listCFDividingMoney.Add(cfdm);
+                    }
+                }
+
+                cfActivityList.Sort((x, y) => y.CreateTime.CompareTo(x.CreateTime));
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var resultEntity = _mapper.Map<List<CollabFundActivity_MV_DTO>>(cfActivityList);
+
+                // loop through result and add listCFDividingMoney to each item if it has same CollabFundActivityID
+                foreach (var item in resultEntity)
+                {
+                    var cfdm = listCFDividingMoney.Find(p => p.CollabFunActivityID == item.CollabFundActivityID);
+                    if (cfdm is not null)
+                    {
+                        var cfdmDTO = _mapper.Map<CF_DivideMoney_DTO_VM>(cfdm);
+                        foreach (var account in cfdmDTO.CF_DividingMoneyDetails)
+                        {
+                            var fromAccount = _context.Account.Find(account.FromAccountID);
+                            if (fromAccount is not null)
+                            {
+                                account.FromAccount = fromAccount;
+                            }
+                            var toAccount = _context.Account.Find(account.ToAccountID);
+                            if (toAccount is not null)
+                            {
+                                account.ToAccount = toAccount;
+                            }
+                        }
+                        item.CFDividingMoneyVMDTO = cfdmDTO;
+                    }
+                }
+
+                // sort result by createTime
+                return resultEntity;
+
             }
             catch (Exception e)
             {

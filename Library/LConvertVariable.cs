@@ -17,9 +17,9 @@ namespace pbms_be.Library
              * default: return "x months ago"
              */
 
-            var now = DateTime.UtcNow;
+            var now = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
             var minusTime = now - time;
-            var minusTimeNowString = string.Empty;
+            string? minusTimeNowString;
             if (minusTime.TotalMinutes < ConstantConfig.MIN_MINUTES_AGO)
                 minusTimeNowString = Message.VN_JUST_NOW;
             else if (minusTime.TotalMinutes < ConstantConfig.MIN_HOURS_AGO)

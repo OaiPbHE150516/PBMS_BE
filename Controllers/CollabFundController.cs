@@ -101,6 +101,29 @@ namespace pbms_be.Controllers
             }
         }
 
+        [HttpGet("get/activity/v2/{collabFundID}/{accountID}")]
+        public IActionResult GetAllActivityCollabFundV2(int collabFundID, string accountID)
+        {
+            try
+            {
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false)
+                    return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+
+                var result = _collabFundDA.GetAllActivityCollabFundV2(collabFundID, accountID, _mapper);
+
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var resultEntity = _mapper.Map<List<CollabFundActivity_MV_DTO>>(result);
+
+                return Ok(resultEntity);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         // get all accounts ( as parties) of collab fund by collab fund id and account id
         [HttpGet("get/member/{collabFundID}/{accountID}")]
         public IActionResult GetAllMemberCollabFund(int collabFundID, string accountID)

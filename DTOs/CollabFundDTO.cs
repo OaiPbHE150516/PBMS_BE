@@ -1,5 +1,6 @@
 ﻿using pbms_be.Data.Auth;
 using pbms_be.Data.CollabFund;
+using pbms_be.Data.Custom;
 using pbms_be.Data.Status;
 using pbms_be.Data.Trans;
 
@@ -158,6 +159,7 @@ namespace pbms_be.DTOs
         public string Filename { get; set; } = String.Empty;
         public int TransactionID { get; set; }
         public virtual Transaction_VM_DTO Transaction { get; set; } = null!;
+        public virtual CF_DivideMoney_DTO_VM CFDividingMoneyVMDTO { get; set; } = null!;
         public DateTime CreateTime { get; set; } = DateTime.UtcNow;
         public string CreateTimeString { get; set; } = String.Empty;
         public string MinusTimeNowString { get; set; } = String.Empty;
@@ -168,4 +170,5 @@ namespace pbms_be.DTOs
         public int CollabFundID { get; set; }
         public string AccountID { get; set; } = String.Empty;
     }
+
 }

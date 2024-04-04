@@ -137,6 +137,7 @@ namespace pbms_be.Configurations
                 .ForMember(dest => dest.RemainAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.RemainAmount)))
                 .ReverseMap();
 
+
             // CF_DividingMoneyDetail_DTO_VM
             CreateMap<Data.CollabFund.CF_DividingMoneyDetail, Data.Custom.CF_DividingMoneyDetail_DTO_VM>()
                 .ForMember(dest => dest.FromAccountTotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.FromAccountTotalAmount)))
