@@ -1034,7 +1034,7 @@ namespace pbms_be.DataAccess
                      && cfa.ActiveStateID == ActiveStateConst.ACTIVE)
                     .OrderByDescending(cfa => cfa.CollabFundActivityID)
                     .FirstOrDefault();
-                if (lastActivity is null) throw new Exception(Message.COLLAB_FUND_ACTIVITY_NOT_FOUND);
+                if (lastActivity is null) return false;
                 // if this lastActivity has CF_DividingMoney, get second lastActivity
                 var lastDividingMoney = _context.CF_DividingMoney
                     .Where(cfdm => cfdm.CollabFundID == collabFundID
@@ -1054,7 +1054,7 @@ namespace pbms_be.DataAccess
                      && cfa.CollabFundActivityID != lastActivity.CollabFundActivityID)
                     .OrderByDescending(cfa => cfa.CollabFundActivityID)
                     .FirstOrDefault();
-                if (secondLastActivity is null) throw new Exception(Message.COLLAB_FUND_ACTIVITY_NOT_FOUND);
+                if (secondLastActivity is null) return false;
                 secondLastActivity.IsBeforeDivide = true;
                 //_context.SaveChanges();
                 return secondLastActivity;
