@@ -221,6 +221,51 @@ namespace pbms_be.Controllers
 
             return Ok(invoiceByGemi);
         }
+
+        // scan/v5/custom
+        [HttpPost("scan/v5/custom")]
+        public async Task<IActionResult> ScanInvoiceV5Custom([FromForm] FileWithTextPrompt fileWithTextPrompt)
+        {
+            //var money = await DocumentAiApi.GetMoney(file);
+            var TextPromptDA = new TextPromptDA(_context);
+            //var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
+            //if (textPrompt == null) return BadRequest("TextPrompt is not found");
+
+            var fileByteString = ByteString.FromStream(fileWithTextPrompt.File.OpenReadStream());
+            var fileMineType = GetMimeType(fileWithTextPrompt.File.FileName);
+
+
+            Task<InvoiceCustom_VM_Scan> taskMoney = Task.Run(async () => await DocumentAiApi.GetMoney(fileByteString, fileMineType));
+            Task<string> taskProduct = Task.Run(() => VertextAiMultimodalApi.GenerateContent(fileByteString, fileMineType, fileWithTextPrompt.TextPrompt));
+
+            await Task.WhenAll(taskMoney, taskProduct);
+
+            var invoiceByDoc = taskMoney.Result;
+            var rawData = taskProduct.Result;
+            rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
+            var invoiceByGemi = VertextAiMultimodalApi.ProcessDataGemini(rawData);
+            invoiceByGemi.TotalAmount = invoiceByDoc.TotalAmount;
+            invoiceByGemi.NetAmount = invoiceByDoc.NetAmount;
+            invoiceByGemi.TaxAmount = invoiceByDoc.TaxAmount;
+            if (string.IsNullOrEmpty(invoiceByGemi.SupplierPhone))
+            {
+                invoiceByGemi.SupplierPhone = invoiceByDoc.SupplierPhone;
+            }
+            if (string.IsNullOrEmpty(invoiceByGemi.SupplierName))
+            {
+                invoiceByGemi.SupplierName = invoiceByDoc.SupplierName;
+            }
+            if (string.IsNullOrEmpty(invoiceByGemi.SupplierAddress))
+            {
+                invoiceByGemi.SupplierAddress = invoiceByDoc.SupplierAddress;
+            }
+            // destroy 2 task if it success and return result
+            taskMoney.Dispose();
+            taskProduct.Dispose();
+
+            return Ok(invoiceByGemi);
+        }
+
         public static string GetMimeType(string fileName)
         {
             // get mine type of file
