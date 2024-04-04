@@ -964,12 +964,16 @@ namespace pbms_be.DataAccess
                 var dividingmoneydetail = new List<CF_DividingMoneyDetail>();
                 var divideMoneyInfor = new List<DivideMoneyInfoWithAccount>();
                 GetDivideMoneyInfo(collabAccountDTO.CollabFundID, collabAccountDTO.AccountID, out dividingmoney, out dividingmoneydetail, out divideMoneyInfor);
-
+                // return if one of 3 variable is null
+                if (dividingmoney is null || dividingmoneydetail is null || divideMoneyInfor is null)
+                {
+                    throw new Exception(Message.COLLAB_FUND_NOTFOUND_ANY_MONEY);
+                }
                 var cf_activity = new CollabFundActivity
                 {
                     CollabFundID = collabAccountDTO.CollabFundID,
                     AccountID = collabAccountDTO.AccountID,
-                    Note = "Test chia tiền",
+                    Note = "Chia tiền",
                     TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID,
                     ActiveStateID = ActiveStateConst.ACTIVE,
                 };
