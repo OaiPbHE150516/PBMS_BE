@@ -436,6 +436,21 @@ namespace pbms_be.Controllers
             }
         }
 
+        [HttpPost("test/changeIsBefore")]
+        public IActionResult TestChangeIsBeforeDivideMoney([FromBody] CollabAccountDTO collabAccountDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = _collabFundDA.ChangeIsBeforeDivide(collabAccountDTO.CollabFundID, collabAccountDTO.AccountID);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         // post method to change 'isDone' property of cf_dividing_money_detail
         [HttpPost("change/isdone")]
         public IActionResult ChangeIsDoneDividingMoneyDetail([FromBody] CF_DividingMoneyDetail_Wallet_DTO cfDividingMoneyDetailWalletDTO)

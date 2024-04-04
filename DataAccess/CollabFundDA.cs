@@ -1016,13 +1016,55 @@ namespace pbms_be.DataAccess
                 _context.CF_DividingMoneyDetail.AddRange(list_cfdm_detail);
                 _context.SaveChanges();
                 return new { cf_dividingmoney, list_cfdm_detail };
-
             }
             catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
         }
+
+        internal object ChangeIsBeforeDivide(int collabFundID, string accountID)
+        {
+            try
+            {
+                // change isBeforeDivide to true of last collabFundActivity of account in collabFund
+                var lastActivity = _context.CollabFundActivity
+                    .Where(cfa => cfa.CollabFundID == collabFundID
+                     && cfa.AccountID == accountID
+                     && cfa.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .OrderByDescending(cfa => cfa.CollabFundActivityID)
+                    .FirstOrDefault();
+                if (lastActivity is null) throw new Exception(Message.COLLAB_FUND_ACTIVITY_NOT_FOUND);
+                // if this lastActivity has CF_DividingMoney, get second lastActivity
+                var lastDividingMoney = _context.CF_DividingMoney
+                    .Where(cfdm => cfdm.CollabFundID == collabFundID
+                    && cfdm.CollabFunActivityID == lastActivity.CollabFundActivityID
+                    && cfdm.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .FirstOrDefault();
+                if (lastDividingMoney is null)
+                {
+                    lastActivity.IsBeforeDivide = true;
+                    //_context.SaveChanges();
+                    return lastActivity;
+                } // if this lastActivity has CF_DividingMoney, get second lastActivity
+                var secondLastActivity = _context.CollabFundActivity
+                    .Where(cfa => cfa.CollabFundID == collabFundID
+                    && cfa.AccountID == accountID
+                     && cfa.ActiveStateID == ActiveStateConst.ACTIVE
+                     && cfa.CollabFundActivityID != lastActivity.CollabFundActivityID)
+                    .OrderByDescending(cfa => cfa.CollabFundActivityID)
+                    .FirstOrDefault();
+                if (secondLastActivity is null) throw new Exception(Message.COLLAB_FUND_ACTIVITY_NOT_FOUND);
+                secondLastActivity.IsBeforeDivide = true;
+                //_context.SaveChanges();
+                return secondLastActivity;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
 
         private List<CF_DividingMoneyDetail> CalculateTheDividingMoneyDetail(List<DivideMoneyInfo> divideMoneyInfor, List<DivideMoneyExecute> listDetailResult)
         {

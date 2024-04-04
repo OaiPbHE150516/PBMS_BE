@@ -55,6 +55,6 @@ public class CollabFundActivity
     public int ActiveStateID { get; set; }
     public virtual ActiveState ActiveState { get; set; } = null!;
 
-    //[Column("isbeforedivide")]
-    //public bool IsBeforeDivide { get; set; } = false;
+    [Column("isbeforedivide")]
+    public bool IsBeforeDivide { get; set; } = false;
 }
