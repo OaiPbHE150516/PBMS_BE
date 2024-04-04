@@ -263,7 +263,11 @@ namespace pbms_be.Controllers
             taskMoney.Dispose();
             taskProduct.Dispose();
 
-            return Ok(invoiceByGemi);
+            return Ok(new
+            {
+                rawData,
+                invoiceByGemi
+            });
         }
 
         public static string GetMimeType(string fileName)
