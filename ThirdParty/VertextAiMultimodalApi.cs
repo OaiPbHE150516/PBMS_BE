@@ -99,7 +99,6 @@ namespace pbms_be.ThirdParty
                 var netAmountRaw = jsonOject["netAmount"]?.ToString() ?? "";
                 var taxAmountRaw = jsonOject["taxAmount"]?.ToString() ?? "";
 
-
                 var invoiceResult = new InvoiceCustom_VM_Scan
                 {
                     IDOfInvoice = idOfInvoiceRaw,

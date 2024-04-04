@@ -859,6 +859,26 @@ namespace pbms_be.DataAccess
         //    }
         //}
 
+        internal List<Account> GetParticipantsInCollabFund(int collabFundID)
+        {
+            try
+            {
+                var collabAccount = _context.AccountCollab
+                    .Where(ca => ca.CollabFundID == collabFundID && ca.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .Select(ca => ca.AccountID)
+                    .ToList();
+                var accounts = _context.Account
+                    .Where(a => collabAccount.Contains(a.AccountID))
+                    .ToList();
+                return accounts;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+
         internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result,
             out List<CF_DividingMoneyDetail>? cfdm_detail_result, out List<DivideMoneyInfoWithAccount>? divideMoneyInfos)
         {
@@ -870,10 +890,30 @@ namespace pbms_be.DataAccess
                     throw new Exception(Message.COLLAB_FUND_NOTFOUND_ANY_MONEY);
                 }
                 var totalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
-                var numberParticipant = divideMoneyInfor.Count;
+                //var numberParticipant = divideMoneyInfor.Count;
+                var allMember = GetParticipantsInCollabFund(collabFundID);
+                var numberParticipant = allMember.Count;
                 var averageAmount = (totalAmount / ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR / numberParticipant) * ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR;
                 var remainAmount = totalAmount - averageAmount * numberParticipant;
-                var cf_dividingmoney = new CF_DividingMoney
+
+                // add the member dont in the divideMoneyInfor of allMember
+                var listMember = divideMoneyInfor.Select(p => p.AccountID).ToList();
+                var listMemberNotIn = allMember.Where(p => !listMember.Contains(p.AccountID)).ToList();
+                foreach (var item in listMemberNotIn)
+                {
+                    var dmInfor = new DivideMoneyInfo
+                    {
+                        AccountID = item.AccountID,
+                        TotalAmount = 0,
+                        TransactionCount = 0
+                    };
+                    divideMoneyInfor.Add(dmInfor);
+                }
+
+                var listDetail = CalculateTheAdditionalAmount(divideMoneyInfor, averageAmount);
+                var listDetailResult = DivideMoney(listDetail);
+                var listDividingMoneyDetail = CalculateTheDividingMoneyDetail(divideMoneyInfor, listDetailResult);
+                cfdividingmoney_result = new CF_DividingMoney
                 {
                     CollabFundID = collabFundID,
                     TotalAmount = totalAmount,
@@ -881,11 +921,6 @@ namespace pbms_be.DataAccess
                     AverageAmount = averageAmount,
                     RemainAmount = remainAmount
                 };
-
-                var listDetail = CalculateTheAdditionalAmount(divideMoneyInfor, averageAmount);
-                var listDetailResult = DivideMoney(listDetail);
-                var listDividingMoneyDetail = CalculateTheDividingMoneyDetail(divideMoneyInfor, listDetailResult);
-                cfdividingmoney_result = cf_dividingmoney;
                 cfdm_detail_result = listDividingMoneyDetail;
 
                 var divideMoneyInforWithAccount = new List<DivideMoneyInfoWithAccount>();
@@ -1011,7 +1046,7 @@ namespace pbms_be.DataAccess
             return listDividingMoneyDetail;
         }
 
-        private List<DivideMoneyExecute> CalculateTheAdditionalAmount(List<DivideMoneyInfo> listinfor, long averageAmount)
+        private static List<DivideMoneyExecute> CalculateTheAdditionalAmount(List<DivideMoneyInfo> listinfor, long averageAmount)
         {
             var listDetail = new List<DivideMoneyExecute>();
             foreach (var item in listinfor)
