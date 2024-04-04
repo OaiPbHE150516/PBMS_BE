@@ -252,7 +252,6 @@ public class FileWithTextPrompt
 
 public class InvoiceCustom_VM_Scan
 {
-    public int InvoiceID { get; set; }
     public string SupplierAddress { get; set; } = String.Empty;
     public string SupplierPhone { get; set; } = String.Empty;
     public string SupplierName { get; set; } = String.Empty;

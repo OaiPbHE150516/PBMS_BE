@@ -72,6 +72,7 @@ namespace pbms_be.DTOs
         public int WalletID { get; set; }
         public int CategoryID { get; set; }
         public long TotalAmount { get; set; }
+        public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
         public string Note { get; set; } = String.Empty;
         public string FromPerson { get; set; } = String.Empty;
         public string ToPerson { get; set; } = String.Empty;

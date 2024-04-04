@@ -287,6 +287,97 @@ namespace pbms_be.Library
         //    }
         //    return result;
         //}
+
+        public static DateTime ConvertStringToDateTime(string timestring)
+        {
+            // return DateTime.ParseExact(time, ConstantConfig.DEFAULT_DATETIME_FORMAT, CultureInfo.InvariantCulture);
+            // try to convert timestring to datetime utc kind, if fail return default datetime is utcnow
+            try
+            {
+                // var format1 = "HH:mm, dd/MM/yyyy";
+                // var format2 = "dd/MM/yyyy HH:mm";
+                // var format3 = "dd/MM/yyyy";
+                // var format4 = "dd-MM-yyyy";
+                // var format5 = "yyyy-MM-dd";
+                // var format6 = "yyyy-MM-dd HH:mm:ss";
+                // var format7 = "yyyy-MM-ddTHH:mm:ss";
+                // var format8 = "yyyy-MM-ddTHH:mm:ssZ";
+                // var format9 = "yyyy-MM-ddTHH:mm:ss.fffZ";
+                // var format10 = "yyyy-MM-ddTHH:mm:ss.fff";
+
+                // // return DateTime.ParseExact(timestring, ConstantConfig.DEFAULT_DATETIME_FORMAT, CultureInfo.InvariantCulture);
+                // if (DateTime.TryParseExact(timestring, ConstantConfig.DEFAULT_DATETIME_FORMAT, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateTime))
+                // {
+                //     return parsedDateTime;
+                // } else if(DateTime.TryParseExact(timestring, ConstantConfig.DEFAULT_DATETIME_FORMAT, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateTime)) {
+                //     return parsedDateTime;
+                // }
+                // else
+                // {
+                //     // add 7 hours to convert from utc to local but still return utc kind
+                //     return DateTime.ParseExact(timestring, ConstantConfig.DEFAULT_DATETIME_FORMAT, CultureInfo.InvariantCulture).AddHours(ConstantConfig.VN_TIMEZONE_UTC);
+                // }
+
+                // get hour, munite, day, month, year from string, if fail return default datetime is utcnow
+                DateTime now = DateTime.Now;
+
+                // Tách chuỗi thành các phần tử ngày, tháng, năm, giờ, phút
+                string[] separators = ["/", "-", " ", ":"];
+                string[] parts = timestring.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+
+                int day = now.Day;
+                int month = now.Month;
+                int year = now.Year;
+                int hour = now.Hour;
+                int minute = now.Minute;
+
+                // Thử chuyển đổi từng phần tử
+                if (parts.Length >= 3)
+                {
+                    if (int.TryParse(parts[0], out int parsedDay))
+                    {
+                        day = parsedDay;
+                    }
+                    if (int.TryParse(parts[1], out int parsedMonth))
+                    {
+                        month = parsedMonth;
+                    }
+                    if (int.TryParse(parts[2], out int parsedYear))
+                    {
+                        year = parsedYear;
+                    }
+                }
+
+                if (parts.Length >= 5)
+                {
+                    if (int.TryParse(parts[3], out int parsedHour))
+                    {
+                        hour = parsedHour;
+                    }
+                    if (int.TryParse(parts[4], out int parsedMinute))
+                    {
+                        minute = parsedMinute;
+                    }
+                }
+
+                try
+                {
+                    // Thử tạo đối tượng DateTime từ các phần tử đã chuyển đổi
+                    return new DateTime(year, month, day, hour, minute, 0, DateTimeKind.Utc).ToUniversalTime();
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    // Nếu không thể chuyển đổi, trả về DateTime hiện tại + vn hour kind utc
+                    return DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
+
+                }
+            }
+            catch
+            {
+                return DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
+            }
+
+        }
     }
 
     //public class WeeksInMonth

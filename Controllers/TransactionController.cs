@@ -332,11 +332,23 @@ namespace pbms_be.Controllers
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var transaction = _mapper.Map<Data.Trans.Transaction>(transactionDTO);
                 if (_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
-                var transDate = DateTime.UtcNow;
-                var imageurl = "https://storage.googleapis.com/pbms-user/invoice/"+ transactionDTO.AccountID + "/" + "invoice_" + transactionDTO.ImageURL + "_file.jpg";
-                var resultTransaction = _transactionDA.CreateTransactionV2(transaction, transDate);
+                var invoice = new Invoice
+                {
+                    IDOfInvoice = transactionDTO.Invoice.IDOfInvoice,
+                    InvoiceDate = LConvertVariable.ConvertStringToDateTime(transactionDTO.Invoice.InvoiceDate),
+                    TotalAmount = transactionDTO.Invoice.TotalAmount,
+                    NetAmount = transactionDTO.Invoice.NetAmount,
+                    TaxAmount = transactionDTO.Invoice.TaxAmount,
+                    SupplierAddress = transactionDTO.Invoice.SupplierAddress,
+                    SupplierName = transactionDTO.Invoice.SupplierName,
+                    SupplierPhone = transactionDTO.Invoice.SupplierPhone,
+                    InvoiceImageURL = transactionDTO.Invoice.InvoiceImageURL,
+                };
+                //var transDate = DateTime.UtcNow;
+                //var imageurl = "https://storage.googleapis.com/pbms-user/invoice/"+ transactionDTO.AccountID + "/" + "invoice_" + transactionDTO.ImageURL + "_file.jpg";
+                var resultTransaction = _transactionDA.CreateTransactionV2(transaction, transactionDTO.TransactionDate);
                 var invoiceDA = new InvoiceDA(_context);
-                var resultInvoice = invoiceDA.CreateInvoice(_mapper.Map<Invoice>(transactionDTO.Invoice), resultTransaction.TransactionID);
+                var resultInvoice = invoiceDA.CreateInvoice(invoice, resultTransaction.TransactionID);
                 if (resultTransaction is null || resultInvoice is null) return BadRequest(Message.TRANSACTION_CREATE_FAILED);
                 var listProductInInvoice = _mapper.Map<List<ProductInInvoice>>(transactionDTO.Invoice.Products);
                 var resultProduct = invoiceDA.CreateProduct(listProductInInvoice, resultInvoice.InvoiceID);

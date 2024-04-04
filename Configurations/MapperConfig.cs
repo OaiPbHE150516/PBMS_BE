@@ -95,7 +95,9 @@ namespace pbms_be.Configurations
             CreateMap<Data.Trans.Transaction, DTOs.TransactionCreateWithImageDTO>().ReverseMap();
 
             // Invoice
-            CreateMap<Data.Invo.Invoice, DTOs.InvoiceCreateDTO>().ReverseMap();
+            //CreateMap<Data.Invo.Invoice, DTOs.InvoiceCreateDTO>()
+            //    .ForMember(dest => dest.InvoiceDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.InvoiceDate)))
+            //    .ReverseMap();
 
             // ProductInInvoice
             CreateMap<Data.Invo.ProductInInvoice, DTOs.ProductInInvoiceCreateDTO>().ReverseMap();
