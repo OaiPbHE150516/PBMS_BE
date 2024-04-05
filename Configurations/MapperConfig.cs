@@ -99,8 +99,18 @@ namespace pbms_be.Configurations
             //    .ForMember(dest => dest.InvoiceDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.InvoiceDate)))
             //    .ReverseMap();
 
+            // Invoice_VM_DTO and Invoice
+            CreateMap<Data.Invo.Invoice, DTOs.Invoice_VM_DTO>()
+                .ForMember(dest => dest.NetAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.NetAmount)))
+                .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))
+                .ForMember(dest => dest.TaxAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TaxAmount)))
+                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.ProductInInvoices))
+                .ReverseMap();
+
             // ProductInInvoice
             CreateMap<Data.Invo.ProductInInvoice, DTOs.ProductInInvoiceCreateDTO>().ReverseMap();
+            // Product_VM_DTO and ProductInInvoice
+            CreateMap<Data.Invo.ProductInInvoice, DTOs.Product_VM_DTO>().ReverseMap();
 
             CreateMap<Data.WalletF.Wallet, DTOs.WalletUpdateDTO>().ReverseMap();
             CreateMap<Data.WalletF.Wallet, DTOs.ChangeWalletActiveStateDTO>().ReverseMap();

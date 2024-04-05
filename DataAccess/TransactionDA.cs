@@ -110,7 +110,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal object GetTransaction(int transactionID, string accountID)
+        internal object GetTransaction(int transactionID, string accountID, IMapper? _mapper)
         {
             try
             {
@@ -119,11 +119,20 @@ namespace pbms_be.DataAccess
                             .Include(t => t.ActiveState)
                             .Include(t => t.Category)
                             .Include(t => t.Wallet)
-                            .FirstOrDefault();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                            .FirstOrDefault() ?? throw new Exception(Message.TRANSACTION_NOT_FOUND);
                 var cateDA = new CategoryDA(_context);
                 result.Category.CategoryType = cateDA.GetCategoryType(result.Category.CategoryTypeID);
-                return result;
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var resultDTO = _mapper.Map<TransactionDetail_VM_DTO>(result);
+                // get invoice of transaction
+                var invoice = _context.Invoice
+                            .Where(i => i.TransactionID == transactionID && i.ActiveStateID == ActiveStateConst.ACTIVE)
+                            .Include(i => i.Currency)
+                            .Include(i => i.ActiveState)
+                            .Include(i => i.ProductInInvoices)
+                            .FirstOrDefault();
+                if (invoice is not null) resultDTO.Invoice = _mapper.Map<Invoice_VM_DTO>(invoice);
+                return resultDTO;
             }
             catch (Exception e)
             {

@@ -57,10 +57,8 @@ namespace pbms_be.Controllers
             {
                 if (transactionID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.TRANSACTION_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
-                var result = _transactionDA.GetTransaction(transactionID, accountID);
-                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
-                var resultDTO = _mapper.Map<TransactionDetail_VM_DTO>(result);
-                return Ok(resultDTO);
+                var result = _transactionDA.GetTransaction(transactionID, accountID, _mapper);
+                return Ok(result);
             }
             catch (System.Exception e)
             {

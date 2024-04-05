@@ -64,6 +64,7 @@ namespace pbms_be.DTOs
         public string FromPerson { get; set; } = String.Empty;
         public string ToPerson { get; set; } = String.Empty;
         public string ImageURL { get; set; } = String.Empty;
+        public virtual Invoice_VM_DTO Invoice { get; set; } = null!;
     }
 
     public class TransactionCreateDTO
