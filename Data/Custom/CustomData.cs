@@ -38,6 +38,7 @@ public class CF_DivideMoney_DTO_VM : CF_DividingMoney
     public string TotalAmountStr { get; set; } = String.Empty;
     public string AverageAmountStr { get; set; } = String.Empty;
     public string RemainAmountStr { get; set; } = String.Empty;
+    public virtual DayDetail CreateTimeDetail { get; set; } = null!;
 }
 
 public class CF_DividingMoneyDetail_DTO_VM : CF_DividingMoneyDetail

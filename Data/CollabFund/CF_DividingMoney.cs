@@ -17,6 +17,7 @@ public class CF_DividingMoney
             average_amount INT NOT NULL,
             remain_amount INT NOT NULL,
             as_id INT NOT NULL DEFAULT 1,
+            createtime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (collabfund_id) REFERENCES collabfund (collabfund_id),
             FOREIGN KEY (collab_fun_activity_id) REFERENCES collab_fun_activity (collab_fun_activity_id),
             FOREIGN KEY (as_id) REFERENCES active_state (as_id)
@@ -48,6 +49,9 @@ public class CF_DividingMoney
     [Column("as_id")]
     public int ActiveStateID { get; set; }
     public virtual ActiveState ActiveState { get; set; } = null!;
+
+    [Column("createtime")]
+    public DateTime CreateTime { get; set; } = DateTime.UtcNow;
 
     public virtual List<CF_DividingMoneyDetail> CF_DividingMoneyDetails { get; set; } = null!;
 }

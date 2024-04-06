@@ -10,6 +10,7 @@ using pbms_be.Data.Trans;
 using pbms_be.Data.WalletF;
 using pbms_be.DTOs;
 using pbms_be.Library;
+using System;
 using System.Collections.Generic;
 using static Google.Cloud.DocumentAI.V1.BatchProcessMetadata.Types;
 
@@ -1523,6 +1524,7 @@ namespace pbms_be.DataAccess
                     .ToList() ?? throw new Exception(Message.COLLAB_FUND_NOTFOUND_ANY_DIVIDING_MONEY);
                 if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var list_DM_DTO = _mapper.Map<List<CF_DivideMoney_DTO_VM>>(list_DM);
+
                 // get fromAccount and toAccount of each CF_DividingMoneyDetail
                 foreach (var item in list_DM_DTO)
                 {
@@ -1539,6 +1541,20 @@ namespace pbms_be.DataAccess
                             detail.ToAccount = toAccount;
                         }
                     }
+                    // convert createTime to DateOnly type
+                    DateOnly dateOnly = new(item.CreateTime.Year, item.CreateTime.Month, item.CreateTime.Day);
+                    item.CreateTimeDetail = new DayDetail
+                    {
+                        DayOfWeek = item.CreateTime.DayOfWeek,
+                        Short_EN = item.CreateTime.DayOfWeek.ToString().Substring(0, 3),
+                        Full_EN = item.CreateTime.DayOfWeek.ToString(),
+                        Short_VN = LConvertVariable.ConvertDayInWeekToVN_SHORT_3(item.CreateTime.DayOfWeek),
+                        Full_VN = LConvertVariable.ConvertDayInWeekToVN_FULL(item.CreateTime.DayOfWeek),
+                        ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateOnly),
+                        FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateOnly),
+                        DayStr = dateOnly.Day.ToString(),
+                        MonthYearStr = $"tháng {dateOnly.Month}, {dateOnly.Year}"
+                    };
                 }
                 return list_DM_DTO;
             }
