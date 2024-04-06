@@ -127,6 +127,24 @@ namespace pbms_be.Controllers
             }
         }
 
+        // get history divide money of a collab fund
+        [HttpGet("get/history/divide-money/{collabFundID}/{accountID}")]
+        public IActionResult GetHistoryDivideMoneyCollabFund(int collabFundID, string accountID)
+        {
+            try
+            {
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+                var result = _collabFundDA.GetHistoryDivideMoneyCollabFund(collabFundID, accountID, _mapper);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         // get all accounts ( as parties) of collab fund by collab fund id and account id
         [HttpGet("get/member/typebytype/{collabFundID}/{accountID}")]
         public IActionResult GetAllMemberCollabFundTypeByType(int collabFundID, string accountID)

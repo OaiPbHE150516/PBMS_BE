@@ -184,6 +184,8 @@
         public const string COLLAB_FUND_ACTIVITY_NOT_FOUND = " Collab fund activity not found";
         public const string COLLAB_FUND_NOTFOUND_ANY_MONEY = " Collab fund not found any money";
         public const string COLLAB_FUND_NOTFOUND_DATA = " Collab fund not found data";
+        // not found any collab fund dividing money
+        public const string COLLAB_FUND_NOTFOUND_ANY_DIVIDING_MONEY = " Collab fund not found any dividing money";
         // cfdm detail not found
         public const string CFDM_DETAIL_NOT_FOUND = " Collab Fund dividing money detail not found";
 

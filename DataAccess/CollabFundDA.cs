@@ -1510,5 +1510,42 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+
+        internal object GetHistoryDivideMoneyCollabFund(int collabFundID, string accountID, AutoMapper.IMapper? _mapper)
+        {
+            try
+            {
+                // get collab fund by collabFundID
+                var list_DM = _context.CF_DividingMoney
+                    .Where(cfdm => cfdm.CollabFundID == collabFundID)
+                    .Include(cfdm => cfdm.CF_DividingMoneyDetails)
+                    .Include(cfdm => cfdm.ActiveState)
+                    .ToList() ?? throw new Exception(Message.COLLAB_FUND_NOTFOUND_ANY_DIVIDING_MONEY);
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var list_DM_DTO = _mapper.Map<List<CF_DivideMoney_DTO_VM>>(list_DM);
+                // get fromAccount and toAccount of each CF_DividingMoneyDetail
+                foreach (var item in list_DM_DTO)
+                {
+                    foreach (var detail in item.CF_DividingMoneyDetails)
+                    {
+                        var fromAccount = _context.Account.Find(detail.FromAccountID);
+                        if (fromAccount is not null)
+                        {
+                            detail.FromAccount = fromAccount;
+                        }
+                        var toAccount = _context.Account.Find(detail.ToAccountID);
+                        if (toAccount is not null)
+                        {
+                            detail.ToAccount = toAccount;
+                        }
+                    }
+                }
+                return list_DM_DTO;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }
