@@ -137,13 +137,12 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal List<CollabFund> GetCollabFunds(string accountID)
+        internal object GetCollabFunds(string accountID, AutoMapper.IMapper? _mapper)
         {
             try
             {
                 var collabAccount = _context.AccountCollab
-                                    .Where(ca => ca.AccountID == accountID
-                                        && ca.ActiveStateID == ActiveStateConst.ACTIVE)
+                                    .Where(ca => ca.AccountID == accountID)
                                     .Select(ca => ca.CollabFundID)
                                     .ToList();
 
@@ -158,8 +157,20 @@ namespace pbms_be.DataAccess
                     var divideMoneyInfor = GetDivideMoneyCollabFund(item.CollabFundID);
                     item.TotalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
                 }
-
-                return result;
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var collabFundDTOs = _mapper.Map<List<CollabFund_VM_DTO>>(result);
+                foreach (var item in collabFundDTOs)
+                {
+                    item.IsFundholder = IsFundholderEasy(item.CollabFundID, accountID);
+                    item.AccountInCollabFunds = GetAccountInCollabFunds(item.CollabFundID);
+                    // find activestate of this accountID in collabFund
+                    item.AccountState = _context.AccountCollab
+                        .Where(ca => ca.CollabFundID == item.CollabFundID && ca.AccountID == accountID)
+                        .Include(ca => ca.ActiveState)
+                        .Select(ca => ca.ActiveState)
+                        .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                }
+                return collabFundDTOs;
             }
             catch (Exception e)
             {
@@ -461,7 +472,7 @@ namespace pbms_be.DataAccess
             {
                 // 1. check if account is fundholder
                 var collabAccount = IsFundholderCollabFund(InviteMemberDTO.CollabFundID, InviteMemberDTO.AccountFundholderID);
-                if (collabAccount) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+                if (!collabAccount) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
 
                 // 2. check if account is exist
                 var authDA = new AuthDA(_context);
@@ -573,12 +584,11 @@ namespace pbms_be.DataAccess
             try
             {
                 var isFundholder = _context.AccountCollab
-                    .Where(ca => ca.CollabFundID == collabFundID
+                    .Any(ca => ca.CollabFundID == collabFundID
                     && ca.AccountID == accountID
                     && ca.IsFundholder == true
-                    && ca.ActiveStateID == ActiveStateConst.ACTIVE)
-                    .FirstOrDefault();
-                return isFundholder != null;
+                    && ca.ActiveStateID == ActiveStateConst.ACTIVE);
+                return isFundholder;
             }
             catch (Exception e)
             {
@@ -1308,7 +1318,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal object DeleteCollabFund(CollabAccountDTO deleteCollabFundDTO)
+        internal object DeleteCollabFund(CollabAccountDTO deleteCollabFundDTO, AutoMapper.IMapper? _mapper)
         {
             try
             {
@@ -1317,7 +1327,7 @@ namespace pbms_be.DataAccess
                 collabFund.ActiveStateID = ActiveStateConst.DELETED;
                 _context.SaveChanges();
                 // return list collab fund
-                return GetCollabFunds(deleteCollabFundDTO.AccountID);
+                return GetCollabFunds(deleteCollabFundDTO.AccountID, _mapper);
             }
             catch (Exception e)
             {

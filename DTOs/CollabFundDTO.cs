@@ -18,7 +18,8 @@ namespace pbms_be.DTOs
         public string ImageURL { get; set; } = String.Empty;
         public long TotalAmount { get; set; }
         public string TotalAmountStr { get; set; } = String.Empty;
-        public virtual bool isFundholder { get; set; } = false;
+        public virtual bool IsFundholder { get; set; } = false;
+        public virtual ActiveState AccountState { get; set; } = null!;
 
         public virtual List<AccountInCollabFundDTO> AccountInCollabFunds { get; set; } = null!;
         //public virtual List<CollabFundActivity> CollabFundActivities { get; set; } = null!;

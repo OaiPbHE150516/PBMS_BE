@@ -38,15 +38,8 @@ namespace pbms_be.Controllers
             try
             {
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
-                var result = _collabFundDA.GetCollabFunds(accountID);
-                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
-                var resultDTO = _mapper.Map<List<CollabFund_VM_DTO>>(result);
-                foreach (var item in resultDTO)
-                {
-                    item.isFundholder = _collabFundDA.IsFundholderEasy(item.CollabFundID, accountID);
-                    item.AccountInCollabFunds = _collabFundDA.GetAccountInCollabFunds(item.CollabFundID);
-                }
-                return Ok(resultDTO);
+                var result = _collabFundDA.GetCollabFunds(accountID, _mapper); 
+                return Ok(result);
             }
             catch (System.Exception e)
             {
@@ -593,7 +586,7 @@ namespace pbms_be.Controllers
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 if (!_collabFundDA.IsFundholderCollabFund(deleteCollabFundDTO.CollabFundID, deleteCollabFundDTO.AccountID))
                     return BadRequest(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
-                var result = _collabFundDA.DeleteCollabFund(deleteCollabFundDTO);
+                var result = _collabFundDA.DeleteCollabFund(deleteCollabFundDTO, _mapper);
                 return Ok(result);
             }
             catch (System.Exception e)
