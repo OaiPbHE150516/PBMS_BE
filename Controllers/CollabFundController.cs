@@ -59,13 +59,6 @@ namespace pbms_be.Controllers
                     return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 var result = _collabFundDA.GetDetailCollabFund(collabFundID, accountID, _mapper);
                 return Ok(result);
-                //CollabFund collabfund = new();
-                //_collabFundDA.GetDetailCollabFund(collabFundID, accountID, out bool isExist, out collabfund);
-                //if (!isExist) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
-                //if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
-                //var collabfundEntity = _mapper.Map<CollabFundDetail_VM_DTO>(collabfund);
-                //collabfundEntity.AccountInCollabFunds = _collabFundDA.GetAccountInCollabFunds(collabfund.CollabFundID);
-                //return Ok(collabfundEntity);
             }
             catch (System.Exception e)
             {

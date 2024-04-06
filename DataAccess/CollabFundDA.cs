@@ -918,7 +918,8 @@ namespace pbms_be.DataAccess
                 //var numberParticipant = divideMoneyInfor.Count;
                 var allMember = GetParticipantsInCollabFund(collabFundID);
                 var numberParticipant = allMember.Count;
-                var averageAmount = (totalAmount / ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR / numberParticipant) * ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR;
+                //var averageAmount = (totalAmount / ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR / numberParticipant) * ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR;
+                var averageAmount = (totalAmount / numberParticipant);
                 var remainAmount = totalAmount - averageAmount * numberParticipant;
 
                 // add the member dont in the divideMoneyInfor of allMember
