@@ -279,13 +279,13 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal void GetDetailCollabFund(int collabFundID, string accountID, out bool isExist, out CollabFund collabFund)
+        internal object GetDetailCollabFund(int collabFundID, string accountID, AutoMapper.IMapper? _mapper)
         {
             try
             {
                 var collabAccount = _context.AccountCollab
                                     .Where(ca => ca.AccountID == accountID
-                                    && ca.ActiveStateID == ActiveStateConst.ACTIVE)
+                                    && ca.ActiveStateID == ActiveStateConst.ACTIVE || ca.ActiveStateID == ActiveStateConst.PENDING)
                                     .Select(ca => ca.CollabFundID)
                                     .ToList();
 
@@ -294,19 +294,33 @@ namespace pbms_be.DataAccess
                     && cf.CollabFundID == collabFundID
                     && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                     .Include(cf => cf.ActiveState)
-                    .FirstOrDefault();
+                    .FirstOrDefault() ?? throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
 
-                if (result is null)
-                {
-                    isExist = false;
-                    collabFund = new CollabFund();
-                }
-                else
-                {
-                    isExist = true;
-                    result.CollabFundActivities = GetAllActivityCollabFund(collabFundID, accountID);
-                    collabFund = result;
-                }
+                var divideMoneyInfor = GetDivideMoneyCollabFund(result.CollabFundID);
+                result.TotalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var collabFundDTO = _mapper.Map<CollabFund_VM_DTO>(result);
+                collabFundDTO.IsFundholder = IsFundholderEasy(collabFundDTO.CollabFundID, accountID);
+                collabFundDTO.AccountInCollabFunds = GetAccountInCollabFunds(collabFundDTO.CollabFundID);
+                collabFundDTO.AccountState = _context.AccountCollab
+                    .Where(ca => ca.CollabFundID == collabFundDTO.CollabFundID && ca.AccountID == accountID)
+                    .Include(ca => ca.ActiveState)
+                    .Select(ca => ca.ActiveState)
+                    .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                return collabFundDTO;
+
+                //if (result is null)
+                //{
+                //    isExist = false;
+                //    collabFund = new CollabFund();
+                //}
+                //else
+                //{
+                //    isExist = true;
+                //    result.CollabFundActivities = GetAllActivityCollabFund(collabFundID, accountID);
+                //    collabFund = result;
+                //}
             }
             catch (Exception e)
             {
@@ -844,11 +858,12 @@ namespace pbms_be.DataAccess
             try
             {
                 var result = _context.AccountCollab
-                    .Where(ca => ca.AccountID == accountID
+                    .Any(ca => ca.AccountID == accountID
                                 && ca.CollabFundID == collabFundID
-                                && ca.ActiveStateID == ActiveStateConst.ACTIVE)
-                    .FirstOrDefault();
-                return result != null;
+                                && ca.ActiveStateID == ActiveStateConst.ACTIVE
+                                || ca.ActiveStateID == ActiveStateConst.PENDING
+                                || ca.ActiveStateID == ActiveStateConst.INACTIVE);
+                return result;
             }
             catch (Exception e)
             {

@@ -57,15 +57,15 @@ namespace pbms_be.Controllers
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false)
                     return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
-
-                CollabFund collabfund = new CollabFund();
-                bool isExist = false;
-                _collabFundDA.GetDetailCollabFund(collabFundID, accountID, out isExist, out collabfund);
-                if (!isExist) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
-                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
-                var collabfundEntity = _mapper.Map<CollabFundDetail_VM_DTO>(collabfund);
-                collabfundEntity.AccountInCollabFunds = _collabFundDA.GetAccountInCollabFunds(collabfund.CollabFundID);
-                return Ok(collabfundEntity);
+                var result = _collabFundDA.GetDetailCollabFund(collabFundID, accountID, _mapper);
+                return Ok(result);
+                //CollabFund collabfund = new();
+                //_collabFundDA.GetDetailCollabFund(collabFundID, accountID, out bool isExist, out collabfund);
+                //if (!isExist) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
+                //if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                //var collabfundEntity = _mapper.Map<CollabFundDetail_VM_DTO>(collabfund);
+                //collabfundEntity.AccountInCollabFunds = _collabFundDA.GetAccountInCollabFunds(collabfund.CollabFundID);
+                //return Ok(collabfundEntity);
             }
             catch (System.Exception e)
             {
@@ -527,8 +527,7 @@ namespace pbms_be.Controllers
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
-                CollabFundDA collabFundDA = new CollabFundDA(_context);
-                var result = collabFundDA.DeleteMemberCollabFund(deleteMemberCollabFundDTO);
+                var result = _collabFundDA.DeleteMemberCollabFund(deleteMemberCollabFundDTO);
                 return Ok(result);
             }
             catch (System.Exception e)
