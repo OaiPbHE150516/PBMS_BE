@@ -1555,6 +1555,8 @@ namespace pbms_be.DataAccess
                         DayStr = dateOnly.Day.ToString(),
                         MonthYearStr = $"tháng {dateOnly.Month}, {dateOnly.Year}"
                     };
+                    item.List_CFDM_Detail_VM_DTO = _mapper.Map<List<CF_DividingMoneyDetail_DTO_VM>>(item.CF_DividingMoneyDetails);
+                    item.CF_DividingMoneyDetails = null;
                 }
                 return list_DM_DTO;
             }

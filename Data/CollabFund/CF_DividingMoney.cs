@@ -53,5 +53,5 @@ public class CF_DividingMoney
     [Column("createtime")]
     public DateTime CreateTime { get; set; } = DateTime.UtcNow;
 
-    public virtual List<CF_DividingMoneyDetail> CF_DividingMoneyDetails { get; set; } = null!;
+    public virtual List<CF_DividingMoneyDetail>? CF_DividingMoneyDetails { get; set; } = null!;
 }
