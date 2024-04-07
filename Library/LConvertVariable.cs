@@ -1,5 +1,6 @@
 ﻿using pbms_be.Configurations;
-using static Google.Cloud.DocumentAI.V1.Document.Types.Provenance.Types;
+using pbms_be.Data.Custom;
+using System.Globalization;
 
 namespace pbms_be.Library
 {
@@ -16,9 +17,9 @@ namespace pbms_be.Library
              * default: return "x months ago"
              */
 
-            var now = DateTime.UtcNow;
+            var now = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
             var minusTime = now - time;
-            var minusTimeNowString = string.Empty;
+            string? minusTimeNowString;
             if (minusTime.TotalMinutes < ConstantConfig.MIN_MINUTES_AGO)
                 minusTimeNowString = Message.VN_JUST_NOW;
             else if (minusTime.TotalMinutes < ConstantConfig.MIN_HOURS_AGO)
@@ -64,7 +65,8 @@ namespace pbms_be.Library
         public static string ConvertToMoneyFormat(long number)
         {
             var result = number.ToString("N0");
-            result = result.Replace(",", ".") + " đ";
+            RegionInfo vietnamRegion = new RegionInfo("vi-VN");
+            result = result.Replace(",", ".") + " " + vietnamRegion.CurrencySymbol;
             return result;
         }
 
@@ -209,9 +211,9 @@ namespace pbms_be.Library
             var dayInWeek = ConvertDayInWeekToVN_SHORT_3(date.DayOfWeek);
             var day = date.Day;
             var month = date.Month;
-            var result = dayInWeek + ", " + Message.VN_DAY_SHORT + " " + day;
-            if (day == 1 || day == 2 || day == 3 || day == 28 || day == 29 || day == 30 || day == 31)
-                result += " " + Message.VN_MONTH_SHORT + " " + month;
+            var result = dayInWeek + ", " + day + " " + Message.VN_MONTH_SHORT + " " + month;
+            //if (day == 1 || day == 2 || day == 3 || day == 28 || day == 29 || day == 30 || day == 31)
+            //    result += " " + Message.VN_MONTH_SHORT + " " + month;
             return result;
         }
 
@@ -238,6 +240,23 @@ namespace pbms_be.Library
             var month = dateTime.ToString("MM");
             if (month[0] == '0') month = month.Remove(0, 1);
             return day + ConstantConfig.DEFAULT_DAY_THG_MONTH + month;
+        }
+
+        internal static DayDetail ConvertDateOnlyToDayDetail(DateOnly dateonly)
+        {
+            var dayDetail = new DayDetail
+            {
+                DayOfWeek = dateonly.DayOfWeek,
+                Short_EN = dateonly.DayOfWeek.ToString()[..3],
+                Full_EN = dateonly.DayOfWeek.ToString(),
+                Short_VN = ConvertDayInWeekToVN_SHORT_3(dateonly.DayOfWeek),
+                Full_VN = ConvertDayInWeekToVN_FULL(dateonly.DayOfWeek),
+                ShortDate = ConvertDateOnlyToVN_ng_thg(dateonly),
+                FullDate = ConvertDateOnlyToVN_ngay_thang(dateonly),
+                DayStr = dateonly.Day.ToString(),
+                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+            };
+            return dayDetail;
         }
 
         //// get all week have inside from start date to end date
@@ -268,6 +287,97 @@ namespace pbms_be.Library
         //    }
         //    return result;
         //}
+
+        public static DateTime ConvertStringToDateTime(string timestring)
+        {
+            // return DateTime.ParseExact(time, ConstantConfig.DEFAULT_DATETIME_FORMAT, CultureInfo.InvariantCulture);
+            // try to convert timestring to datetime utc kind, if fail return default datetime is utcnow
+            try
+            {
+                // var format1 = "HH:mm, dd/MM/yyyy";
+                // var format2 = "dd/MM/yyyy HH:mm";
+                // var format3 = "dd/MM/yyyy";
+                // var format4 = "dd-MM-yyyy";
+                // var format5 = "yyyy-MM-dd";
+                // var format6 = "yyyy-MM-dd HH:mm:ss";
+                // var format7 = "yyyy-MM-ddTHH:mm:ss";
+                // var format8 = "yyyy-MM-ddTHH:mm:ssZ";
+                // var format9 = "yyyy-MM-ddTHH:mm:ss.fffZ";
+                // var format10 = "yyyy-MM-ddTHH:mm:ss.fff";
+
+                // // return DateTime.ParseExact(timestring, ConstantConfig.DEFAULT_DATETIME_FORMAT, CultureInfo.InvariantCulture);
+                // if (DateTime.TryParseExact(timestring, ConstantConfig.DEFAULT_DATETIME_FORMAT, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateTime))
+                // {
+                //     return parsedDateTime;
+                // } else if(DateTime.TryParseExact(timestring, ConstantConfig.DEFAULT_DATETIME_FORMAT, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateTime)) {
+                //     return parsedDateTime;
+                // }
+                // else
+                // {
+                //     // add 7 hours to convert from utc to local but still return utc kind
+                //     return DateTime.ParseExact(timestring, ConstantConfig.DEFAULT_DATETIME_FORMAT, CultureInfo.InvariantCulture).AddHours(ConstantConfig.VN_TIMEZONE_UTC);
+                // }
+
+                // get hour, munite, day, month, year from string, if fail return default datetime is utcnow
+                DateTime now = DateTime.Now;
+
+                // Tách chuỗi thành các phần tử ngày, tháng, năm, giờ, phút
+                string[] separators = ["/", "-", " ", ":"];
+                string[] parts = timestring.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+
+                int day = now.Day;
+                int month = now.Month;
+                int year = now.Year;
+                int hour = now.Hour;
+                int minute = now.Minute;
+
+                // Thử chuyển đổi từng phần tử
+                if (parts.Length >= 3)
+                {
+                    if (int.TryParse(parts[0], out int parsedDay))
+                    {
+                        day = parsedDay;
+                    }
+                    if (int.TryParse(parts[1], out int parsedMonth))
+                    {
+                        month = parsedMonth;
+                    }
+                    if (int.TryParse(parts[2], out int parsedYear))
+                    {
+                        year = parsedYear;
+                    }
+                }
+
+                if (parts.Length >= 5)
+                {
+                    if (int.TryParse(parts[3], out int parsedHour))
+                    {
+                        hour = parsedHour;
+                    }
+                    if (int.TryParse(parts[4], out int parsedMinute))
+                    {
+                        minute = parsedMinute;
+                    }
+                }
+
+                try
+                {
+                    // Thử tạo đối tượng DateTime từ các phần tử đã chuyển đổi
+                    return new DateTime(year, month, day, hour, minute, 0, DateTimeKind.Utc).ToUniversalTime();
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    // Nếu không thể chuyển đổi, trả về DateTime hiện tại + vn hour kind utc
+                    return DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
+
+                }
+            }
+            catch
+            {
+                return DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
+            }
+
+        }
     }
 
     //public class WeeksInMonth

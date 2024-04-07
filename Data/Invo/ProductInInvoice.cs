@@ -17,10 +17,9 @@ public class ProductInInvoice
             unit_price BIGINT DEFAULT 1,
             total_amount BIGINT NOT NULL,
             note VARCHAR ( 5000 ) DEFAULT '',
-            tag_id INT NOT NULL DEFAULT 1,
+            tag VARCHAR(100) NOT NULL DEFAULT '',
             as_id INT NOT NULL DEFAULT 1,
             FOREIGN KEY (invoice_id) REFERENCES invoice (invoice_id),
-            FOREIGN KEY (tag_id) REFERENCES tag (tag_id),
             FOREIGN KEY (as_id) REFERENCES active_state (as_id)
         );
      */
@@ -40,7 +39,7 @@ public class ProductInInvoice
     public int Quanity { get; set; } = 1;
 
     [Column("unit_price")]
-    public long UnitPrice { get; set; } = 0;
+    public long UnitPrice { get; set; } = 1;
 
     [Column("total_amount")]
     public long TotalAmount { get; set; }
@@ -48,8 +47,8 @@ public class ProductInInvoice
     [Column("note")]
     public string Note { get; set; } = String.Empty;
 
-    [Column("tag_id")]
-    public int TagID { get; set; } = 1;
+    [Column("tag")]
+    public string Tag { get; set; } = String.Empty;
 
     [Column("as_id")]
     public int ActiveStateID { get; set; }

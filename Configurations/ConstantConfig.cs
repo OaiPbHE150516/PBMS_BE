@@ -29,6 +29,8 @@
         public const string MINE_TYPE_JPEG = "image/jpeg";
         public const string MINE_TYPE_PNG = "image/png";
         public const string MINE_TYPE_JPG = "image/jpg";
+        // heic
+        public const string MINE_TYPE_HEIC = "image/heic";
 
         // NUMBER_LAST_DAYS
         public const int NUMBER_LAST_DAYS = 7;
@@ -40,7 +42,7 @@
         public const long NEGATIVE_VALUE = -1;
         public const int DEFAULT_ACTIVE_STATE_VALUE = 1;
         // Dùng trong trường hợp không có transaction id
-        public const int DEFAULT_NULL_TRANSACTION_ID = 1;
+        public const int DEFAULT_NULL_TRANSACTION_ID = 14887;
         // default primary key
         public const int DEFAULT_PRIMARY_KEY = 1;
         // default value for zero
@@ -58,7 +60,7 @@
         // min months ago to know it days ago
         public const int MIN_MONTHS_AGO = 30;
 
-        public const string DEFAULT_DATETIME_FORMAT = "HH:mm, dd/MM/yyyy";
+        public const string DEFAULT_DATETIME_FORMAT = "dd/MM/yyyy";
 
         public const string DEFAULT_UTC_DATETIME_FORMAT = "yyyy-MM-ddTHH:mm:ssZ";
         // default time format
@@ -108,6 +110,9 @@
         public const string FILE_IS_NULL = " File is null or not of type pdf";
         public const string FILE_IS_NOT_PDF_JPG_PNG = " File is null or not of type pdf, jpg or png";
 
+        // profile 
+        public const string KEYWORD_REQUIRED = " Keyword is required";
+
         // DATE_TIME_REQUIRED
         public const string DATE_TIME_REQUIRED = " Date time is required";
 
@@ -131,7 +136,9 @@
         public const string YEAR_REQUIRED = " Year is required";
         public const string FROM_DATE_REQUIRED = " From date is required";
         public const string TO_DATE_REQUIRED = " To date is required";
-
+        public const string TRANSACTION_IS_NULL = " Transaction is null";
+        public const string WALLET_NOT_BELONG_ACCOUNT = " Wallet not belong to account";
+        public const string CATEGORY_NOT_BELONG_ACCOUNT = " Category not belong to account";
 
 
         // Budget
@@ -139,6 +146,10 @@
         public const string BUDGET_ID_REQUIRED = " BudgetID is required";
         public const string BUDGET_NOT_FOUND = " Budget not found";
         public const string BUDGET_TYPE_NOT_FOUND = " Budget type not found";
+
+        // Balance
+        public const string BALANCE_HISTORY_LOG_NOT_FOUND = "No balance history log found for this account";
+        public const string BALANCE_HISTORY_LOG_INVALID = "Balance history log is invalid";
 
         // Category
         public const string CATEGORY_ALREADY_EXIST = " Category already exist";
@@ -171,7 +182,10 @@
         public const string ACCOUNT_FROM_NOT_FOUND = " Account from not found";
         public const string ACCOUNT_TO_NOT_FOUND = " Account to not found";
         public const string COLLAB_FUND_ACTIVITY_NOT_FOUND = " Collab fund activity not found";
-
+        public const string COLLAB_FUND_NOTFOUND_ANY_MONEY = " Collab fund not found any money";
+        public const string COLLAB_FUND_NOTFOUND_DATA = " Collab fund not found data";
+        // not found any collab fund dividing money
+        public const string COLLAB_FUND_NOTFOUND_ANY_DIVIDING_MONEY = " Collab fund not found any dividing money";
         // cfdm detail not found
         public const string CFDM_DETAIL_NOT_FOUND = " Collab Fund dividing money detail not found";
 
@@ -199,6 +213,7 @@
         public const string FILE_IS_NULL_ = " File is null";
         public const string FILE_IS_TOO_LARGE = " File is too large";
         public const string FILE_IS_NOT_JPG_PNG = " File is not of type jpg or png";
+        public const string FILE_NAME_IS_NULL = " File name is null";
 
         // Datetime
         public const string FROM_DATE_GREATER_THAN_TO_DATE = " From date greater than to date";

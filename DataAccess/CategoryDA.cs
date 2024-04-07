@@ -124,8 +124,7 @@ namespace pbms_be.DataAccess
             try
             {
                 var result = _context.CategoryType.Where(c => c.CategoryTypeID == categoryTypeID).FirstOrDefault();
-                if (result is null) throw new Exception(categoryTypeID + Message.CATEGORY_TYPE_NOT_FOUND);
-                return result;
+                return result is null ? throw new Exception(categoryTypeID + Message.CATEGORY_TYPE_NOT_FOUND) : result;
             }
             catch (Exception e)
             {
@@ -178,8 +177,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var parent = GetCategory(category.ParentCategoryID, category.AccountID);
-                if (parent is null) throw new Exception(Message.CATEGORY_PARENT_NOT_FOUND);
+                var parent = GetCategory(category.ParentCategoryID, category.AccountID) ?? throw new Exception(Message.CATEGORY_PARENT_NOT_FOUND);
                 category.CategoryTypeID = parent.CategoryTypeID;
                 category.ActiveStateID = ActiveStateConst.ACTIVE;
                 category.IsRoot = false;
@@ -202,8 +200,7 @@ namespace pbms_be.DataAccess
                             .Include(c => c.ActiveState)
                             .Include(c => c.CategoryType)
                             .FirstOrDefault();
-                if (result is null) throw new Exception(Message.CATEGORY_NOT_FOUND);
-                return result;
+                return result is null ? throw new Exception(Message.CATEGORY_NOT_FOUND) : result;
             }
             catch (Exception e)
             {
@@ -215,17 +212,16 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var categoryUpdate = GetCategory(category.CategoryID, category.AccountID);
-                if (categoryUpdate is null) throw new Exception(Message.CATEGORY_NOT_FOUND);
+                var categoryUpdate = GetCategory(category.CategoryID, category.AccountID) ?? throw new Exception(Message.CATEGORY_NOT_FOUND);
                 categoryUpdate.NameEN = category.NameEN;
                 categoryUpdate.NameVN = category.NameVN;
                 categoryUpdate.ParentCategoryID = category.ParentCategoryID;
-                var parent = GetCategory(category.ParentCategoryID, category.AccountID);
-                if (parent is null) throw new Exception(Message.CATEGORY_PARENT_NOT_FOUND);
+                var parent = GetCategory(category.ParentCategoryID, category.AccountID) ?? throw new Exception(Message.CATEGORY_PARENT_NOT_FOUND);
                 categoryUpdate.CategoryTypeID = parent.CategoryTypeID;
                 _context.SaveChanges();
                 return GetCategory(category.CategoryID, category.AccountID);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
@@ -235,8 +231,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var category = GetCategory(categoryID, accountID);
-                if (category is null) throw new Exception(Message.CATEGORY_NOT_FOUND);
+                var category = GetCategory(categoryID, accountID) ?? throw new Exception(Message.CATEGORY_NOT_FOUND);
                 category.ActiveStateID = ActiveStateConst.DELETED;
                 _context.SaveChanges();
                 return category;
@@ -268,79 +263,13 @@ namespace pbms_be.DataAccess
                     }
                     else
                     {
-                        if (categoryMap.ContainsKey(category.ParentCategoryID))
+                        if (categoryMap.TryGetValue(category.ParentCategoryID, out CategoryTree_VM_DTO? value))
                         {
-                            categoryMap[category.ParentCategoryID].Children.Add(category);
+                            value.Children.Add(category);
                         }
                     }
                 }
                 return rootCategories;
-
-
-
-
-                //var categoryTypes = GetCategoryTypes();
-                //foreach (var categoryType in categoryTypes)
-                //{
-                //    var list = categories.Where(c => c.CategoryTypeID == categoryType.CategoryTypeID).ToList();
-                //    categoriesDict.Add(categoryType.Name, list);
-                //}
-
-                //var newCateDict = new Dictionary<string, List<CategoryTree_VM_DTO>>();
-                //foreach (var categoryType in categoryTypes)
-                //{
-                //    var list = categories.Where(c => c.CategoryTypeID == categoryType.CategoryTypeID).ToList();
-                //    var listTree = new List<CategoryTree_VM_DTO>();
-                //    foreach (var category in list)
-                //    {
-                //        //var categoryTree = new CategoryTree_VM_DTO
-                //        //{
-                //        //    CategoryID = category.CategoryID,
-                //        //    NameVN = category.NameVN,
-                //        //    ParentCategoryID = category.ParentCategoryID,
-                //        //    IsRoot = category.IsRoot
-                //        //};
-                //        //listTree.Add(categoryTree);
-
-                //        // if category have parent category id in list, add to parent category children
-                //        if (listTree.Any(c => c.CategoryID == category.ParentCategoryID))
-                //        {
-                //            var parentCategory = listTree.FirstOrDefault(c => c.CategoryID == category.ParentCategoryID);
-                //            var categoryTree = new CategoryTree_VM_DTO
-                //            {
-                //                CategoryID = category.CategoryID,
-                //                NameVN = category.NameVN,
-                //                ParentCategoryID = category.ParentCategoryID,
-                //                IsRoot = category.IsRoot
-                //            };
-                //            parentCategory.Children.Add(categoryTree);
-                //        }
-                //        else
-                //        {
-                //            var categoryTree = new CategoryTree_VM_DTO
-                //            {
-                //                CategoryID = category.CategoryID,
-                //                NameVN = category.NameVN,
-                //                ParentCategoryID = category.ParentCategoryID,
-                //                IsRoot = category.IsRoot
-                //            };
-                //            listTree.Add(categoryTree);
-                //        }
-                //    }
-                //    newCateDict.Add(categoryType.Name, listTree);
-                //}
-                //return newCateDict;
-
-
-
-
-
-
-
-
-
-
-
             }
             catch (Exception e)
             {

@@ -135,5 +135,12 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+
+        internal object SearchAccount(string keyword)
+        {
+            // search by keyword is a part of  email or account name
+            var result = _context.Account.Where(a => a.EmailAddress.Contains(keyword) || a.AccountName.Contains(keyword)).ToList();
+            return result;
+        }
     }
 }

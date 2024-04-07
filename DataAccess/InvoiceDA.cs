@@ -35,11 +35,14 @@ namespace pbms_be.DataAccess
         {
             try
             {
+                // if date is not in Universal Time, convert to Universal Time
+                if (invoice.InvoiceDate.Kind != DateTimeKind.Utc)
+                {
+                    invoice.InvoiceDate = invoice.InvoiceDate.ToUniversalTime();
+                }
                 invoice.TransactionID = transactionID;
                 invoice.ActiveStateID = ActiveStateConst.ACTIVE;
                 invoice.CurrencyID = CurrencyConst.DEFAULT_CURRENCY_ID_VND;
-                invoice.InvoiceDate = LConvertVariable.ConvertLocalToUtcTime(invoice.InvoiceDate);
-                Console.WriteLine("error here: "+LConvertVariable.ConvertLocalToUtcTime(invoice.InvoiceDate));
                 _context.Invoice.Add(invoice);
                 _context.SaveChanges();
                 return invoice;

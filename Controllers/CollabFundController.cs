@@ -9,6 +9,7 @@ using pbms_be.Data.CollabFund;
 using pbms_be.Data.WalletF;
 using pbms_be.DataAccess;
 using pbms_be.DTOs;
+using pbms_be.Data.Custom;
 
 namespace pbms_be.Controllers
 {
@@ -37,15 +38,8 @@ namespace pbms_be.Controllers
             try
             {
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
-                var result = _collabFundDA.GetCollabFunds(accountID);
-                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
-                var resultDTO = _mapper.Map<List<CollabFund_VM_DTO>>(result);
-                foreach (var item in resultDTO)
-                {
-                    item.isFundholder = _collabFundDA.IsFundholderEasy(item.CollabFundID, accountID);
-                    item.AccountInCollabFunds = _collabFundDA.GetAccountInCollabFunds(item.CollabFundID);
-                }
-                return Ok(resultDTO);
+                var result = _collabFundDA.GetCollabFunds(accountID, _mapper); 
+                return Ok(result);
             }
             catch (System.Exception e)
             {
@@ -63,15 +57,8 @@ namespace pbms_be.Controllers
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false)
                     return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
-
-                CollabFund collabfund = new CollabFund();
-                bool isExist = false;
-                _collabFundDA.GetDetailCollabFund(collabFundID, accountID, out isExist, out collabfund);
-                if (!isExist) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
-                if( _mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
-                var collabfundEntity = _mapper.Map<CollabFundDetail_VM_DTO>(collabfund);
-                collabfundEntity.AccountInCollabFunds = _collabFundDA.GetAccountInCollabFunds(collabfund.CollabFundID);
-                return Ok(collabfundEntity);
+                var result = _collabFundDA.GetDetailCollabFund(collabFundID, accountID, _mapper);
+                return Ok(result);
             }
             catch (System.Exception e)
             {
@@ -100,6 +87,29 @@ namespace pbms_be.Controllers
             }
         }
 
+        [HttpGet("get/activity/v2/{collabFundID}/{accountID}")]
+        public IActionResult GetAllActivityCollabFundV2(int collabFundID, string accountID)
+        {
+            try
+            {
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false)
+                    return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+
+                var result = _collabFundDA.GetAllActivityCollabFundV2(collabFundID, accountID, _mapper);
+
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var resultEntity = _mapper.Map<List<CollabFundActivity_MV_DTO>>(result);
+
+                return Ok(resultEntity);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         // get all accounts ( as parties) of collab fund by collab fund id and account id
         [HttpGet("get/member/{collabFundID}/{accountID}")]
         public IActionResult GetAllMemberCollabFund(int collabFundID, string accountID)
@@ -109,6 +119,41 @@ namespace pbms_be.Controllers
                 if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 var result = _collabFundDA.GetAllMemberWithDetailCollabFund(collabFundID, accountID);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // get history divide money of a collab fund
+        [HttpGet("get/history/divide-money/{collabFundID}/{accountID}")]
+        public IActionResult GetHistoryDivideMoneyCollabFund(int collabFundID, string accountID)
+        {
+            try
+            {
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+                var result = _collabFundDA.GetHistoryDivideMoneyCollabFund(collabFundID, accountID, _mapper);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // get all accounts ( as parties) of collab fund by collab fund id and account id
+        [HttpGet("get/member/typebytype/{collabFundID}/{accountID}")]
+        public IActionResult GetAllMemberCollabFundTypeByType(int collabFundID, string accountID)
+        {
+            try
+            {
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                var result = _collabFundDA.GetAllMemberWithDetailCollabFundTypeByType(collabFundID, accountID);
                 return Ok(result);
             }
             catch (System.Exception e)
@@ -166,15 +211,20 @@ namespace pbms_be.Controllers
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 if (_collabFundDA.IsAccountInCollabFund(accountID, collabFundID) == false) return BadRequest(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 //out CF_DividingMoney cfdividingmoney_result, out List<CF_DividingMoneyDetail> cfdm_detail_result
-                var cfdividingmoney_result = new CF_DividingMoney();
-                var cfdm_detail_result = new List<CF_DividingMoneyDetail>();
-                _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID, out cfdividingmoney_result, out cfdm_detail_result);
+                var cfdividingmoney_resultEntity = new CF_DividingMoney();
+                var cfdm_detail_resultEntity = new List<CF_DividingMoneyDetail>();
+                var listDVMI = new List<DivideMoneyInfoWithAccount>();
+                _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID, out cfdividingmoney_resultEntity, out cfdm_detail_resultEntity, out listDVMI);
 
-                if (cfdividingmoney_result is null || cfdm_detail_result is null) return BadRequest(Message.COLLAB_FUND_NOT_EXIST);
+                if (cfdividingmoney_resultEntity is null || cfdm_detail_resultEntity is null) return Ok(Message.COLLAB_FUND_NOTFOUND_DATA);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 // convert property in dividemoneyinfor to string
                 //var cf_dividing_moneyEntity = _mapper.Map<CF_DividingMoney_MV_DTO>(dividemoneyinfor);
-                return Ok(new { cfdividingmoney_result, cfdm_detail_result });
+                var cfdividingmoney_result = _mapper.Map<CF_DivideMoney_DTO_VM>(cfdividingmoney_resultEntity);
+                // cfdm_detail_result
+                var cfdm_detail_result = _mapper.Map<List<CF_DividingMoneyDetail_DTO_VM>>(cfdm_detail_resultEntity);
+                // 
+                return Ok(new { listDVMI, cfdividingmoney_result, cfdm_detail_result });
             }
             catch (System.Exception e)
             {
@@ -257,6 +307,45 @@ namespace pbms_be.Controllers
             }
         }
 
+        // create collab fund activity 
+        [HttpPost("create/activity/notrans/form")]
+        public IActionResult CreateCollabFundActivityForm([FromForm] CreateCfaNoTransactionHaveFileDTO collabFundActivityDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var collabFundActivityEntity = _mapper.Map<CollabFundActivity>(collabFundActivityDTO);
+                collabFundActivityEntity.TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID;
+                collabFundActivityEntity.ActiveStateID = ActiveStateConst.ACTIVE;
+                //var datetimenow convert to universal time, add 7 hours to get Vietnam time
+                collabFundActivityEntity.CreateTime = DateTime.UtcNow.AddHours(7);
+                // if collabFundActivityDTO have file, then upload file to GCP
+                if (collabFundActivityDTO.File is not null)
+                {
+                    // get filename of file without extension
+                    var filenamewithoutextension = Path.GetFileNameWithoutExtension(collabFundActivityDTO.File.FileName);
+                    var foldername = CloudStorageConfig.COLLAB_FUND_FOLDER + "/" + collabFundActivityDTO.CollabFundID.ToString();
+                    var filename = collabFundActivityDTO.File.FileName + "_" + collabFundActivityDTO.CollabFundID.ToString() + "_" + collabFundActivityDTO.AccountID;
+                    var fileURL = GCP_BucketDA.UploadFileCustom(collabFundActivityDTO.File, CloudStorageConfig.PBMS_BUCKET_NAME, foldername,
+                                                                                       "activity", filename, "file", true);
+                    collabFundActivityEntity.Filename = fileURL;
+                }
+                else
+                {
+                    collabFundActivityEntity.Filename = "";
+                }
+                // log DTO File to check
+                Console.WriteLine("File: ", collabFundActivityDTO.File);
+                var result = _collabFundDA.CreateCollabFundActivity(collabFundActivityEntity);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         // create collab fund activity with transaction id
         [HttpPost("create/activity/withtrans")]
         public IActionResult CreateCollabFundActivityWithTransaction([FromBody] CreateCfaWithTransactionDTO collabFundActivityDTO)
@@ -276,6 +365,46 @@ namespace pbms_be.Controllers
             }
         }
 
+        [HttpPost("create/activity/withtrans/form")]
+        public IActionResult CreateCollabFundActivityWithTransactionForm([FromForm] CreateCfaWithTransactionHaveFileDTO collabFundActivityDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                var collabFundActivityEntity = _mapper.Map<CollabFundActivity>(collabFundActivityDTO);
+                collabFundActivityEntity.ActiveStateID = ActiveStateConst.ACTIVE;
+                collabFundActivityEntity.CreateTime = DateTime.UtcNow.AddHours(7);
+                if (collabFundActivityDTO.File is not null)
+                {
+                    // get filename of file without extension
+                    var filenamewithoutextension = Path.GetFileNameWithoutExtension(collabFundActivityDTO.File.FileName);
+                    var foldername = CloudStorageConfig.COLLAB_FUND_FOLDER + "/" + collabFundActivityDTO.CollabFundID.ToString();
+                    var filename = collabFundActivityDTO.File.FileName + "_" + collabFundActivityDTO.CollabFundID.ToString() + "_" + collabFundActivityDTO.AccountID;
+                    var fileURL = GCP_BucketDA.UploadFileCustom(collabFundActivityDTO.File, CloudStorageConfig.PBMS_BUCKET_NAME, foldername,
+                                                                                       "activity", filename, "file", true);
+                    collabFundActivityEntity.Filename = fileURL;
+                }
+                else
+                {
+                    collabFundActivityEntity.Filename = "";
+                }
+                if (collabFundActivityDTO.TransactionID is not null && collabFundActivityDTO.TransactionID is not ConstantConfig.DEFAULT_ZERO_VALUE)
+                {
+                    collabFundActivityEntity.TransactionID = (int)collabFundActivityDTO.TransactionID;
+                }
+                else
+                {
+                    collabFundActivityEntity.TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID;
+                }
+                var result = _collabFundDA.CreateCollabFundActivity(collabFundActivityEntity);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
         // add member to collab fund by collab fund id and account id, only fundholder can add member
         [HttpPost("invite")]
         public IActionResult InviteMemberCollabFund([FromBody] MemberCollabFundDTO addMemberCollabFundDTO)
@@ -310,6 +439,21 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        //[HttpPost("test/changeIsBefore")]
+        //public IActionResult TestChangeIsBeforeDivideMoney([FromBody] CollabAccountDTO collabAccountDTO)
+        //{
+        //    try
+        //    {
+        //        if (!ModelState.IsValid) return BadRequest(ModelState);
+        //        var result = _collabFundDA.ChangeIsBeforeDivide(collabAccountDTO.CollabFundID, collabAccountDTO.AccountID);
+        //        return Ok(result);
+        //    }
+        //    catch (System.Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
         // post method to change 'isDone' property of cf_dividing_money_detail
         [HttpPost("change/isdone")]
@@ -394,8 +538,7 @@ namespace pbms_be.Controllers
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
-                CollabFundDA collabFundDA = new CollabFundDA(_context);
-                var result = collabFundDA.DeleteMemberCollabFund(deleteMemberCollabFundDTO);
+                var result = _collabFundDA.DeleteMemberCollabFund(deleteMemberCollabFundDTO);
                 return Ok(result);
             }
             catch (System.Exception e)
@@ -453,7 +596,7 @@ namespace pbms_be.Controllers
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 if (!_collabFundDA.IsFundholderCollabFund(deleteCollabFundDTO.CollabFundID, deleteCollabFundDTO.AccountID))
                     return BadRequest(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
-                var result = _collabFundDA.DeleteCollabFund(deleteCollabFundDTO);
+                var result = _collabFundDA.DeleteCollabFund(deleteCollabFundDTO, _mapper);
                 return Ok(result);
             }
             catch (System.Exception e)

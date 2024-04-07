@@ -1,5 +1,6 @@
 ﻿using pbms_be.Data.Auth;
 using pbms_be.Data.CollabFund;
+using pbms_be.Data.Custom;
 using pbms_be.Data.Status;
 using pbms_be.Data.Trans;
 
@@ -17,7 +18,8 @@ namespace pbms_be.DTOs
         public string ImageURL { get; set; } = String.Empty;
         public long TotalAmount { get; set; }
         public string TotalAmountStr { get; set; } = String.Empty;
-        public virtual bool isFundholder { get; set; } = false;
+        public virtual bool IsFundholder { get; set; } = false;
+        public virtual ActiveState AccountState { get; set; } = null!;
 
         public virtual List<AccountInCollabFundDTO> AccountInCollabFunds { get; set; } = null!;
         //public virtual List<CollabFundActivity> CollabFundActivities { get; set; } = null!;
@@ -55,7 +57,7 @@ namespace pbms_be.DTOs
         public string Name { get; set; } = String.Empty;
         public string Description { get; set; } = String.Empty;
         public string ImageURL { get; set; } = String.Empty;
-        public long TotalAmount { get; set; }
+        //public long TotalAmount { get; set; }
         public int ActiveStateID { get; set; }
 
     }
@@ -75,6 +77,23 @@ namespace pbms_be.DTOs
         public string AccountID { get; set; } = String.Empty;
         public string Note { get; set; } = String.Empty;
         public string Filename { get; set; } = String.Empty;
+    }
+
+    public class CreateCfaNoTransactionHaveFileDTO
+    {
+        public int CollabFundID { get; set; }
+        public string AccountID { get; set; } = String.Empty;
+        public string Note { get; set; } = String.Empty;
+        public IFormFile? File { get; set; } = null!;
+    }
+
+    public class CreateCfaWithTransactionHaveFileDTO
+    {
+        public int CollabFundID { get; set; }
+        public string AccountID { get; set; } = String.Empty;
+        public string Note { get; set; } = String.Empty;
+        public IFormFile? File { get; set; } = null!;
+        public int? TransactionID { get; set; }
     }
 
     // CreateCfaWithTransactionDTO
@@ -141,6 +160,7 @@ namespace pbms_be.DTOs
         public string Filename { get; set; } = String.Empty;
         public int TransactionID { get; set; }
         public virtual Transaction_VM_DTO Transaction { get; set; } = null!;
+        public virtual CF_DivideMoney_DTO_VM CFDividingMoneyVMDTO { get; set; } = null!;
         public DateTime CreateTime { get; set; } = DateTime.UtcNow;
         public string CreateTimeString { get; set; } = String.Empty;
         public string MinusTimeNowString { get; set; } = String.Empty;
@@ -151,4 +171,5 @@ namespace pbms_be.DTOs
         public int CollabFundID { get; set; }
         public string AccountID { get; set; } = String.Empty;
     }
+
 }
