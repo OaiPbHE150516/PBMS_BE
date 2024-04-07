@@ -60,7 +60,7 @@
         // min months ago to know it days ago
         public const int MIN_MONTHS_AGO = 30;
 
-        public const string DEFAULT_DATETIME_FORMAT = "HH:mm, dd/MM/yyyy";
+        public const string DEFAULT_DATETIME_FORMAT = "dd/MM/yyyy";
 
         public const string DEFAULT_UTC_DATETIME_FORMAT = "yyyy-MM-ddTHH:mm:ssZ";
         // default time format
