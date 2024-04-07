@@ -59,6 +59,8 @@ namespace pbms_be.Configurations
             CreateMap<Data.Filter.Category, DTOs.CategoryInTransaction_VM_DTO>().ReverseMap();
             CreateMap<Data.Filter.Category, DTOs.CategoryCreateDTO>().ReverseMap();
             CreateMap<Data.Filter.Category, DTOs.CategoryUpdateDTO>().ReverseMap();
+            // CategoryDetail_VM_DTO and Category
+            CreateMap<Data.Filter.Category, DTOs.CategoryDetail_VM_DTO>().ReverseMap();
 
             // CategoryTree_VM_DTO
             CreateMap<Data.Filter.Category, DTOs.CategoryTree_VM_DTO>().ReverseMap();

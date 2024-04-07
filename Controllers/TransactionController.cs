@@ -318,6 +318,24 @@ namespace pbms_be.Controllers
             }
         }
 
+        // get total amount of all categories by account id in month
+        [HttpGet("get/filter/category/{month}/{year}/{accountID}")]
+        public IActionResult getAllTransactionFilterCategory(int month, int year, string accountID)
+        {
+            try
+            {
+                if (month <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.MONTH_REQUIRED);
+                if (year <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.YEAR_REQUIRED);
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                var result = _transactionDA.GetAllTransactionFilterCategory(month, year, accountID, _mapper);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         #region Post Methods
 
         // create transaction with invoice and products

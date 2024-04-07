@@ -281,3 +281,25 @@ public class MoneyInvoice
     public long TaxAmount { get; set; }
     public long TotalAmount { get; set; }
 }
+
+//public class CategoryWithAllTransaction
+//{
+//    public int CategoryID { get; set; }
+//    public string NameVN { get; set; } = String.Empty;
+//    public string NameEN { get; set; } = String.Empty;
+//    public long TotalAmount { get; set; }
+//    public string TotalAmountStr { get; set; } = String.Empty;
+//    public int NumberOfTransaction { get; set; }
+//    //public virtual List<TransactionDetail_VM_DTO> Transactions { get; set; } = null!;
+//}
+
+public class CategoryWithTransactionData
+{
+    public int CategoryNumber { get; set; }
+    public CategoryDetail_VM_DTO Category { get; set; } = null!;
+    public long TotalAmount { get; set; }
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public int NumberOfTransaction { get; set; }
+    public double Percentage { get; set; }
+    public string PercentageStr { get; set; } = String.Empty;
+}

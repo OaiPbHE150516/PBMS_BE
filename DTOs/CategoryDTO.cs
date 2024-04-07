@@ -14,6 +14,14 @@ namespace pbms_be.DTOs
         public string NameVN { get; set; } = String.Empty;
     }
 
+    public class CategoryDetail_VM_DTO : Category_VM_DTO
+    {
+        public bool IsRoot { get; set; }
+        public int ParentCategoryID { get; set; }
+        public virtual CategoryType CategoryType { get; set; } = null!;
+    }
+
+
     public class CategoryInTransaction_VM_DTO
     {
         public string NameVN { get; set; } = String.Empty;

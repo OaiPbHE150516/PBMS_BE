@@ -881,5 +881,66 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+
+        internal object GetAllTransactionFilterCategory(int month, int year, string accountID, IMapper? mapper)
+        {
+            try
+            {
+                // 1. check that accountID is exist
+                var account = _context.Account
+                            .Where(a => a.AccountID == accountID)
+                            .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                // 3. get all transactions by month and year
+                var transactionsByMonth = _context.Transaction
+                            .Where(t => t.AccountID == accountID && t.TransactionDate.Month == month && t.TransactionDate.Year == year)
+                            .ToList();
+                // 4. group by category
+                var transactionsByCategory = transactionsByMonth.GroupBy(t => t.CategoryID).ToList();
+                // 5. return list of category with total amount of each category and number of transaction of each category
+                var result = new List<CategoryWithTransactionData>();
+                long totalAmountOfMonth = 0;
+                var countCate = 1;
+                foreach (var tran in transactionsByCategory)
+                {
+                    var category = _context.Category
+                                .Where(c => c.CategoryID == tran.Key)
+                                .Include(c => c.CategoryType)
+                                .FirstOrDefault() ?? throw new Exception(Message.CATEGORY_NOT_FOUND);
+                    var totalAmount = tran.Sum(t => t.TotalAmount);
+                    var totalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount);
+                    var numberOfTransaction = tran.Count();
+                    if (mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                    var CategoryWithAllTransaction = new CategoryWithTransactionData
+                    {
+                        CategoryNumber = countCate++,
+                        Category = mapper.Map<CategoryDetail_VM_DTO>(category),
+                        TotalAmount = totalAmount,
+                        TotalAmountStr = totalAmountStr,
+                        NumberOfTransaction = numberOfTransaction
+                    };
+                    result.Add(CategoryWithAllTransaction);
+                    totalAmountOfMonth += totalAmount;
+                }
+                // foreach to calculate percentage of each category
+                foreach (var item in result)
+                {
+                    // calculate percentage to 2 decimal places
+                    item.Percentage = ((double)item.TotalAmount / totalAmountOfMonth * 100);
+                    item.PercentageStr = item.Percentage.ToString("0.00") + "%";
+                }
+                return new
+                {
+                    TotalAmountOfMonth = totalAmountOfMonth,
+                    TotalAmountOfMonthStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOfMonth),
+                    TotalNumberOfTransaction = transactionsByMonth.Count,
+                    TotalNumberOfCategory = transactionsByCategory.Count,
+                    CategoryWithTransactionData = result
+                };
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 }
