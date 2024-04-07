@@ -227,11 +227,12 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var collabFund = GetCollabFund(changeActiveStateDTO.CollabFundID);
-                if (collabFund is null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+                var collabFund = _context.CollabFund
+                    .Where(cf => cf.CollabFundID == changeActiveStateDTO.CollabFundID)
+                    .FirstOrDefault() ?? throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 collabFund.ActiveStateID = changeActiveStateDTO.ActiveStateID;
                 _context.SaveChanges();
-                return GetCollabFund(collabFund.CollabFundID);
+                return collabFund;
             }
             catch (Exception e)
             {
