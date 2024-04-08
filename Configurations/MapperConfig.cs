@@ -31,6 +31,8 @@ namespace pbms_be.Configurations
             CreateMap<Data.WalletF.Wallet, DTOs.WalletDetail_VM_DTO>().ReverseMap();
             CreateMap<Data.WalletF.Wallet, DTOs.WalletInTransaction_VM_DTO>().ReverseMap();
 
+            // Currency
+            CreateMap<Data.WalletF.Currency, DTOs.Currency_VM_DTO>().ReverseMap();
 
             //Budget
             CreateMap<Data.Budget.Budget, DTOs.CreateBudgetDTO>().ReverseMap();
