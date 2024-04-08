@@ -45,6 +45,7 @@ namespace pbms_be.Configurations
                 .ForMember(dest => dest.EndDateStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToStringCustom(src.EndDate, ConstantConfig.DEFAULT_DATE_FORMAT)))
                 .ForMember(dest => dest.CreateTimeStr, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToString(src.CreateTime)))
                 .ForMember(dest => dest.PercentProgress, opt => opt.MapFrom(src => LConvertVariable.CalculatePercentProgress(src.CurrentAmount, src.TargetAmount, 2)))
+                .ForMember (dest => dest.PercentProgressStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToPercentFormat(LConvertVariable.CalculatePercentProgress(src.CurrentAmount, src.TargetAmount, 2))))
                 .ReverseMap();
 
             // BalanceHisLog

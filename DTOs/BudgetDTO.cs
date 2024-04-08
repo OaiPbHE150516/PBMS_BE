@@ -23,6 +23,7 @@ namespace pbms_be.DTOs
         public long TargetAmount { get; set; }
         public string TargetAmountStr { get; set; } = string.Empty;
         public double PercentProgress { get; set; }
+        public string PercentProgressStr { get; set; } = string.Empty;
         public DateTime BeginDate { get; set; } = DateTime.UtcNow;
         public string BeginDateStr { get; set; } = string.Empty;
         public DateTime EndDate { get; set; } = DateTime.UtcNow;

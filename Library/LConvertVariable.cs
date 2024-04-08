@@ -378,6 +378,12 @@ namespace pbms_be.Library
             }
 
         }
+
+        internal static object ConvertToPercentFormat(double v)
+        {
+            // convert double to string with 2 digits after dot and add % at the end
+            return v.ToString("0.00") + "%";
+        }
     }
 
     //public class WeeksInMonth
