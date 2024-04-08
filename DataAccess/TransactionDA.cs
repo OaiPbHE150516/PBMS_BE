@@ -191,7 +191,7 @@ namespace pbms_be.DataAccess
                     WalletID = transaction.WalletID,
                     Balance = wallet.Balance,
                     TransactionID = transaction.TransactionID,
-                    HisLogDate = DateTime.UtcNow,
+                    HisLogDate = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC),
                     ActiveStateID = ActiveStateConst.ACTIVE
                 };
                 var threadB = new Thread(() => balanceHisLogDA.CreateBalanceHistoryLog(balancehislog));
