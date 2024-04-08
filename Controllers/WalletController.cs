@@ -125,6 +125,7 @@ namespace pbms_be.Controllers
 
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var walletEntity = _mapper.Map<Wallet>(wallet);
+                walletEntity.CurrencyID = ConstantConfig.DEFAULT_CURRENCY_VN;
                 var result = _walletDA.CreateWallet(walletEntity);
 
                 if (result is null) return BadRequest();

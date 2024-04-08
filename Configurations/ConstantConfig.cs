@@ -89,6 +89,9 @@
         public const int DEFAULT_CATEGORY_TYPE_ID_EXPENSE = 2;
         public const int DEFAULT_CATEGORY_TYPE_ID_OTHER = 3;
 
+        // default DEFAULT_CURRENCY_VN
+        public const int DEFAULT_CURRENCY_VN = 2;
+
         // default Sort & Filter
         // public const string ascending sort
         public const string ASCENDING_SORT = "asc";
