@@ -86,6 +86,7 @@ namespace pbms_be.Configurations
                 .ForMember(dest => dest.DayOfWeekStrShort, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToDayOfWeekShort(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate))))
                 .ForMember(dest => dest.DayOfWeekStrMdl, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToDayOfWeekMdl(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate))))
                 .ForMember(dest => dest.DayOfWeekStrLong, opt => opt.MapFrom(src => LConvertVariable.ConvertDateTimeToDayOfWeekLong(LConvertVariable.ConvertUtcToLocalTime(src.TransactionDate))))
+
                 .ReverseMap();
             CreateMap<Data.Trans.Transaction, DTOs.TransactionDetail_VM_DTO>()
                .ForMember(dest => dest.TotalAmountStr, opt => opt.MapFrom(src => LConvertVariable.ConvertToMoneyFormat(src.TotalAmount)))

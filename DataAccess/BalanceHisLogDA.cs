@@ -137,7 +137,12 @@ namespace pbms_be.DataAccess
                 }
                 if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var listLogDTO = _mapper.Map<List<BalanceHisLog_VM_DTO>>(listlog);
-                var listAfter = FilterData(listLogDTO);
+
+                // get all wallet of account
+                var listWallet = await _context.Wallet.Where(x => x.AccountID == accountID).ToListAsync();
+
+
+                var listAfter = FilterData(listLogDTO, listWallet);
                 var minBalance = listLogDTO.Min(x => x.Balance);
                 var maxBalance = listLogDTO.Max(x => x.Balance);
                 return new { minBalance, maxBalance, listAfter };
@@ -161,8 +166,10 @@ namespace pbms_be.DataAccess
                     throw new Exception(Message.BALANCE_HISTORY_LOG_NOT_FOUND);
                 }
                 if (mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                // get all wallet of account
+                var listWallet = await _context.Wallet.Where(x => x.AccountID == accountID).ToListAsync();
                 var listLogDTO = mapper.Map<List<BalanceHisLog_VM_DTO>>(listLog);
-                var listAfter = FilterData(listLogDTO);
+                var listAfter = FilterData(listLogDTO, listWallet);
                 // get min balance and max balance in list after
                 var minBalance = listLogDTO.Min(x => x.Balance);
                 var maxBalance = listLogDTO.Max(x => x.Balance);
@@ -175,10 +182,11 @@ namespace pbms_be.DataAccess
             throw new NotImplementedException();
         }
 
-        private static object FilterData(List<BalanceHisLog_VM_DTO> listLogDTO)
+        private static object FilterData(List<BalanceHisLog_VM_DTO> listLogDTO, List<Data.WalletF.Wallet> listWallet)
         {
             try
             {
+                // filer all log by date of each day
                 var balanceLogDict = new Dictionary<DateOnly, CustomBalanceHisLogByDate>();
                 foreach (var log in listLogDTO)
                 {
@@ -202,6 +210,40 @@ namespace pbms_be.DataAccess
                         });
                     }
                 }
+
+                // filter last log of each wallet in each day
+                foreach (var item in balanceLogDict)
+                {
+                    var balanceLog = item.Value.BalanceHistoryLogs;
+                    var balanceLogDictByWalletID = new Dictionary<int, BalanceHisLog_VM_DTO>();
+                    foreach (var log in balanceLog)
+                    {
+                        if (balanceLogDictByWalletID.TryGetValue(log.WalletID, out BalanceHisLog_VM_DTO? value))
+                        {
+                            if (value.HisLogDate < log.HisLogDate)
+                            {
+                                balanceLogDictByWalletID[log.WalletID] = log;
+                            }
+                        }
+                        else
+                        {
+                            balanceLogDictByWalletID.Add(log.WalletID, log);
+                        }
+                    }
+                    item.Value.BalanceHistoryLogs = [.. balanceLogDictByWalletID.Values];
+                }
+
+                // loop through balance log dict each day, 
+
+                // re calculate total amount of each day
+                foreach (var item in balanceLogDict)
+                {
+                    var balanceLog = item.Value.BalanceHistoryLogs;
+                    var totalAmount = balanceLog.Sum(x => x.Balance);
+                    item.Value.TotalAmount = totalAmount;
+                    item.Value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount);
+                }
+
                 var result = balanceLogDict.Values.ToList();
                 result.Sort((x, y) => x.Date.CompareTo(y.Date));
                 return result;
@@ -211,5 +253,7 @@ namespace pbms_be.DataAccess
                 throw new Exception(ex.Message);
             }
         }
+
+        // function get closest balance history log of a wallet by date
     }
 }

@@ -14,6 +14,7 @@ namespace pbms_be.DTOs
         public string AccountID { get; set; } = String.Empty;
         public string Name { get; set; } = String.Empty;
         public long Balance { get; set; }
+        public string Note { get; set; } = String.Empty;
         //public int CurrencyID { get; set; }
     }
 
