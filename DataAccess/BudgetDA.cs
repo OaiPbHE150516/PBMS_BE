@@ -208,8 +208,8 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var result = GetBudget(budget.BudgetID, budget.AccountID);
-                if (result is null) throw new Exception(Message.BUDGET_NOT_FOUND);
+                var result = GetBudget(budget.BudgetID, budget.AccountID) ?? throw new Exception(Message.BUDGET_NOT_FOUND);
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 if (result.AccountID != budget.AccountID) throw new Exception(Message.BUDGET_NOT_FOUND);
                 result.ActiveStateID = ActiveStateConst.DELETED;
                 _context.SaveChanges();
@@ -231,7 +231,61 @@ namespace pbms_be.DataAccess
                         .FirstOrDefault();
                 if (result is null) throw new Exception(Message.BUDGET_NOT_FOUND);
                 return result;
-            } catch (Exception e)
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        // add amount to current amount of budget by budget id, account id and amount
+        public Budget AddAmountToBudget(int budgetID, string accountID, long amount)
+        {
+            try
+            {
+                var budget = GetBudget(budgetID, accountID);
+                budget.CurrentAmount += amount;
+                _context.SaveChanges();
+                return budget;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        // function check that budget is exist by budget id and account id
+        public bool IsBudgetExist(int budgetID, string accountID)
+        {
+            var exist = _context.Budget.Any(x => x.BudgetID == budgetID && x.AccountID == accountID);
+            return exist;
+        }
+
+        internal void UpdateBudgetAmount(string accountID, long plusamount, int categoryID)
+        {
+            try
+            {
+                if (plusamount == ConstantConfig.DEFAULT_ZERO_VALUE) return;
+                // 1. find budgets by account id that have category id, join with budget category
+                var budgets = _context.Budget
+                                .Join(_context.BudgetCategory,
+                                    b => b.BudgetID,
+                                    bc => bc.BudgetID,
+                                    (b, bc) => new { b, bc })
+                                .Where(x => x.b.AccountID == accountID
+                                    && x.bc.CategoryID == categoryID
+                                    && x.b.ActiveStateID == ActiveStateConst.ACTIVE)
+                                .Select(x => x.b)
+                                .ToList();
+                if (budgets.Count == ConstantConfig.DEFAULT_ZERO_VALUE) return;
+                // 2. update current amount of budget in budgets by add plusamount to current amount
+                foreach (var budget in budgets)
+                {
+                    budget.CurrentAmount += plusamount;
+                }
+                _context.SaveChanges();
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }

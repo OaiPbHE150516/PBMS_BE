@@ -197,6 +197,12 @@ namespace pbms_be.DataAccess
                 var threadB = new Thread(() => balanceHisLogDA.CreateBalanceHistoryLog(balancehislog));
                 threadB.Start();
                 threadB.Join();
+
+                var budgetDA = new BudgetDA(_context);
+                var threadBud = new Thread(() => budgetDA.UpdateBudgetAmount(transaction.AccountID, transaction.TotalAmount, category.CategoryID));
+                threadBud.Start();
+                threadBud.Join();
+
                 return transaction;
             }
             catch (Exception e)

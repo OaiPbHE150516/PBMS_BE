@@ -117,7 +117,6 @@ namespace pbms_be.Controllers
                 // check budget name exist, if exist return error
                 var result = _budgetDA.CreateBudget(budgetDTO);
                 return Ok(result);
-
             }
             catch (System.Exception e)
             {
