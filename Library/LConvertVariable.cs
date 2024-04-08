@@ -35,7 +35,10 @@ namespace pbms_be.Library
 
         public static string ConvertMinusTimeNowMonthString(DateTime time)
         {
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
+            // log now and time
+            Console.WriteLine("now: " + now);
+            Console.WriteLine("time: " + time);
             var minusTime = now - time;
             var minusTimeNowString = string.Empty;
             if (minusTime.TotalMinutes < ConstantConfig.MIN_MINUTES_AGO)

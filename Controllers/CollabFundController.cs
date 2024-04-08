@@ -296,6 +296,7 @@ namespace pbms_be.Controllers
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var collabFundActivityEntity = _mapper.Map<CollabFundActivity>(collabFundActivityDTO);
+                collabFundActivityEntity.CreateTime= DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 collabFundActivityEntity.TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID;
                 collabFundActivityEntity.ActiveStateID = ActiveStateConst.ACTIVE;
                 var result = _collabFundDA.CreateCollabFundActivity(collabFundActivityEntity);
@@ -319,7 +320,7 @@ namespace pbms_be.Controllers
                 collabFundActivityEntity.TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID;
                 collabFundActivityEntity.ActiveStateID = ActiveStateConst.ACTIVE;
                 //var datetimenow convert to universal time, add 7 hours to get Vietnam time
-                collabFundActivityEntity.CreateTime = DateTime.UtcNow.AddHours(7);
+                collabFundActivityEntity.CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 // if collabFundActivityDTO have file, then upload file to GCP
                 if (collabFundActivityDTO.File is not null)
                 {
@@ -355,6 +356,7 @@ namespace pbms_be.Controllers
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var collabFundActivityEntity = _mapper.Map<CollabFundActivity>(collabFundActivityDTO);
+                collabFundActivityEntity.CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 collabFundActivityEntity.ActiveStateID = ActiveStateConst.ACTIVE;
                 var result = _collabFundDA.CreateCollabFundActivity(collabFundActivityEntity);
                 return Ok(result);
@@ -374,7 +376,7 @@ namespace pbms_be.Controllers
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var collabFundActivityEntity = _mapper.Map<CollabFundActivity>(collabFundActivityDTO);
                 collabFundActivityEntity.ActiveStateID = ActiveStateConst.ACTIVE;
-                collabFundActivityEntity.CreateTime = DateTime.UtcNow.AddHours(7);
+                collabFundActivityEntity.CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 if (collabFundActivityDTO.File is not null)
                 {
                     // get filename of file without extension

@@ -114,6 +114,25 @@ namespace pbms_be.DataAccess
                         });
                     }
                 }
+
+                // loop through balance log dict each day, get last log of wallet in each day
+                foreach (var item in balanceLogDict)
+                {
+                    var balanceLog = item.Value.BalanceHistoryLogs;
+                    // get last log of wallet in each day
+                    var lastLog = balanceLog.Last();
+                    item.Value.BalanceHistoryLogs = [lastLog];
+                }
+
+                // loop through balance log dict each day, to re calculate total amount of each day
+                foreach (var item in balanceLogDict)
+                {
+                    var balanceLog = item.Value.BalanceHistoryLogs;
+                    var totalAmount = balanceLog.Sum(x => x.Balance);
+                    item.Value.TotalAmount = totalAmount;
+                    item.Value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount);
+                }
+
                 // convert balance log dict to list
                 var result = balanceLogDict.Values.ToList();
                 // sort by date

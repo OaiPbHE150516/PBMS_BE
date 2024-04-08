@@ -33,6 +33,7 @@ namespace pbms_be.DataAccess
                     throw new Exception(Message.COLLAB_FUND_ALREADY_EXIST);
                 }
                 collabFund.ActiveStateID = ActiveStateConst.ACTIVE;
+                collabFund.CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 _context.CollabFund.Add(collabFund);
                 _context.SaveChanges();
                 var result = GetCollabFund(collabFund.CollabFundID);
@@ -54,6 +55,7 @@ namespace pbms_be.DataAccess
                         AccountID = item,
                         CollabFundID = result.CollabFundID,
                         IsFundholder = false,
+                        LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime(),
                         ActiveStateID = ActiveStateConst.ACTIVE
                     };
                     accountCollabs.Add(accountCollab);
@@ -82,7 +84,7 @@ namespace pbms_be.DataAccess
                             .Where(cf => cf.Name == name
                                 && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(cf => cf.ActiveState)
-                            .FirstOrDefault();
+                            .FirstOrDefault() ?? throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 return result;
             }
             catch (Exception e)
@@ -99,7 +101,7 @@ namespace pbms_be.DataAccess
                             .Where(cf => cf.CollabFundID == collabFundID
                                     && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(cf => cf.ActiveState)
-                            .FirstOrDefault();
+                            .FirstOrDefault() ?? throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 return result;
             }
             catch (Exception e)
@@ -116,18 +118,21 @@ namespace pbms_be.DataAccess
                                     .Where(ca => ca.AccountID == accountID
                                             && ca.ActiveStateID == ActiveStateConst.ACTIVE)
                                     .Select(ca => ca.CollabFundID)
-                                    .ToList();
+                                    .ToList() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
 
                 var result = _context.CollabFund
                             .Where(cf => collabAccount.Contains(cf.CollabFundID)
                                     && cf.CollabFundID == collabFundID
                                     && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(cf => cf.ActiveState)
-                            .FirstOrDefault();
+                            .FirstOrDefault() ?? throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 if (result is not null)
                 {
                     var divideMoneyInfor = GetDivideMoneyCollabFund(result.CollabFundID);
                     result.TotalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                } else
+                {
+                    throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 }
                 //if (result == null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 return result;

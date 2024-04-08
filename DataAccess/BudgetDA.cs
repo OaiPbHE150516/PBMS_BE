@@ -131,7 +131,7 @@ namespace pbms_be.DataAccess
                     BudgetTypeID = budgetDTO.BudgetTypeID,
                     RepeatInterVal = budgetDTO.RepeatInterVal,
                     Note = budgetDTO.Note,
-                    CreateTime = DateTime.UtcNow,
+                    CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime(),
                     ActiveStateID = ActiveStateConst.ACTIVE
                 };
                 budget.ActiveStateID = 1;

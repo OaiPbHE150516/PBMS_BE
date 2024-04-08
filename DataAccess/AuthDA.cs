@@ -33,7 +33,7 @@ namespace pbms_be.DataAccess
                     account.EmailAddress = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_EMAIL).Value;
                     account.RoleID = ConstantConfig.USER_ROLE_ID;
                     account.PictureURL = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_PICTURE).Value;
-                    account.CreateTime = DateTime.UtcNow;
+                    account.CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                     var resultAccount = CreateAccount(account);
                     GenerateDefaultInformation(resultAccount);
                     return resultAccount;
