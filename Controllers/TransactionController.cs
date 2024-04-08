@@ -234,9 +234,6 @@ namespace pbms_be.Controllers
                 var toDate = DateTime.ParseExact(toDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
                 if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
 
-                var fromDateTime = new DateTime(2024, 04, 01, 0, 0, 0);
-                var toDateTime = new DateTime(2024, 04, 07, 23, 59, 59);
-
                 var result = _transactionDA.GetTransactionsWeekByWeek(accountID, fromDateStr, toDateStr, _mapper);
                 return Ok(result);
             }
@@ -245,6 +242,32 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet("get/raw/data/{accountID}/{fromDateStr}/{toDateStr}")]
+        public IActionResult GetRawData(string accountID, string fromDateStr, string toDateStr)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (string.IsNullOrEmpty(fromDateStr)) return BadRequest(Message.FROM_DATE_REQUIRED);
+                if (string.IsNullOrEmpty(toDateStr)) return BadRequest(Message.TO_DATE_REQUIRED);
+
+                var fromDate = DateTime.ParseExact(fromDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                var toDate = DateTime.ParseExact(toDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
+
+                var result = _transactionDA.GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
+                // sort result by date
+                result = [.. result.OrderByDescending(x => x.TransactionDate)];
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+
 
         [HttpGet("get/daybyday/specific/{accountID}/{datetimestr}")]
         public IActionResult GetTransactionsDayByDaySpecific(string accountID, string datetimestr)

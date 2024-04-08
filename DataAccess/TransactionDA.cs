@@ -354,6 +354,9 @@ namespace pbms_be.DataAccess
                 //}
                 var fromDateTimeUtc = fromDate.ToUniversalTime();
                 var toDateTimeUtc = toDate.ToUniversalTime();
+                // log fromDateTimeUtc and toDateTimeUtc
+                Console.WriteLine("fromDateTimeUtc: " + fromDateTimeUtc);
+                Console.WriteLine("toDateTimeUtc: " + toDateTimeUtc);
 
                 // var listTran is by excute sql query raw to get transactions in range of fromDate and toDate
                 var listTran = _context.Transaction
