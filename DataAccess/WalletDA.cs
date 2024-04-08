@@ -160,6 +160,7 @@ namespace pbms_be.DataAccess
                         result.QRCodeURL = wallet.QRCodeURL;
                         result.BankName = wallet.BankName;
                         result.BankAccount = wallet.BankAccount;
+                        result.BankUsername = wallet.BankUsername;
                         _context.SaveChanges();
                         return GetWallet(wallet.WalletID);
                     }
