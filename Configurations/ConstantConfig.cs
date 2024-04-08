@@ -342,6 +342,7 @@
         public const string PBMS_BUCKET_NAME = "pbms-user";
         public const string INVOICE_FOLDER = "invoice";
         public const string COLLAB_FUND_FOLDER = "collabfund";
+        public const string ACCOUNT_FOLDER = "account";
         public const string FILE_FOLDER = "file";
         // pbms-user/invoice default = public_url + pbms-user/invoice
         public const string INVOICE_DEFAULT_FOLDER = PUBLIC_URL + "/" + PBMS_BUCKET_NAME + "/" + INVOICE_FOLDER;

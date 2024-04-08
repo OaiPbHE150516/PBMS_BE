@@ -75,6 +75,20 @@ namespace pbms_be.Controllers
             return Ok(fileURL);
         }
 
+        // upload file to account folder in default bucket
+        [HttpPost("upload/file/{accountID}")]
+        public IActionResult UploadFileToAccountFolder(string accountID, IFormFile file)
+        {
+            // only accept image, pdf, doc, docx, xls, xlsx, ppt, pptx, txt
+            if (file is null) return BadRequest(Message.FILE_IS_NULL_);
+            if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
+            var filename = LConvertVariable.GenerateRandomString(CloudStorageConfig.DEFAULT_FILE_NAME_LENGTH, Path.GetFileNameWithoutExtension(file.FileName));
+            var folderName = CloudStorageConfig.ACCOUNT_FOLDER + "/" + accountID;
+            var fileURL = GCP_BucketDA.UploadFileCustom(file, CloudStorageConfig.PBMS_BUCKET_NAME, folderName,
+                                                                       "file", filename, "file", true);
+            return Ok(fileURL);
+        }
+
         // generate data
         [HttpGet("generatesqlquery")]
         public IActionResult GenerateData()
