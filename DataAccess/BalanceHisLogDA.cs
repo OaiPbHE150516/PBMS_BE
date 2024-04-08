@@ -4,6 +4,7 @@ using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Balance;
 using pbms_be.Data.Custom;
+using pbms_be.Data.WalletF;
 using pbms_be.DTOs;
 using pbms_be.Library;
 
@@ -182,7 +183,7 @@ namespace pbms_be.DataAccess
             throw new NotImplementedException();
         }
 
-        private static object FilterData(List<BalanceHisLog_VM_DTO> listLogDTO, List<Data.WalletF.Wallet> listWallet)
+        private object FilterData(List<BalanceHisLog_VM_DTO> listLogDTO, List<Data.WalletF.Wallet> listWallet)
         {
             try
             {
@@ -234,6 +235,39 @@ namespace pbms_be.DataAccess
                 }
 
                 // loop through balance log dict each day, 
+                foreach (var item in balanceLogDict)
+                {
+                    var balanceLogs = item.Value.BalanceHistoryLogs;
+                    var listWalletNotInLog = listWallet.Where(x => !balanceLogs.Any(y => y.WalletID == x.WalletID));
+                    var listLogBalanceOfLostWalletLog = new List<BalanceHisLog_VM_DTO>();
+                    foreach (var wallet in listWalletNotInLog)
+                    {
+                        var datetime = new DateTime(item.Key.Year, item.Key.Month, item.Key.Day).ToUniversalTime();
+
+                        // get closest balance history log of a wallet by date
+                        var closestBalanceHistoryLog = _context.BalanceHistoryLogs
+                                                    .Where(x => x.WalletID == wallet.WalletID
+                                                    && x.HisLogDate <= datetime)
+                                                    .OrderByDescending(x => x.HisLogDate)
+                                                    .FirstOrDefault();
+                        if (closestBalanceHistoryLog is null) continue;
+
+                        // log datetime to console
+                        Console.WriteLine($"Date: {datetime}, WalletID: {wallet.WalletID}, ClosestBalanceHistoryLog: {closestBalanceHistoryLog.HisLogDate}");
+
+                        listLogBalanceOfLostWalletLog.Add(new BalanceHisLog_VM_DTO
+                        {
+                            AccountID = closestBalanceHistoryLog.AccountID,
+                            WalletID = closestBalanceHistoryLog.WalletID,
+                            Balance = closestBalanceHistoryLog.Balance,
+                            BalanceStr = LConvertVariable.ConvertToMoneyFormat(closestBalanceHistoryLog.Balance),
+                            TransactionID = closestBalanceHistoryLog.TransactionID,
+                            HisLogDate = closestBalanceHistoryLog.HisLogDate,
+                            HisLogDateStr = LConvertVariable.ConvertDateTimeToString(closestBalanceHistoryLog.HisLogDate)
+                        });
+                    }
+                    item.Value.BalanceHistoryLogs.AddRange(listLogBalanceOfLostWalletLog);
+                }
 
                 // re calculate total amount of each day
                 foreach (var item in balanceLogDict)
@@ -254,6 +288,21 @@ namespace pbms_be.DataAccess
             }
         }
 
-        // function get closest balance history log of a wallet by date
+        //// function get closest balance history log of a wallet by date
+        //public async Task<BalanceHistoryLog> GetClosestBalanceHistoryLogByDate(int walletID, DateTime date)
+        //{
+        //    try
+        //    {
+        //        var result = await _context.BalanceHistoryLogs
+        //            .Where(x => x.WalletID == walletID && x.HisLogDate <= date)
+        //            .OrderByDescending(x => x.HisLogDate)
+        //            .FirstOrDefaultAsync();
+        //        return result is null ? throw new Exception(Message.BALANCE_HISTORY_LOG_NOT_FOUND) : result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception(ex.Message);
+        //    }
+        //}
     }
 }
