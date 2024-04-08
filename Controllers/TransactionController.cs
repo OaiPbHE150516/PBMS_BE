@@ -395,6 +395,7 @@ namespace pbms_be.Controllers
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                transactionDTO.TransactionDate.AddHours(ConstantConfig.VN_TIMEZONE_UTC);
                 var transaction = _mapper.Map<Data.Trans.Transaction>(transactionDTO);
                 if (_transactionDA.IsTransactionExist(transaction)) return BadRequest(Message.TRANSACTION_EXISTED);
                 var invoice = new Invoice
