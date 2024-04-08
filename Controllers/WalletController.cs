@@ -170,7 +170,7 @@ namespace pbms_be.Controllers
                 var authDA = new AuthDA(_context);
                 if (!authDA.IsAccountExist(changeActiveStateDTO.AccountID)) return BadRequest(Message.ACCOUNT_NOT_FOUND);
 
-                if (_walletDA.IsWalletExist(changeActiveStateDTO.AccountID, changeActiveStateDTO.WalletID))
+                if (!_walletDA.IsWalletExist(changeActiveStateDTO.AccountID, changeActiveStateDTO.WalletID))
                     return BadRequest(Message.WALLET_NOT_FOUND);
                 var result = _walletDA.ChangeWalletActiveState(changeActiveStateDTO);
                 return Ok(result);
