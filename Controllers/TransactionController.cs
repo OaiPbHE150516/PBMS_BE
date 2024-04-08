@@ -183,8 +183,8 @@ namespace pbms_be.Controllers
                 // check if fromDate is greater than toDate
                 if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
                 // from dateTime with utc time kind
-                var fromDateTime = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day, 0, 0, 0).ToUniversalTime();
-                var toDateTime = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59).ToUniversalTime();
+                var fromDateTime = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day, 0, 0, 0);
+                var toDateTime = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
                 var result = _transactionDA.GetTransactionsDayByDay(accountID, fromDateTime, toDateTime, _mapper);
                 //if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 //var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
@@ -234,10 +234,10 @@ namespace pbms_be.Controllers
                 var toDate = DateTime.ParseExact(toDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
                 if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
 
-                var fromDateTime = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day, 0, 0, 0).ToUniversalTime();
-                var toDateTime = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59).ToUniversalTime();
+                var fromDateTime = new DateTime(2024, 04, 01, 0, 0, 0);
+                var toDateTime = new DateTime(2024, 04, 07, 23, 59, 59);
 
-                var result = _transactionDA.GetTransactionsWeekByWeek(accountID, fromDateTime, toDateTime, _mapper);
+                var result = _transactionDA.GetTransactionsWeekByWeek(accountID, fromDateStr, toDateStr, _mapper);
                 return Ok(result);
             }
             catch (System.Exception e)
