@@ -421,7 +421,7 @@ namespace pbms_be.DataAccess
                         IsFundholder = inCollab.IsFundholder,
                         ActiveStateID = inCollab.ActiveStateID,
                         ActiveState = inCollab.ActiveState,
-                        LastTime = LConvertVariable.ConvertUtcToLocalTime(inCollab.LastTime)
+                        LastTime = inCollab.LastTime
                     };
                     accountDetailInCollabFundDTOs.Add(accountDetailInCollabFundDTO);
                 }
@@ -463,7 +463,7 @@ namespace pbms_be.DataAccess
                         IsFundholder = inCollab.IsFundholder,
                         ActiveStateID = inCollab.ActiveStateID,
                         ActiveState = inCollab.ActiveState,
-                        LastTime = LConvertVariable.ConvertUtcToLocalTime(inCollab.LastTime)
+                        LastTime = inCollab.LastTime
                     };
                     accountDetailInCollabFundDTOs.Add(accountDetailInCollabFundDTO);
                 }
@@ -841,7 +841,7 @@ namespace pbms_be.DataAccess
                     {
                         itemDetail.FromAccount = _authDA.GetAccount(itemDetail.FromAccountID);
                         itemDetail.ToAccount = _authDA.GetAccount(itemDetail.ToAccountID);
-                        var time = LConvertVariable.ConvertUtcToLocalTime(itemDetail.LastTime);
+                        var time = itemDetail.LastTime;
                         itemDetail.LastTime = time;
                     }
                     dividingMoneyDetail.AddRange(detail);
@@ -1011,7 +1011,7 @@ namespace pbms_be.DataAccess
                     Note = "Chia tiền",
                     TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID,
                     ActiveStateID = ActiveStateConst.ACTIVE,
-                    CreateTime = LConvertVariable.ConvertUtcToLocalTime(DateTime.UtcNow)
+                    CreateTime = DateTime.UtcNow
                 };
 
                 _context.CollabFundActivity.Add(cf_activity);
@@ -1044,7 +1044,7 @@ namespace pbms_be.DataAccess
                         FromAccountTransactionCount = item.FromAccountTransactionCount,
                         ToAccountID = item.ToAccountID,
                         DividingAmount = item.DividingAmount,
-                        LastTime = LConvertVariable.ConvertUtcToLocalTime(DateTime.UtcNow)
+                        LastTime = DateTime.UtcNow
                     };
                     list_cfdm_detail.Add(cfdm_detail);
                 }
@@ -1120,7 +1120,7 @@ namespace pbms_be.DataAccess
                     ToAccountID = item.ToAccountID,
                     ToAccount = authDA.GetAccount(item.ToAccountID),
                     DividingAmount = Math.Abs(item.ActualAmount),
-                    LastTime = LConvertVariable.ConvertUtcToLocalTime(DateTime.UtcNow)
+                    LastTime = DateTime.UtcNow
                 };
                 listDividingMoneyDetail.Add(detail);
                 count++;

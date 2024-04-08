@@ -230,11 +230,19 @@ namespace pbms_be.Controllers
                 if (string.IsNullOrEmpty(fromDateStr)) return BadRequest(Message.FROM_DATE_REQUIRED);
                 if (string.IsNullOrEmpty(toDateStr)) return BadRequest(Message.TO_DATE_REQUIRED);
 
-                var fromDate = DateTime.ParseExact(fromDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
-                var toDate = DateTime.ParseExact(toDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                var fromDateArr = fromDateStr.Split("-");
+                var toDateArr = toDateStr.Split("-");
+
+                var fromDate = new DateTime(int.Parse(fromDateArr[2]), int.Parse(fromDateArr[1]), int.Parse(fromDateArr[0]), 0, 0, 0);
+                var toDate = new DateTime(int.Parse(toDateArr[2]), int.Parse(toDateArr[1]), int.Parse(toDateArr[0]), 23, 59, 59);
                 if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
 
-                var result = _transactionDA.GetTransactionsWeekByWeek(accountID, fromDateStr, toDateStr, _mapper);
+
+                //var fromDate = DateTime.ParseExact(fromDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                //var toDate = DateTime.ParseExact(toDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                //if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
+
+                var result = _transactionDA.GetTransactionsWeekByWeek(accountID, fromDate, toDate, _mapper);
                 return Ok(result);
             }
             catch (System.Exception e)

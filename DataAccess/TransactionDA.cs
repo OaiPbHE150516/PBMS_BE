@@ -282,9 +282,8 @@ namespace pbms_be.DataAccess
                 var cates = cateDA.GetCategoryTypes();
                 foreach (var transaction in result)
                 {
-                    transaction.TransactionDate = LConvertVariable.ConvertUtcToLocalTime(transaction.TransactionDate);
-                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
-                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    transaction.TransactionDate = transaction.TransactionDate;
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID) ?? throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
                     transaction.Category.CategoryType = cateType;
                 }
                 return result;
@@ -307,14 +306,12 @@ namespace pbms_be.DataAccess
                                     .Include(t => t.ActiveState)
                                     .Include(t => t.Category)
                                     .Include(t => t.Wallet)
-                                    .ToList();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                                    .ToList() ?? throw new Exception(Message.TRANSACTION_NOT_FOUND);
                 var cateDA = new CategoryDA(_context);
                 var cates = cateDA.GetCategoryTypes();
                 foreach (var transaction in result)
                 {
-                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
-                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID) ?? throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
                     transaction.Category.CategoryType = cateType;
                 }
                 return result;
@@ -358,6 +355,9 @@ namespace pbms_be.DataAccess
                 Console.WriteLine("fromDateTimeUtc: " + fromDateTimeUtc);
                 Console.WriteLine("toDateTimeUtc: " + toDateTimeUtc);
 
+                //var fromDateStr = fromDate.ToString("yyyy-MM-dd");
+                //var toDateStr = toDate.ToString("yyyy-MM-dd");
+
                 // var listTran is by excute sql query raw to get transactions in range of fromDate and toDate
                 var listTran = _context.Transaction
                                     .FromSql($"SELECT * FROM transaction WHERE account_id = {accountID} AND transaction_date BETWEEN {fromDateTimeUtc} AND {toDateTimeUtc}")
@@ -365,8 +365,8 @@ namespace pbms_be.DataAccess
                                     .Include(t => t.Category)
                                     .Include(t => t.Wallet)
                                     .ToList();
-
-                // result = result.Where(t => t.TransactionDate.Date >= fromDate.Date && t.TransactionDate.Date <= toDate.Date).ToList();
+                // sort listTran by date
+                listTran = [.. listTran.OrderByDescending(t => t.TransactionDate)];
                 var cateDA = new CategoryDA(_context);
                 var cates = cateDA.GetCategoryTypes();
                 foreach (var transaction in listTran)
@@ -710,12 +710,10 @@ namespace pbms_be.DataAccess
         }
 
 
-        internal object GetTransactionsWeekByWeek(string accountID, string fromDateStr, string toDateStr, IMapper? mapper)
+        internal object GetTransactionsWeekByWeek(string accountID, DateTime fromDateTime, DateTime toDateTime, IMapper? mapper)
         {
             try
             {
-                var fromDateTime = DateTime.Parse(fromDateStr);
-                var toDateTime = DateTime.Parse(toDateStr);
                 var result = new TransactionWeekByWeek
                 {
                     WeekDetail = new WeekDetail
