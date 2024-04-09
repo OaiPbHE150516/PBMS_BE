@@ -132,6 +132,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
+                if (budgetDTO.CategoryIDs.Count == ConstantConfig.DEFAULT_ZERO_VALUE) throw new Exception(Message.CATEGORY_NOT_FOUND);
                 var budget = new Budget
                 {
                     AccountID = budgetDTO.AccountID,
