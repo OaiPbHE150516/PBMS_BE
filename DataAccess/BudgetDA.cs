@@ -97,17 +97,14 @@ namespace pbms_be.DataAccess
                 var result = _context.Budget
                             .Where(x => x.BudgetID == budgetID && x.AccountID == accountID && x.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(x => x.ActiveState)
-                            .FirstOrDefault();
-                if (result is null) throw new Exception(Message.BUDGET_NOT_FOUND);
-                var btype = _budgetTypes.Find(x => x.BudgetTypeID == result.BudgetTypeID);
-                if (btype is null) throw new Exception();
+                            .FirstOrDefault() ?? throw new Exception(Message.BUDGET_NOT_FOUND);
+                var btype = _budgetTypes.Find(x => x.BudgetTypeID == result.BudgetTypeID) ?? throw new Exception();
                 result.BudgetType = btype;
                 // get all category by budget id
                 var categories = _context.BudgetCategory
                                 .Where(x => x.BudgetID == budgetID && x.ActiveStateID == ActiveStateConst.ACTIVE)
                                 .Include(x => x.ActiveState)
                                 .ToList();
-                if (categories.Count == ConstantConfig.DEFAULT_ZERO_VALUE) throw new Exception(Message.CATEGORY_NOT_FOUND);
                 var categoryList = new List<Category>();
                 foreach (var category in categories)
                 {
