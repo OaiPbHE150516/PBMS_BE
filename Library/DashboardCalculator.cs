@@ -57,6 +57,8 @@ namespace pbms_be.Library
                     item.Percentage = ((double)item.TotalAmount / totalAmountOfMonth * 100);
                     item.PercentageStr = item.Percentage.ToString("0.00") + "%";
                 }
+                // sort list by total amount
+                result.Sort((x, y) => y.TotalAmount.CompareTo(x.TotalAmount));
                 return new
                 {
                     TotalAmountOfMonth = totalAmountOfMonth,
@@ -110,6 +112,8 @@ namespace pbms_be.Library
                     item.Percentage = ((double)item.TotalAmount / totalAmountOfMonth * 100);
                     item.PercentageStr = item.Percentage.ToString("0.00") + "%";
                 }
+                // sort result by total amount
+                result = [.. result.OrderByDescending(x => x.TotalAmount)];
                 return new
                 {
                     TotalAmountOfMonth = totalAmountOfMonth,
