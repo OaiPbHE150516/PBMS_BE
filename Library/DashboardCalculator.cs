@@ -18,13 +18,21 @@ namespace pbms_be.Library
             _context = context;
         }
 
-        public object GetTotalAmountByCategory(string accountID, DateTime fromDate, DateTime toDate, AutoMapper.IMapper? _mapper)
+        public object GetTotalAmountByCategory(int type, string accountID, DateTime fromDate, DateTime toDate, AutoMapper.IMapper? _mapper)
         {
             try
             {
+                // type = 1: income, 2: expense
                 var transDA = new TransactionDA(_context);
                 var listTrans = transDA.GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
+                listTrans = type switch
+                {
+                    ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME => listTrans.Where(x => x.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME).ToList(),
+                    ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_EXPENSE => listTrans.Where(x => x.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_EXPENSE).ToList(),
+                    _ => throw new Exception(Message.VALUE_TYPE_IS_NOT_VALID),
+                };
                 var listTransByCategory = listTrans.GroupBy(x => x.CategoryID).ToList();
+                // remove transaction that is not in the category type
                 // new dictionary to store total amount of each category
                 var result = new List<CategoryWithTransactionData>();
                 long totalAmountOfMonth = 0;

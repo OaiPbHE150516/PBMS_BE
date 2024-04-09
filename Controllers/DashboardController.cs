@@ -25,14 +25,17 @@ namespace pbms_be.Controllers
         //[HttpGet("get/walletbalancelog/{accountID}")]
 
         // get total amount of each category in range of date of accountID
-        [HttpGet("get/totalamount/category/{accountID}/{fromDateStr}/{toDateStr}")]
-        public IActionResult GetTotalAmountByCategory(string accountID, string fromDateStr, string toDateStr)
+        [HttpGet("get/totalamount/category/{type}/{accountID}/{fromDateStr}/{toDateStr}")]
+        public IActionResult GetTotalAmountByCategory(int type, string accountID, string fromDateStr, string toDateStr)
         {
             try
             {
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 if (string.IsNullOrEmpty(fromDateStr)) return BadRequest(Message.FROM_DATE_REQUIRED);
                 if (string.IsNullOrEmpty(toDateStr)) return BadRequest(Message.TO_DATE_REQUIRED);
+                if (type != ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME
+                    && type != ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_EXPENSE)
+                    return BadRequest(Message.VALUE_TYPE_IS_NOT_VALID);
 
                 var fromDateArr = fromDateStr.Split("-");
                 var toDateArr = toDateStr.Split("-");
@@ -42,7 +45,7 @@ namespace pbms_be.Controllers
                 if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
 
                 var dashboardCalculator = new DashboardCalculator(_context);
-                var result = dashboardCalculator.GetTotalAmountByCategory(accountID, fromDate, toDate, _mapper);
+                var result = dashboardCalculator.GetTotalAmountByCategory(type, accountID, fromDate, toDate, _mapper);
 
                 return Ok(result);
             }
