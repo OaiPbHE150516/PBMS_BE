@@ -25,7 +25,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var now = DateTime.UtcNow;
+                var now = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 int skip = (pageNumber - 1) * pageSize;
                 var result = _context.Transaction
                             .Where(t => t.AccountID == AccountID && t.TransactionDate <= now)
