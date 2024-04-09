@@ -55,17 +55,31 @@ namespace pbms_be.DataAccess
                             .ToList();
                 foreach (var item in result)
                 {
-                    var btype = _budgetTypes.Find(x => x.BudgetTypeID == item.BudgetTypeID);
-                    if (btype is null) throw new Exception();
+                    var btype = _budgetTypes.Find(x => x.BudgetTypeID == item.BudgetTypeID) ?? throw new Exception();
                     item.BudgetType = btype;
                 }
                 var listBudgetDTO = _mapper.Map<List<BudgetWithCategoryDTO>>(result);
                 foreach (var item in listBudgetDTO)
                 {
-                    var categoriesResult = new List<Category>();
-                    var budget = new Budget();
-                    GetBudgetDetail(accountID, item.BudgetID, out categoriesResult, out budget);
-                    item.Categories = categoriesResult;
+                    //var categoriesResult = new List<Category>();
+                    //var budget = new Budget();
+                    //GetBudgetDetail(accountID, item.BudgetID, out categoriesResult, out budget);
+                    //item.Categories = categoriesResult;
+                    var budgetcategories = _context.BudgetCategory
+                                    .Where(x => x.BudgetID == item.BudgetID && x.ActiveStateID == ActiveStateConst.ACTIVE)
+                                    .Include(x => x.ActiveState)
+                                    .ToList();
+                    var categories = new List<Category>();
+                    foreach (var bc in budgetcategories)
+                    {
+                        var cate = _context.Category
+                                    .Where(x => x.CategoryID == bc.CategoryID && x.ActiveStateID == ActiveStateConst.ACTIVE)
+                                    .Include(x => x.ActiveState)
+                                    .FirstOrDefault();
+                        if (cate is null) continue;
+                        categories.Add(cate);
+                    }
+                    item.Categories = categories;
                 }
                 return listBudgetDTO;
                 //return result;
