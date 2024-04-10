@@ -35,7 +35,7 @@ namespace pbms_be.Library
                 // remove transaction that is not in the category type
                 // new dictionary to store total amount of each category
                 var result = new List<CategoryWithTransactionData>();
-                long totalAmountOfMonth = 0;
+                long totalAmountOfRange = 0;
                 var countCate = 1;
                 foreach (var tran in listTransByCategory)
                 {
@@ -56,21 +56,21 @@ namespace pbms_be.Library
                         NumberOfTransaction = numberOfTransaction
                     };
                     result.Add(CategoryWithAllTransaction);
-                    totalAmountOfMonth += totalAmount;
+                    totalAmountOfRange += totalAmount;
                 }
                 // foreach to calculate percentage of each category
                 foreach (var item in result)
                 {
                     // calculate percentage to 2 decimal places
-                    item.Percentage = ((double)item.TotalAmount / totalAmountOfMonth * 100);
+                    item.Percentage = ((double)item.TotalAmount / totalAmountOfRange * 100);
                     item.PercentageStr = item.Percentage.ToString("0.00") + "%";
                 }
                 // sort list by total amount
                 result.Sort((x, y) => y.TotalAmount.CompareTo(x.TotalAmount));
                 return new
                 {
-                    TotalAmountOfMonth = totalAmountOfMonth,
-                    TotalAmountOfMonthStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOfMonth),
+                    TotalAmountOfRange = totalAmountOfRange,
+                    TotalAmountOfRangeStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOfRange),
                     TotalNumberOfTransaction = listTrans.Count,
                     TotalNumberOfCategory = listTransByCategory.Count,
                     CategoryWithTransactionData = result
@@ -91,7 +91,7 @@ namespace pbms_be.Library
                 var listTransByType = listTrans.GroupBy(x => x.Category.CategoryTypeID).ToList();
                 // new dictionary to store total amount of each category
                 var result = new List<CategoryWithTransactionData2>();
-                long totalAmountOfMonth = 0;
+                long totalAmountOfRange = 0;
                 var countType = 1;
                 foreach (var tran in listTransByType)
                 {
@@ -111,21 +111,21 @@ namespace pbms_be.Library
                         NumberOfTransaction = numberOfTransaction
                     };
                     result.Add(CategoryTypeWithAllTransaction);
-                    totalAmountOfMonth += totalAmount;
+                    totalAmountOfRange += totalAmount;
                 }
                 // foreach to calculate percentage of each category
                 foreach (var item in result)
                 {
                     // calculate percentage to 2 decimal places
-                    item.Percentage = ((double)item.TotalAmount / totalAmountOfMonth * 100);
+                    item.Percentage = ((double)item.TotalAmount / totalAmountOfRange * 100);
                     item.PercentageStr = item.Percentage.ToString("0.00") + "%";
                 }
                 // sort result by total amount
                 result = [.. result.OrderByDescending(x => x.TotalAmount)];
                 return new
                 {
-                    TotalAmountOfMonth = totalAmountOfMonth,
-                    TotalAmountOfMonthStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOfMonth),
+                    TotalAmountOfRange = totalAmountOfRange,
+                    TotalAmountOfRangeStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOfRange),
                     TotalNumberOfTransaction = listTrans.Count,
                     TotalNumberOfCategory = listTransByType.Count,
                     CategoryWithTransactionData = result
