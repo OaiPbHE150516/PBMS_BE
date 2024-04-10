@@ -365,6 +365,9 @@ namespace pbms_be.DataAccess
                                     .Include(t => t.Category)
                                     .Include(t => t.Wallet)
                                     .ToList();
+                // remove which transaction not have activestateID = 1
+                listTran = listTran.FindAll(t => t.ActiveStateID == ActiveStateConst.ACTIVE);
+
                 // sort listTran by date
                 listTran = [.. listTran.OrderByDescending(t => t.TransactionDate)];
                 var cateDA = new CategoryDA(_context);
