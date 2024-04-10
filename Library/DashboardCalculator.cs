@@ -122,10 +122,14 @@ namespace pbms_be.Library
                 }
                 // sort result by total amount
                 result = [.. result.OrderByDescending(x => x.TotalAmount)];
+
+                var result2 = result.OrderBy(x => x.CategoryType.CategoryTypeID).ToList();
                 return new
                 {
                     TotalAmountOfRange = totalAmountOfRange,
                     TotalAmountOfRangeStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOfRange),
+                    MinusAmountOfRange = result2[0].TotalAmount - result2[^1].TotalAmount,
+                    MinusAmountOfRangeStr = LConvertVariable.ConvertToMoneyFormat(result2[0].TotalAmount - result2[^1].TotalAmount),
                     TotalNumberOfTransaction = listTrans.Count,
                     TotalNumberOfCategory = listTransByType.Count,
                     CategoryWithTransactionData = result
