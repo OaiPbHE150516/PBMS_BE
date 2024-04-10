@@ -291,6 +291,8 @@ namespace pbms_be.DataAccess
                             || w.ActiveStateID == ActiveStateConst.INACTIVE
                             )
                             .ToList();
+                result = [.. result.OrderBy(w => w.ActiveStateID).ThenByDescending(w => w.Balance)];
+
                 return result;
             }
             catch (Exception e)
