@@ -52,8 +52,9 @@ namespace pbms_be.DataAccess
                             )
                             .Include(w => w.Currency)
                             .Include(w => w.ActiveState)
-                            .OrderBy(w => w.Balance)
                             .ToList();
+                // sort by active state id and balance
+                result = [.. result.OrderBy(w => w.ActiveStateID).ThenByDescending(w => w.Balance)];
                 return result;
             }
             catch (Exception e)
