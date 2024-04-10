@@ -140,21 +140,21 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal Transaction CreateTransaction(Transaction transaction)
-        {
-            try
-            {
-                transaction.TransactionDate = DateTime.UtcNow;
-                transaction.ActiveStateID = ActiveStateConst.ACTIVE;
-                _context.Transaction.Add(transaction);
-                _context.SaveChanges();
-                return transaction;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
+        //internal Transaction CreateTransaction(Transaction transaction)
+        //{
+        //    try
+        //    {
+        //        transaction.TransactionDate = DateTime.UtcNow;
+        //        transaction.ActiveStateID = ActiveStateConst.ACTIVE;
+        //        _context.Transaction.Add(transaction);
+        //        _context.SaveChanges();
+        //        return transaction;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception(e.Message);
+        //    }
+        //}
         internal Transaction CreateTransactionV2(Transaction transaction, DateTime transactionDate)
         {
             try
@@ -245,7 +245,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                transaction.TransactionDate = DateTime.UtcNow;
+                transaction.TransactionDate = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 transaction.ActiveStateID = ActiveStateConst.ACTIVE;
                 var result = _context.Transaction
                             .Any(t => t.AccountID == transaction.AccountID
@@ -442,7 +442,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var now = DateTime.UtcNow;
+                var now = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 var result = _context.Transaction
                             .Where(t => t.AccountID == accountID && t.TransactionDate <= now)
                             .Include(t => t.ActiveState)
@@ -450,15 +450,13 @@ namespace pbms_be.DataAccess
                             .Include(t => t.Wallet)
                             .OrderByDescending(t => t.TransactionDate)
                             .Take(number)
-                            .ToList();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                            .ToList() ?? throw new Exception(Message.TRANSACTION_NOT_FOUND);
                 var cateDA = new CategoryDA(_context);
 
                 var cates = cateDA.GetCategoryTypes();
                 foreach (var transaction in result)
                 {
-                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
-                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID) ?? throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
                     transaction.Category.CategoryType = cateType;
                 }
                 return result;
