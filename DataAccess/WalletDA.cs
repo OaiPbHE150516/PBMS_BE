@@ -52,6 +52,7 @@ namespace pbms_be.DataAccess
                             )
                             .Include(w => w.Currency)
                             .Include(w => w.ActiveState)
+                            .OrderBy(w => w.Balance)
                             .ToList();
                 return result;
             }
