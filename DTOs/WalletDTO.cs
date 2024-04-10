@@ -15,6 +15,11 @@ namespace pbms_be.DTOs
         public string Name { get; set; } = String.Empty;
         public long Balance { get; set; }
         public string Note { get; set; } = String.Empty;
+        public bool? IsBanking { get; set; } = false;
+        public string? QRCodeURL { get; set; } = String.Empty;
+        public string? BankName { get; set; } = String.Empty;
+        public string? BankAccount { get; set; } = String.Empty;
+        public string? BankUsername { get; set; } = String.Empty;
         //public int CurrencyID { get; set; }
     }
 
