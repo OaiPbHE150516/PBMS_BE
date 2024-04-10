@@ -28,19 +28,17 @@ namespace pbms_be.DataAccess
                 var now = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 int skip = (pageNumber - 1) * pageSize;
                 var result = _context.Transaction
-                            .Where(t => t.AccountID == AccountID && t.TransactionDate <= now)
+                            .Where(t => t.AccountID == AccountID && t.TransactionDate <= now && t.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(t => t.ActiveState)
                             .Include(t => t.Category)
                             .Include(t => t.Wallet)
                             .OrderByDescending(t => t.TransactionDate)
-                            .ToList();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                            .ToList() ?? throw new Exception(Message.TRANSACTION_NOT_FOUND);
                 var cateDA = new CategoryDA(_context);
                 var cates = cateDA.GetCategoryTypes();
                 foreach (var transaction in result)
                 {
-                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
-                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID) ?? throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
                     transaction.Category.CategoryType = cateType;
                 }
                 result = result.Skip(skip).Take(pageSize).ToList();
@@ -57,13 +55,12 @@ namespace pbms_be.DataAccess
             try
             {
                 var result = _context.Transaction
-                .Where(t => t.TransactionID == TransactionID)
+                .Where(t => t.TransactionID == TransactionID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                 .Include(t => t.ActiveState)
                 .Include(t => t.Category)
                 .Include(t => t.Wallet)
                 .FirstOrDefault();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
-                return result;
+                return result is null ? throw new Exception(Message.TRANSACTION_NOT_FOUND) : result;
             }
             catch (Exception e)
             {
@@ -74,7 +71,7 @@ namespace pbms_be.DataAccess
         public List<Transaction> GetTransactionsByCategory(int CategoryID)
         {
             var result = _context.Transaction
-                .Where(t => t.CategoryID == CategoryID)
+                .Where(t => t.CategoryID == CategoryID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                 .Include(t => t.ActiveState)
                 .Include(t => t.Category)
                 .Include(t => t.Wallet)
@@ -85,7 +82,7 @@ namespace pbms_be.DataAccess
         public List<Transaction> GetTransactionsByWallet(int WalletID)
         {
             var result = _context.Transaction
-                .Where(t => t.WalletID == WalletID)
+                .Where(t => t.WalletID == WalletID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                 .Include(t => t.ActiveState)
                 .Include(t => t.Category)
                 .Include(t => t.Wallet)
@@ -98,7 +95,7 @@ namespace pbms_be.DataAccess
             try
             {
                 var totalRecord = _context.Transaction
-                                .Where(t => t.AccountID == accountID)
+                                .Where(t => t.AccountID == accountID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                                 .Count();
                 var totalPage = totalRecord / pageSize;
                 if (totalRecord % pageSize != 0) totalPage++;
@@ -115,7 +112,7 @@ namespace pbms_be.DataAccess
             try
             {
                 var result = _context.Transaction
-                            .Where(t => t.TransactionID == transactionID && t.AccountID == accountID)
+                            .Where(t => t.TransactionID == transactionID && t.AccountID == accountID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(t => t.ActiveState)
                             .Include(t => t.Category)
                             .Include(t => t.Wallet)
@@ -163,9 +160,7 @@ namespace pbms_be.DataAccess
                 var wallet = _context.Wallet
                             .Where(w => w.WalletID == transaction.WalletID && w.AccountID == transaction.AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(w => w.ActiveState)
-                            .FirstOrDefault();
-                if (wallet is null) throw new Exception(Message.WALLET_NOT_BELONG_ACCOUNT + ": " + transaction.AccountID);
-
+                            .FirstOrDefault() ?? throw new Exception(Message.WALLET_NOT_BELONG_ACCOUNT + ": " + transaction.AccountID);
                 var category = _context.Category
                             .Where(c => c.CategoryID == transaction.CategoryID && c.AccountID == transaction.AccountID && c.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(c => c.ActiveState)
@@ -276,8 +271,9 @@ namespace pbms_be.DataAccess
                                     .Include(t => t.ActiveState)
                                     .Include(t => t.Category)
                                     .Include(t => t.Wallet)
-                                    .ToList();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                                    .ToList() ?? throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                // remove list transaction that is not active
+                result = result.FindAll(t => t.ActiveStateID == ActiveStateConst.ACTIVE);
                 var cateDA = new CategoryDA(_context);
                 var cates = cateDA.GetCategoryTypes();
                 foreach (var transaction in result)
@@ -409,7 +405,7 @@ namespace pbms_be.DataAccess
                             Date = new DateOnly(transaction.TransactionDate.Year, transaction.TransactionDate.Month, transaction.TransactionDate.Day),
                             isHasTransaction = true,
                             TransactionCount = 1,
-                            Transactions = new List<TransactionDetail_VM_DTO> { _mapper.Map<TransactionDetail_VM_DTO>(transaction) }
+                            Transactions = [_mapper.Map<TransactionDetail_VM_DTO>(transaction)]
                         };
                         transactionsByDay.Add(day, transactionInDayCalendar);
                     }
@@ -524,17 +520,17 @@ namespace pbms_be.DataAccess
                 foreach (var tran in transactions)
                 {
                     var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
-                    if (transactionsDict.ContainsKey(dateonly))
+                    if (transactionsDict.TryGetValue(dateonly, out TransactionInLastDays? value))
                     {
                         if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
                         {
-                            transactionsDict[dateonly].TotalAmountIn += tran.TotalAmount;
-                            transactionsDict[dateonly].NumberOfTransactionIn++;
+                            value.TotalAmountIn += tran.TotalAmount;
+                            value.NumberOfTransactionIn++;
                         }
                         else
                         {
-                            transactionsDict[dateonly].TotalAmountOut += tran.TotalAmount;
-                            transactionsDict[dateonly].NumberOfTransactionOut++;
+                            value.TotalAmountOut += tran.TotalAmount;
+                            value.NumberOfTransactionOut++;
                         }
                     }
                     else
@@ -648,19 +644,18 @@ namespace pbms_be.DataAccess
                 foreach (var tran in transactions)
                 {
                     var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
-                    if (transactionsDict.ContainsKey(dateonly))
+                    if (transactionsDict.TryGetValue(dateonly, out TransactionDayByDay? value))
                     {
-                        // add transaction to list of transactions
-                        transactionsDict[dateonly].Transactions.Add(_mapper.Map<TransactionInList_VM_DTO>(tran));
+                        value.Transactions.Add(_mapper.Map<TransactionInList_VM_DTO>(tran));
                         if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
                         {
-                            transactionsDict[dateonly].TotalAmountIn += tran.TotalAmount;
-                            transactionsDict[dateonly].NumberOfTransactionIn++;
+                            value.TotalAmountIn += tran.TotalAmount;
+                            value.NumberOfTransactionIn++;
                         }
                         else
                         {
-                            transactionsDict[dateonly].TotalAmountOut += tran.TotalAmount;
-                            transactionsDict[dateonly].NumberOfTransactionOut++;
+                            value.TotalAmountOut += tran.TotalAmount;
+                            value.NumberOfTransactionOut++;
                         }
                     }
                     else
