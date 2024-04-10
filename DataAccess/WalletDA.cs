@@ -84,7 +84,8 @@ namespace pbms_be.DataAccess
             {
                 var result = _context.Wallet.Any(w => w.WalletID == WalletID
                 && w.AccountID == AccountID
-                && w.ActiveStateID == ActiveStateConst.ACTIVE);
+                && w.ActiveStateID == ActiveStateConst.ACTIVE 
+                || w.ActiveStateID == ActiveStateConst.INACTIVE);
                 return result;
             }
             catch (Exception e)
@@ -220,8 +221,7 @@ namespace pbms_be.DataAccess
                     .Where(w => w.WalletID == changeActiveStateDTO.WalletID)
                     .Include(w => w.Currency)
                     .Include(w => w.ActiveState)
-                    .FirstOrDefault();
-                if (wallet is null) throw new Exception(Message.WALLET_NOT_FOUND);
+                    .FirstOrDefault() ?? throw new Exception(Message.WALLET_NOT_FOUND);
                 wallet.ActiveStateID = changeActiveStateDTO.ActiveStateID;
                 _context.SaveChanges();
                 return GetWallet(wallet.WalletID);
