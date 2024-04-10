@@ -24,8 +24,8 @@ namespace pbms_be.DataAccess
             try
             {
                 var result = _context.Wallet
-                .Where(w => w.WalletID == WalletID 
-                && w.AccountID == AccountID 
+                .Where(w => w.WalletID == WalletID
+                && w.AccountID == AccountID
                 && w.ActiveStateID == ActiveStateConst.ACTIVE
                 || w.ActiveStateID == ActiveStateConst.INACTIVE
                 )
@@ -46,7 +46,7 @@ namespace pbms_be.DataAccess
             try
             {
                 var result = _context.Wallet
-                            .Where(w => w.AccountID == AccountID 
+                            .Where(w => w.AccountID == AccountID
                             && w.ActiveStateID == ActiveStateConst.ACTIVE
                             || w.ActiveStateID == ActiveStateConst.INACTIVE
                             )
@@ -68,13 +68,12 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var result = _context.Wallet.Any(w => w.Name.Contains(WalletName) 
-                && w.AccountID == AccountID 
-                && w.ActiveStateID == ActiveStateConst.ACTIVE
-                || w.ActiveStateID == ActiveStateConst.INACTIVE
-                );
+                var result = _context.Wallet.Any(w => w.Name.Contains(WalletName)
+                && w.AccountID == AccountID
+                && w.ActiveStateID == ActiveStateConst.ACTIVE);
                 return result;
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
@@ -83,11 +82,9 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var result = _context.Wallet.Any(w => w.WalletID == WalletID 
-                && w.AccountID == AccountID 
-                && w.ActiveStateID == ActiveStateConst.ACTIVE
-                || w.ActiveStateID == ActiveStateConst.INACTIVE
-                );
+                var result = _context.Wallet.Any(w => w.WalletID == WalletID
+                && w.AccountID == AccountID
+                && w.ActiveStateID == ActiveStateConst.ACTIVE);
                 return result;
             }
             catch (Exception e)
@@ -101,10 +98,8 @@ namespace pbms_be.DataAccess
         public Wallet? GetWalletByName(string AccountID, string WalletName)
         {
             var result = _context.Wallet
-                .Where(w => w.AccountID == AccountID && w.Name.Contains(WalletName) 
-                && w.ActiveStateID == ActiveStateConst.ACTIVE
-                || w.ActiveStateID == ActiveStateConst.INACTIVE
-                )
+                .Where(w => w.AccountID == AccountID && w.Name.Contains(WalletName)
+                && w.ActiveStateID == ActiveStateConst.ACTIVE)
                 .Include(w => w.Currency)
                 .Include(w => w.ActiveState)
                 .FirstOrDefault();
@@ -118,10 +113,8 @@ namespace pbms_be.DataAccess
             {
                 // get wallet by wallet id
                 var result = _context.Wallet
-                    .Where(w => w.WalletID == WalletID 
-                    && w.ActiveStateID == ActiveStateConst.ACTIVE
-                    || w.ActiveStateID == ActiveStateConst.INACTIVE
-                    )
+                    .Where(w => w.WalletID == WalletID
+                    && w.ActiveStateID == ActiveStateConst.ACTIVE)
                     .Include(w => w.Currency)
                     .Include(w => w.ActiveState)
                     .FirstOrDefault();
@@ -158,7 +151,8 @@ namespace pbms_be.DataAccess
                     return GetWallet(wallet.WalletID);
                 }
                 return null;
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
@@ -171,29 +165,35 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                if (IsWalletExist(wallet.AccountID, wallet.WalletID))
+                if (!IsWalletExist(wallet.AccountID, wallet.WalletID))
                 {
-                    var result = _context.Wallet.Where(w => w.WalletID == wallet.WalletID && w.AccountID == wallet.AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE || w.ActiveStateID == ActiveStateConst.INACTIVE)
-                    .FirstOrDefault();
-                    if (result is not null)
-                    {
-                        result.Name = wallet.Name;
-                        result.Note = wallet.Note;
-                        result.IsBanking = wallet.IsBanking;
-                        result.QRCodeURL = wallet.QRCodeURL;
-                        result.BankName = wallet.BankName;
-                        result.BankAccount = wallet.BankAccount;
-                        result.BankUsername = wallet.BankUsername;
-                        _context.SaveChanges();
-                        return GetWallet(wallet.WalletID);
-                    }
+                    return null; // Nếu ví không tồn tại, không cần thực hiện cập nhật
+                }
+
+                var result = _context.Wallet.FirstOrDefault(
+                    w => w.WalletID == wallet.WalletID
+                    && w.AccountID == wallet.AccountID
+                    && w.ActiveStateID == ActiveStateConst.ACTIVE);
+
+                if (result != null)
+                {
+                    result.Name = wallet.Name;
+                    result.Note = wallet.Note;
+                    result.IsBanking = wallet.IsBanking;
+                    result.QRCodeURL = wallet.QRCodeURL;
+                    result.BankName = wallet.BankName;
+                    result.BankAccount = wallet.BankAccount;
+                    result.BankUsername = wallet.BankUsername;
+                    _context.SaveChanges();
+                    return GetWallet(wallet.WalletID);
                 }
                 return null;
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(ex.Message); // Ném lỗi nguyên gốc để xử lý ở mức cao hơn
             }
+
         }
 
 
@@ -256,7 +256,7 @@ namespace pbms_be.DataAccess
                 // get total amount of all wallets have currency id = 2
 
                 var result = _context.Wallet
-                    .Where(w => w.AccountID == accountID 
+                    .Where(w => w.AccountID == accountID
                     && w.CurrencyID == CurrencyConst.DEFAULT_CURRENCY_ID_VND
                     && w.ActiveStateID == ActiveStateConst.ACTIVE)
                     .Sum(w => w.Balance);
@@ -286,7 +286,7 @@ namespace pbms_be.DataAccess
                 //    })
                 //    .ToList();
                 var result = _context.Wallet
-                            .Where(w => w.AccountID == accountID 
+                            .Where(w => w.AccountID == accountID
                             && w.ActiveStateID == ActiveStateConst.ACTIVE
                             || w.ActiveStateID == ActiveStateConst.INACTIVE
                             )
@@ -305,7 +305,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                
+
                 var wallet = GetWallet(walletID) ?? throw new Exception(Message.WALLET_NOT_FOUND);
                 if (categoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_EXPENSE)
                 {
