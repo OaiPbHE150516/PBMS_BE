@@ -851,7 +851,7 @@ namespace pbms_be.DataAccess
             {
                 if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var fromDate = DateTime.UtcNow.AddDays(-numdays);
-                var toDate = DateTime.UtcNow;
+                var toDate = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 var transactions = GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
                 var transactionsExpenses = transactions.Where(t => t.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_EXPENSE).ToList();
                 // group by day
