@@ -10,6 +10,7 @@ using pbms_be.Data.Trans;
 using pbms_be.DTOs;
 using pbms_be.Library;
 using System.Collections.Generic;
+using System.Transactions;
 
 namespace pbms_be.DataAccess
 {
@@ -21,7 +22,7 @@ namespace pbms_be.DataAccess
             _context = context;
         }
 
-        public List<Transaction> GetTransactions(string AccountID, int pageNumber, int pageSize, string sortType)
+        public List<Data.Trans.Transaction> GetTransactions(string AccountID, int pageNumber, int pageSize, string sortType)
         {
             try
             {
@@ -50,7 +51,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        public Transaction GetTransaction(int TransactionID)
+        public Data.Trans.Transaction GetTransaction(int TransactionID)
         {
             try
             {
@@ -68,7 +69,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        public List<Transaction> GetTransactionsByCategory(int CategoryID)
+        public List<Data.Trans.Transaction> GetTransactionsByCategory(int CategoryID)
         {
             var result = _context.Transaction
                 .Where(t => t.CategoryID == CategoryID && t.ActiveStateID == ActiveStateConst.ACTIVE)
@@ -79,7 +80,7 @@ namespace pbms_be.DataAccess
             return result;
         }
 
-        public List<Transaction> GetTransactionsByWallet(int WalletID)
+        public List<Data.Trans.Transaction> GetTransactionsByWallet(int WalletID)
         {
             var result = _context.Transaction
                 .Where(t => t.WalletID == WalletID && t.ActiveStateID == ActiveStateConst.ACTIVE)
@@ -152,8 +153,9 @@ namespace pbms_be.DataAccess
         //        throw new Exception(e.Message);
         //    }
         //}
-        internal Transaction CreateTransactionV2(Transaction transaction, DateTime transactionDate)
+        internal Data.Trans.Transaction CreateTransactionV2(Data.Trans.Transaction transaction, DateTime transactionDate)
         {
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             try
             {
                 if (transaction is null) throw new Exception(Message.TRANSACTION_IS_NULL);
@@ -174,11 +176,8 @@ namespace pbms_be.DataAccess
                 _context.SaveChanges();
 
                 var walletDA = new WalletDA(_context);
-                var threadW = new Thread(() => walletDA.UpdateWalletAmount(transaction.WalletID, transaction.TotalAmount, category.CategoryTypeID));
-                threadW.Start();
-                threadW.Join();
-
-
+                walletDA.UpdateWalletAmount(transaction.WalletID, transaction.TotalAmount, category.CategoryTypeID);
+                
                 var balanceHisLogDA = new BalanceHisLogDA(_context);
                 var balancehislog = new BalanceHistoryLog
                 {
@@ -189,24 +188,22 @@ namespace pbms_be.DataAccess
                     HisLogDate = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC),
                     ActiveStateID = ActiveStateConst.ACTIVE
                 };
-                var threadB = new Thread(() => balanceHisLogDA.CreateBalanceHistoryLog(balancehislog));
-                threadB.Start();
-                threadB.Join();
-
+                 balanceHisLogDA.CreateBalanceHistoryLog(balancehislog);
+                
                 var budgetDA = new BudgetDA(_context);
-                var threadBud = new Thread(() => budgetDA.UpdateBudgetAmount(transaction.AccountID, transaction.TotalAmount, category.CategoryID));
-                threadBud.Start();
-                threadBud.Join();
-
+                budgetDA.UpdateBudgetAmount(transaction.AccountID, transaction.TotalAmount, category.CategoryID);
+                
+                scope.Complete();
                 return transaction;
             }
             catch (Exception e)
             {
+                scope.Dispose();
                 throw new Exception(e.Message);
             }
         }
 
-        internal Transaction CreateTransactionRaw(Transaction transaction)
+        internal Data.Trans.Transaction CreateTransactionRaw(Data.Trans.Transaction transaction)
         {
             try
             {
@@ -222,7 +219,7 @@ namespace pbms_be.DataAccess
         }
 
         // create transaction by list of transactions raw
-        internal List<Transaction> CreateTransactionsRaw(List<Transaction> transactions)
+        internal List<Data.Trans.Transaction> CreateTransactionsRaw(List<Data.Trans.Transaction> transactions)
         {
             try
             {
@@ -236,7 +233,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal bool IsTransactionExist(Transaction transaction)
+        internal bool IsTransactionExist(Data.Trans.Transaction transaction)
         {
             try
             {
@@ -260,7 +257,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal List<Transaction> GetTransactionsByMonth(string accountID, int month, int year)
+        internal List<Data.Trans.Transaction> GetTransactionsByMonth(string accountID, int month, int year)
         {
             try
             {
@@ -290,7 +287,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal List<Transaction> GetTransactionsByDay(string accountID, int day, int month, int year)
+        internal List<Data.Trans.Transaction> GetTransactionsByDay(string accountID, int day, int month, int year)
         {
             try
             {
@@ -318,7 +315,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal List<Transaction> GetTransactionsByDateTimeRange(string accountID, DateTime fromDate, DateTime toDate)
+        internal List<Data.Trans.Transaction> GetTransactionsByDateTimeRange(string accountID, DateTime fromDate, DateTime toDate)
         {
             try
             {
@@ -828,7 +825,7 @@ namespace pbms_be.DataAccess
         }
 
         //         internal Transaction CreateTransactionV2(Transaction transaction, DateTime transactionDate)
-        internal object CreateTransactionWithImage(Transaction transaction, TransactionCreateWithImageDTO transactionDTO, IFormFile image)
+        internal object CreateTransactionWithImage(Data.Trans.Transaction transaction, TransactionCreateWithImageDTO transactionDTO, IFormFile image)
         {
             try
             {
