@@ -185,7 +185,7 @@ namespace pbms_be.Controllers
             //var money = await DocumentAiApi.GetMoney(file);
             var TextPromptDA = new TextPromptDA(_context);
             var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
-            if (textPrompt == null) return BadRequest("TextPrompt is not found");
+            if (textPrompt == null) return BadRequest("prom is not found");
 
             var fileByteString = ByteString.FromStream(file.OpenReadStream());
             var fileMineType = GetMimeType(file.FileName);
@@ -200,9 +200,11 @@ namespace pbms_be.Controllers
             var rawData = taskProduct.Result;
             rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
             var invoiceByGemi = VertextAiMultimodalApi.ProcessDataGemini(rawData);
-            invoiceByGemi.TotalAmount = invoiceByDoc.TotalAmount;
-            invoiceByGemi.NetAmount = invoiceByDoc.NetAmount;
-            invoiceByGemi.TaxAmount = invoiceByDoc.TaxAmount;
+
+            if (invoiceByDoc.TotalAmount != 0) invoiceByGemi.TotalAmount = invoiceByDoc.TotalAmount;
+            if (invoiceByDoc.NetAmount != 0) invoiceByGemi.NetAmount = invoiceByDoc.NetAmount;
+            if (invoiceByDoc.TaxAmount != 0) invoiceByGemi.TaxAmount = invoiceByDoc.TaxAmount;
+
             if (string.IsNullOrEmpty(invoiceByGemi.SupplierPhone))
             {
                 invoiceByGemi.SupplierPhone = invoiceByDoc.SupplierPhone;

@@ -15,7 +15,7 @@ namespace pbms_be.ThirdParty
 {
     public class VertextAiMultimodalApi
     {
-        public static string GenerateContent(ByteString fileByteString, string fileMineType,  string textprompt)
+        public static string GenerateContent(ByteString fileByteString, string fileMineType, string textprompt)
         {
             string projectId = ConstantConfig.PROJECT_ID;
             string location = "us-central1";
@@ -105,12 +105,16 @@ namespace pbms_be.ThirdParty
                     InvoiceDate = invoiceDateRaw,
                     SupplierName = supplierNameRaw,
                     SupplierAddress = supplierAddressRaw,
-                    SupplierPhone = supplierPhoneRaw
+                    SupplierPhone = supplierPhoneRaw,
+
+                    TotalAmount = long.TryParse(totalAmountRaw, out var totalAmountResultInvoice) ? totalAmountResultInvoice : 0,
+                    NetAmount = long.TryParse(netAmountRaw, out var netAmountResult) ? netAmountResult : 0,
+                    TaxAmount = long.TryParse(taxAmountRaw, out var taxAmountResult) ? taxAmountResult : 0
                 };
 
                 var productsData = new List<ProductInInvoice_VM_Scan>();
                 var productsRaw = jsonOject["line_item"]?.ToObject<List<JObject>>();
-                if (productsRaw is null)  return invoiceResult;
+                if (productsRaw is null) return invoiceResult;
                 var countProduct = 1;
                 foreach (var product in productsRaw)
                 {
@@ -124,9 +128,9 @@ namespace pbms_be.ThirdParty
                     {
                         ProductID = countProduct,
                         ProductName = productName,
-                        Quanity = int.Parse(quantity),
-                        UnitPrice = long.Parse(unitPrice),
-                        TotalAmount = long.Parse(totalAmount),
+                        Quanity = int.TryParse(quantity, out var quantityResult) ? quantityResult : 0,
+                        UnitPrice = long.TryParse(unitPrice, out var unitPriceResult) ? unitPriceResult : 0,
+                        TotalAmount = long.TryParse(totalAmount, out var totalAmountResultProduct) ? totalAmountResultProduct : 0,
                         Tag = tag
                     };
                     productsData.Add(productResult);
