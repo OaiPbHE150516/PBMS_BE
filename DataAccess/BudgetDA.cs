@@ -6,6 +6,7 @@ using pbms_be.Data.CollabFund;
 using pbms_be.Data.Filter;
 using pbms_be.Data.WalletF;
 using pbms_be.DTOs;
+using System.Transactions;
 
 
 namespace pbms_be.DataAccess
@@ -130,6 +131,7 @@ namespace pbms_be.DataAccess
 
         internal Budget CreateBudget(CreateBudgetDTO budgetDTO)
         {
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             try
             {
                 if (budgetDTO.CategoryIDs.Count == ConstantConfig.DEFAULT_ZERO_VALUE) throw new Exception(Message.CATEGORY_NOT_FOUND);
@@ -165,11 +167,12 @@ namespace pbms_be.DataAccess
                 }
                 _context.BudgetCategory.AddRange(listBudgetCategory);
                 _context.SaveChanges();
-
+                scope.Complete();
                 return result;
             }
             catch (Exception e)
             {
+                scope.Dispose();
                 throw new Exception(e.Message);
             }
         }
