@@ -1017,7 +1017,7 @@ namespace pbms_be.DataAccess
                     Note = "Chia tiền",
                     TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID,
                     ActiveStateID = ActiveStateConst.ACTIVE,
-                    CreateTime = DateTime.UtcNow
+                    CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime(),
                 };
 
                 _context.CollabFundActivity.Add(cf_activity);
