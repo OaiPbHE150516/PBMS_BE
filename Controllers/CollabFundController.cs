@@ -99,10 +99,10 @@ namespace pbms_be.Controllers
 
                 var result = _collabFundDA.GetAllActivityCollabFundV2(collabFundID, accountID, _mapper);
 
-                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
-                var resultEntity = _mapper.Map<List<CollabFundActivity_MV_DTO>>(result);
+                //if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                //var resultEntity = _mapper.Map<List<CollabFundActivity_MV_DTO>>(result);
 
-                return Ok(resultEntity);
+                return Ok(result);
             }
             catch (System.Exception e)
             {

@@ -130,7 +130,8 @@ namespace pbms_be.DataAccess
                 {
                     var divideMoneyInfor = GetDivideMoneyCollabFund(result.CollabFundID);
                     result.TotalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
-                } else
+                }
+                else
                 {
                     throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 }
@@ -1458,7 +1459,20 @@ namespace pbms_be.DataAccess
                 {
                     if (item.TransactionID is not ConstantConfig.DEFAULT_NULL_TRANSACTION_ID)
                     {
-                        item.Transaction = transDA.GetTransaction(item.TransactionID);
+                        var transaction = _context.Transaction
+                                        .Where(t => t.TransactionID == item.TransactionID && t.ActiveStateID == ActiveStateConst.ACTIVE)
+                                        .Include(t => t.ActiveState)
+                                        .Include(t => t.Category)
+                                        .Include(t => t.Wallet)
+                                        .FirstOrDefault();
+                        if (transaction is not null)
+                        {
+                            item.Transaction = transaction;
+                        }
+                        else
+                        {
+                            item.TransactionID = ConstantConfig.DEFAULT_ZERO_VALUE;
+                        }
                     }
                     else
                     {
@@ -1491,6 +1505,7 @@ namespace pbms_be.DataAccess
                     if (cfdm is not null)
                     {
                         var cfdmDTO = _mapper.Map<CF_DivideMoney_DTO_VM>(cfdm);
+                        if (cfdmDTO.CF_DividingMoneyDetails is null) continue;
                         foreach (var account in cfdmDTO.CF_DividingMoneyDetails)
                         {
                             var fromAccount = _context.Account.Find(account.FromAccountID);
@@ -1505,6 +1520,22 @@ namespace pbms_be.DataAccess
                             }
                         }
                         item.CFDividingMoneyVMDTO = cfdmDTO;
+                    }
+                    if (item.TransactionID is not ConstantConfig.DEFAULT_NULL_TRANSACTION_ID)
+                    {
+                        if (item.TransactionID is not ConstantConfig.DEFAULT_ZERO_VALUE)
+                        {
+                            var invoice = _context.Invoice
+                                .Where(i => i.TransactionID == item.TransactionID)
+                                .Include(i => i.ActiveState)
+                                .Include(i => i.ProductInInvoices)
+                                .FirstOrDefault();
+                            if (invoice is not null)
+                            {
+                                var invoiceEntity = _mapper.Map<Invoice_VM_DTO>(invoice);
+                                item.Transaction.Invoice = invoiceEntity;
+                            }
+                        }
                     }
                 }
 
