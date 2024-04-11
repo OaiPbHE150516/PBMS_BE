@@ -980,7 +980,10 @@ namespace pbms_be.DataAccess
                             .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
                 // 2. get all transactions by month and year, include category
                 var transactionsByMonth = _context.Transaction
-                            .Where(t => t.AccountID == accountID && t.TransactionDate.Month == month && t.TransactionDate.Year == year)
+                            .Where(t => t.AccountID == accountID 
+                            && t.ActiveStateID == ActiveStateConst.ACTIVE
+                            && t.TransactionDate.Month == month 
+                            && t.TransactionDate.Year == year)
                             .Include(t => t.Category)
                             .ToList();
                 // 3. group by category type
