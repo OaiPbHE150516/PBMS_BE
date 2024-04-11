@@ -1050,7 +1050,7 @@ namespace pbms_be.DataAccess
                         FromAccountTransactionCount = item.FromAccountTransactionCount,
                         ToAccountID = item.ToAccountID,
                         DividingAmount = item.DividingAmount,
-                        LastTime = DateTime.UtcNow
+                        LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime()
                     };
                     list_cfdm_detail.Add(cfdm_detail);
                 }
@@ -1126,7 +1126,7 @@ namespace pbms_be.DataAccess
                     ToAccountID = item.ToAccountID,
                     ToAccount = authDA.GetAccount(item.ToAccountID),
                     DividingAmount = Math.Abs(item.ActualAmount),
-                    LastTime = DateTime.UtcNow
+                    LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime()
                 };
                 listDividingMoneyDetail.Add(detail);
                 count++;
@@ -1346,8 +1346,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var collabFund = GetCollabFund(deleteCollabFundDTO.CollabFundID);
-                if (collabFund is null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+                var collabFund = GetCollabFund(deleteCollabFundDTO.CollabFundID) ?? throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 collabFund.ActiveStateID = ActiveStateConst.DELETED;
                 _context.SaveChanges();
                 // return list collab fund
@@ -1366,9 +1365,7 @@ namespace pbms_be.DataAccess
                 var totalAmount = _context.CF_DividingMoneyDetail
                     .Where(cfdmd => cfdmd.CF_DividingMoneyDetailID == cfdm_detailID
                                     && cfdmd.FromAccountID == fromAccountID
-                                    && cfdmd.ToAccountID == toAccountID).FirstOrDefault();
-                if (totalAmount is null) throw new Exception(Message.CFDM_DETAIL_NOT_FOUND);
-
+                                    && cfdmd.ToAccountID == toAccountID).FirstOrDefault() ?? throw new Exception(Message.CFDM_DETAIL_NOT_FOUND);
                 totalAmountString = LConvertVariable.ConvertToMoneyFormat(totalAmount.DividingAmount);
 
                 var walletDA = new WalletDA(_context);
@@ -1390,8 +1387,7 @@ namespace pbms_be.DataAccess
                 var result = _context.CF_DividingMoneyDetail
                    .Where(cfdmd => cfdmd.CF_DividingMoneyDetailID == cfdm_detail.CF_DividingMoneyDetailID
                                    && cfdmd.FromAccountID == cfdm_detail.FromAccountID
-                                   && cfdmd.ToAccountID == cfdm_detail.ToAccountID).FirstOrDefault();
-                if (result is null) throw new Exception(Message.CFDM_DETAIL_NOT_FOUND);
+                                   && cfdmd.ToAccountID == cfdm_detail.ToAccountID).FirstOrDefault() ?? throw new Exception(Message.CFDM_DETAIL_NOT_FOUND);
                 result.IsDone = true;
                 _context.SaveChanges();
                 return result;
@@ -1565,6 +1561,8 @@ namespace pbms_be.DataAccess
                 // get fromAccount and toAccount of each CF_DividingMoneyDetail
                 foreach (var item in list_DM_DTO)
                 {
+                    // continue if item.CF_DividingMoneyDetails is null
+                    if (item.CF_DividingMoneyDetails is null) continue;
                     foreach (var detail in item.CF_DividingMoneyDetails)
                     {
                         var fromAccount = _context.Account.Find(detail.FromAccountID);
