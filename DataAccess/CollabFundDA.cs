@@ -56,7 +56,7 @@ namespace pbms_be.DataAccess
                         CollabFundID = result.CollabFundID,
                         IsFundholder = false,
                         LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime(),
-                        ActiveStateID = ActiveStateConst.ACTIVE
+                        ActiveStateID = ActiveStateConst.PENDING
                     };
                     accountCollabs.Add(accountCollab);
                 }
