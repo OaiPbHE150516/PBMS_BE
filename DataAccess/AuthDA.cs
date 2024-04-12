@@ -6,6 +6,11 @@ using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Auth;
 using System.IdentityModel.Tokens.Jwt;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Globalization;
 namespace pbms_be.DataAccess
 {
     public class AuthDA
@@ -139,8 +144,30 @@ namespace pbms_be.DataAccess
         internal object SearchAccount(string keyword)
         {
             // search by keyword is a part of  email or account name
-            var result = _context.Account.Where(a => a.EmailAddress.Contains(keyword) || a.AccountName.Contains(keyword)).ToList();
+            //var result = _context.Account.Where(a => a.EmailAddress.Contains(keyword) || a.AccountName.Contains(keyword)).ToList();
+
+            // lấy tất cả các tài khoản có tên hoặc email chứa keyword với việc bỏ các dấu tiếng Việt và chuyển về chữ thường lowercase
+            var result = _context.Account.Where(a => RemoveDiacritics(a.EmailAddress).Contains(RemoveDiacritics(keyword), StringComparison.CurrentCultureIgnoreCase)
+            || RemoveDiacritics(a.AccountName).Contains(RemoveDiacritics(keyword), StringComparison.CurrentCultureIgnoreCase)).ToList();
             return result;
+        }
+
+        public string RemoveDiacritics(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            string normalizedString = input.Normalize(NormalizationForm.FormD);
+            StringBuilder stringBuilder = new();
+
+            foreach (char c in normalizedString)
+            {
+                UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                    stringBuilder.Append(c);
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
     }
 }
