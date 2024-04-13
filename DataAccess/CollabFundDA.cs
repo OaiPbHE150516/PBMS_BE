@@ -72,7 +72,7 @@ namespace pbms_be.DataAccess
 
         public bool IsCollabFundExist(CollabFund collabFund)
         {
-            var exist = _context.CollabFund.Any(cf => cf.Name == collabFund.Name);
+            var exist = _context.CollabFund.Any(cf => cf.Name == collabFund.Name && cf.ActiveStateID == ActiveStateConst.ACTIVE);
             return exist;
         }
 
