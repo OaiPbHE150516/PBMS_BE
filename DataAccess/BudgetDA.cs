@@ -190,16 +190,41 @@ namespace pbms_be.DataAccess
         }
 
         // Update Budget
-        public Budget? UpdateBudget(Budget budget)
+        public Budget UpdateBudget(UpdateBudgetDTO budgetDTO)
         {
-            if (IsBudgetExist(budget))
+            try
             {
-                _context.Budget.Update(budget);
+                // Kiểm tra ngân sách tồn tại trước khi cập nhật
+                if (!IsBudgetExist(budgetDTO.AccountID, budgetDTO.BudgetID))
+                {
+                    throw new Exception(Message.BUDGET_NOT_FOUND);
+                }
+
+                using var transaction = _context.Database.BeginTransaction();
+
+                Budget budget = _context.Budget
+                                    .Where(x => x.BudgetID == budgetDTO.BudgetID && x.AccountID == budgetDTO.AccountID)
+                                    .Include(x => x.ActiveState)
+                                    .FirstOrDefault() ?? throw new Exception(Message.BUDGET_NOT_FOUND);
+
+                budget.ActiveStateID = ActiveStateConst.ACTIVE;
+                budget.BudgetName = budgetDTO.BudgetName;
+                budget.TargetAmount = budgetDTO.TargetAmount;
+                budget.Note = budgetDTO.Note;
+
+                // _context.Budget.Update(budget);
                 _context.SaveChanges();
-                return GetBudget(budget.BudgetID);
+
+                transaction.Commit();
+
+                return budget;
             }
-            return null;
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
+
 
         internal object? GetBudgetType()
         {
@@ -299,6 +324,131 @@ namespace pbms_be.DataAccess
                     budget.CurrentAmount += plusamount;
                 }
                 _context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal bool IsCategoryExist(List<int> categoryIDs)
+        {
+            // check that all category id in list category id is exist
+            var exist = _context.Category.Any(x => categoryIDs.Contains(x.CategoryID));
+            return exist;
+        }
+
+        internal object UpdateBudgetCategory(UpdateBudgetCategoryDTO budgetCategoryDTO)
+        {
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            try
+            {
+                // 1. find budget by budget id and account id
+                var budget = _context.Budget
+                            .Where(x => x.BudgetID == budgetCategoryDTO.BudgetID
+                                && x.AccountID == budgetCategoryDTO.AccountID
+                                && x.ActiveStateID == ActiveStateConst.ACTIVE)
+                            .Include(x => x.ActiveState)
+                            .FirstOrDefault() ?? throw new Exception(Message.BUDGET_NOT_FOUND);
+
+                // 2. add new budget category to budget
+                var listBudgetCategory = new List<BudgetCategory>();
+                foreach (var categoryID in budgetCategoryDTO.CategoryIDs)
+                {
+                    var budgetCategory = new BudgetCategory
+                    {
+                        BudgetID = budget.BudgetID,
+                        CategoryID = categoryID,
+                        ActiveStateID = ActiveStateConst.ACTIVE
+                    };
+                    listBudgetCategory.Add(budgetCategory);
+                }
+
+                // 3. update budget category by delete all budget category in budget and add new budget category
+                _context.BudgetCategory.RemoveRange(_context.BudgetCategory.Where(x => x.BudgetID == budget.BudgetID));
+                _context.SaveChanges();
+
+                // 4. add new budget category to budget
+                _context.BudgetCategory.AddRange(listBudgetCategory);
+                _context.SaveChanges();
+                scope.Complete();
+                return budget;
+
+
+                //// 1. find budget by budget id and account id
+                //var budget = GetBudget(budgetCategoryDTO.BudgetID, budgetCategoryDTO.AccountID);
+                //// 2. find all budget category by budget id
+                //var budgetCategories = _context.BudgetCategory
+                //                        .Where(x => x.BudgetID == budget.BudgetID && x.ActiveStateID == ActiveStateConst.ACTIVE)
+                //                        .ToList();
+                //// 3. find all category by account id
+                //var categories = _context.Category
+                //                .Where(x => x.AccountID == budgetCategoryDTO.AccountID && x.ActiveStateID == ActiveStateConst.ACTIVE)
+                //                .ToList();
+                //// 4. filter category id in list category id that exist in categories
+                //var listCategoryIDs = FilterExistCategories(budgetCategoryDTO.CategoryIDs, budgetCategoryDTO.AccountID);
+                //if (listCategoryIDs.Count == ConstantConfig.DEFAULT_ZERO_VALUE) throw new Exception(Message.CATEGORY_NOT_FOUND);
+                //// 5. delete all budget category in budget categories
+                //foreach (var bc in budgetCategories)
+                //{
+                //    bc.ActiveStateID = ActiveStateConst.DELETED;
+                //}
+                //_context.SaveChanges();
+                //// 6. add new budget category to budget
+                //var listBudgetCategory = new List<BudgetCategory>();
+                //foreach (var categoryID in listCategoryIDs)
+                //{
+                //    var budgetCategory = new BudgetCategory
+                //    {
+                //        BudgetID = budget.BudgetID,
+                //        CategoryID = categoryID,
+                //        ActiveStateID = ActiveStateConst.ACTIVE
+                //    };
+                //    listBudgetCategory.Add(budgetCategory);
+                //}
+                //_context.BudgetCategory.AddRange(listBudgetCategory);
+                //_context.SaveChanges();
+                //scope.Complete();
+                //return GetBudgets(budgetCategoryDTO.AccountID, null);
+            }
+            catch (Exception e)
+            {
+                scope.Dispose();
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal List<int> FilterBudgetCategories(List<int> categoryIDs, int budgetID)
+        {
+            try
+            {
+                // 1. find budget categories by budget id
+                var budgetCategories = _context.BudgetCategory
+                                    .Where(x => x.BudgetID == budgetID && x.ActiveStateID == ActiveStateConst.ACTIVE)
+                                    .Select(x => x.CategoryID)
+                                    .ToList();
+                // 2. filter category id in list category id that not exist in budget categories
+                var result = categoryIDs.Where(x => !budgetCategories.Contains(x)).ToList();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal List<int> FilterExistCategories(List<int> categoryIDs, string accountID)
+        {
+            try
+            {
+                // 1. find all category by account id
+                var categories = _context.Category
+                                .Where(x => x.AccountID == accountID && x.ActiveStateID == ActiveStateConst.ACTIVE)
+                                .Select(x => x.CategoryID)
+                                .ToList();
+                // 2. filter category id in list category id that exist in categories
+                var result = categoryIDs.Where(x => categories.Contains(x)).ToList();
+                return result;
             }
             catch (Exception e)
             {
