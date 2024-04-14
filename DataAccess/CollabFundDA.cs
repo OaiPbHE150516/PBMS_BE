@@ -149,7 +149,7 @@ namespace pbms_be.DataAccess
             try
             {
                 var collabAccount = _context.AccountCollab
-                                    .Where(ca => ca.AccountID == accountID)
+                                    .Where(ca => ca.AccountID == accountID && ca.ActiveStateID != ActiveStateConst.DELETED)
                                     .Select(ca => ca.CollabFundID)
                                     .ToList();
 
@@ -172,7 +172,7 @@ namespace pbms_be.DataAccess
                     item.AccountInCollabFunds = GetAccountInCollabFunds(item.CollabFundID);
                     // find activestate of this accountID in collabFund
                     item.AccountState = _context.AccountCollab
-                        .Where(ca => ca.CollabFundID == item.CollabFundID && ca.AccountID == accountID)
+                        .Where(ca => ca.CollabFundID == item.CollabFundID && ca.AccountID == accountID && ca.ActiveStateID != ActiveStateConst.DELETED)
                         .Include(ca => ca.ActiveState)
                         .Select(ca => ca.ActiveState)
                         .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
@@ -1311,7 +1311,7 @@ namespace pbms_be.DataAccess
                     AND t.transaction_id != 14887
                 GROUP BY cf.account_id;
                  */
-                var rawQuery =  $"WITH LastTrue AS (" +
+                var rawQuery = $"WITH LastTrue AS (" +
                             $"\r\n    SELECT DISTINCT ON (account_id) account_id, collab_fun_activity_id" +
                             $"\r\n    FROM collab_fun_activity " +
                             $"\r\n    WHERE collabfund_id = {collabFundID} AND isBeforeDivide = true " +
