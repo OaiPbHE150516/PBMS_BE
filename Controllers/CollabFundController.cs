@@ -530,6 +530,22 @@ namespace pbms_be.Controllers
             }
         }
 
+        // decline invitation to join collab fund by collab fund id and account id
+        [HttpPut("decline")]
+        public IActionResult DeclineMemberCollabFund([FromBody] AcceptMemberCollabFundDTO declineMemberCollabFundDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = _collabFundDA.DeclineMemberCollabFund(declineMemberCollabFundDTO);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         #endregion Put Methods
 
         #region Delete Methods
@@ -541,22 +557,6 @@ namespace pbms_be.Controllers
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 var result = _collabFundDA.DeleteMemberCollabFund(deleteMemberCollabFundDTO);
-                return Ok(result);
-            }
-            catch (System.Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        // decline invitation to join collab fund by collab fund id and account id
-        [HttpDelete("decline")]
-        public IActionResult DeclineMemberCollabFund([FromBody] AcceptMemberCollabFundDTO declineMemberCollabFundDTO)
-        {
-            try
-            {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-                var result = _collabFundDA.DeclineMemberCollabFund(declineMemberCollabFundDTO);
                 return Ok(result);
             }
             catch (System.Exception e)

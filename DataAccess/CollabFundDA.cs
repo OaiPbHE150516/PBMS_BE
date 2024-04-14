@@ -721,8 +721,7 @@ namespace pbms_be.DataAccess
                 var accountCollab = _context.AccountCollab
                     .Where(ca => ca.CollabFundID == declineMemberCollabFundDTO.CollabFundID
                                                           && ca.AccountID == declineMemberCollabFundDTO.AccountMemberID)
-                    .FirstOrDefault();
-                if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                    .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
                 accountCollab.ActiveStateID = ActiveStateConst.DELETED;
                 accountCollab.LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 _context.SaveChanges();
