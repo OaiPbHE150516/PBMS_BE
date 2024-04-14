@@ -113,6 +113,13 @@ namespace pbms_be.DTOs
         public string AccountMemberID { get; set; } = String.Empty;
     }
 
+
+    public class AcceptMemberCollabFundDTO
+    {
+        public int CollabFundID { get; set; }
+        public string AccountMemberID { get; set; } = String.Empty;
+    }
+
     public class CollabFundAccountActiveStateDTO : Account
     {
         public int CFA_ActiveStateID { get; set; }

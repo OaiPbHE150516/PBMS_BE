@@ -516,7 +516,7 @@ namespace pbms_be.Controllers
 
         // accept invitation to join collab fund by collab fund id and account id
         [HttpPut("accept")]
-        public IActionResult AcceptMemberCollabFund([FromBody] MemberCollabFundDTO acceptMemberCollabFundDTO)
+        public IActionResult AcceptMemberCollabFund([FromBody] AcceptMemberCollabFundDTO acceptMemberCollabFundDTO)
         {
             try
             {
@@ -551,7 +551,7 @@ namespace pbms_be.Controllers
 
         // decline invitation to join collab fund by collab fund id and account id
         [HttpDelete("decline")]
-        public IActionResult DeclineMemberCollabFund([FromBody] MemberCollabFundDTO declineMemberCollabFundDTO)
+        public IActionResult DeclineMemberCollabFund([FromBody] AcceptMemberCollabFundDTO declineMemberCollabFundDTO)
         {
             try
             {

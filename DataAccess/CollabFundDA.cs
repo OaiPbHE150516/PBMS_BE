@@ -398,7 +398,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                if (!IsAccountInCollabFund(collabFundID, accountID)) throw new Exception(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+                //if (!IsAccountInCollabFund(collabFundID, accountID)) throw new Exception(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 var collabAccount = _context.AccountCollab
                     .Where(ca => ca.CollabFundID == collabFundID
                         && ca.ActiveStateID == ActiveStateConst.ACTIVE)
@@ -415,8 +415,7 @@ namespace pbms_be.DataAccess
                                              && ca.AccountID == item.AccountID
                                              && ca.ActiveStateID == ActiveStateConst.ACTIVE)
                                             .Include(ca => ca.ActiveState)
-                                            .FirstOrDefault();
-                    if (inCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                                            .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
                     var accountDetailInCollabFundDTO = new AccountDetailInCollabFundDTO
                     {
                         AccountID = item.AccountID,
@@ -683,14 +682,10 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal object AcceptMemberCollabFund(MemberCollabFundDTO acceptMemberCollabFundDTO)
+        internal object AcceptMemberCollabFund(AcceptMemberCollabFundDTO acceptMemberCollabFundDTO)
         {
             try
             {
-                // 1. check if account is fundholder
-                var isFundholder = IsFundholderCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountFundholderID);
-                if (!isFundholder) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
-
                 // 2. check if account is already invited
                 var isInvited = IsAlreadyInvitedCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountMemberID);
                 if (!isInvited) throw new Exception(Message.ACCOUNT_WAS_NOT_INVITED);
@@ -698,15 +693,15 @@ namespace pbms_be.DataAccess
                 // 3. accept account as member
                 var accountCollab = _context.AccountCollab
                     .Where(ca => ca.CollabFundID == acceptMemberCollabFundDTO.CollabFundID
-                                       && ca.AccountID == acceptMemberCollabFundDTO.AccountMemberID)
+                     && ca.AccountID == acceptMemberCollabFundDTO.AccountMemberID)
                     .FirstOrDefault();
                 if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
                 accountCollab.ActiveStateID = ActiveStateConst.ACTIVE;
-                accountCollab.LastTime = DateTime.UtcNow;
+                accountCollab.LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 _context.SaveChanges();
 
                 // 4. return all member
-                return GetAllMemberWithDetailCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountFundholderID);
+                return GetAllMemberWithDetailCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountMemberID);
             }
             catch (Exception e)
             {
@@ -714,7 +709,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal object DeclineMemberCollabFund(MemberCollabFundDTO declineMemberCollabFundDTO)
+        internal object DeclineMemberCollabFund(AcceptMemberCollabFundDTO declineMemberCollabFundDTO)
         {
             try
             {
@@ -728,12 +723,12 @@ namespace pbms_be.DataAccess
                                                           && ca.AccountID == declineMemberCollabFundDTO.AccountMemberID)
                     .FirstOrDefault();
                 if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
-                accountCollab.ActiveStateID = ActiveStateConst.INACTIVE;
-                accountCollab.LastTime = DateTime.UtcNow;
+                accountCollab.ActiveStateID = ActiveStateConst.DELETED;
+                accountCollab.LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 _context.SaveChanges();
 
                 // 4. return all member
-                return GetAllMemberWithDetailCollabFund(declineMemberCollabFundDTO.CollabFundID, declineMemberCollabFundDTO.AccountFundholderID);
+                return GetAllMemberWithDetailCollabFund(declineMemberCollabFundDTO.CollabFundID, declineMemberCollabFundDTO.AccountMemberID);
             }
             catch (Exception e)
             {
