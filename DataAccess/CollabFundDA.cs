@@ -33,6 +33,7 @@ namespace pbms_be.DataAccess
                     throw new Exception(Message.COLLAB_FUND_ALREADY_EXIST);
                 }
                 collabFund.ActiveStateID = ActiveStateConst.ACTIVE;
+                collabFund.CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 _context.CollabFund.Add(collabFund);
                 _context.SaveChanges();
                 var result = GetCollabFund(collabFund.CollabFundID);
@@ -54,7 +55,8 @@ namespace pbms_be.DataAccess
                         AccountID = item,
                         CollabFundID = result.CollabFundID,
                         IsFundholder = false,
-                        ActiveStateID = ActiveStateConst.ACTIVE
+                        LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime(),
+                        ActiveStateID = ActiveStateConst.PENDING
                     };
                     accountCollabs.Add(accountCollab);
                 }
@@ -82,7 +84,7 @@ namespace pbms_be.DataAccess
                             .Where(cf => cf.Name == name
                                 && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(cf => cf.ActiveState)
-                            .FirstOrDefault();
+                            .FirstOrDefault() ?? throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 return result;
             }
             catch (Exception e)
@@ -99,7 +101,7 @@ namespace pbms_be.DataAccess
                             .Where(cf => cf.CollabFundID == collabFundID
                                     && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(cf => cf.ActiveState)
-                            .FirstOrDefault();
+                            .FirstOrDefault() ?? throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 return result;
             }
             catch (Exception e)
@@ -116,18 +118,22 @@ namespace pbms_be.DataAccess
                                     .Where(ca => ca.AccountID == accountID
                                             && ca.ActiveStateID == ActiveStateConst.ACTIVE)
                                     .Select(ca => ca.CollabFundID)
-                                    .ToList();
+                                    .ToList() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
 
                 var result = _context.CollabFund
                             .Where(cf => collabAccount.Contains(cf.CollabFundID)
                                     && cf.CollabFundID == collabFundID
                                     && cf.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(cf => cf.ActiveState)
-                            .FirstOrDefault();
+                            .FirstOrDefault() ?? throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 if (result is not null)
                 {
                     var divideMoneyInfor = GetDivideMoneyCollabFund(result.CollabFundID);
                     result.TotalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                }
+                else
+                {
+                    throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 }
                 //if (result == null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 return result;
@@ -143,7 +149,7 @@ namespace pbms_be.DataAccess
             try
             {
                 var collabAccount = _context.AccountCollab
-                                    .Where(ca => ca.AccountID == accountID)
+                                    .Where(ca => ca.AccountID == accountID && ca.ActiveStateID != ActiveStateConst.DELETED)
                                     .Select(ca => ca.CollabFundID)
                                     .ToList();
 
@@ -166,7 +172,7 @@ namespace pbms_be.DataAccess
                     item.AccountInCollabFunds = GetAccountInCollabFunds(item.CollabFundID);
                     // find activestate of this accountID in collabFund
                     item.AccountState = _context.AccountCollab
-                        .Where(ca => ca.CollabFundID == item.CollabFundID && ca.AccountID == accountID)
+                        .Where(ca => ca.CollabFundID == item.CollabFundID && ca.AccountID == accountID && ca.ActiveStateID != ActiveStateConst.DELETED)
                         .Include(ca => ca.ActiveState)
                         .Select(ca => ca.ActiveState)
                         .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
@@ -392,7 +398,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                if (!IsAccountInCollabFund(collabFundID, accountID)) throw new Exception(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
+                //if (!IsAccountInCollabFund(collabFundID, accountID)) throw new Exception(Message.ACCOUNT_IS_NOT_IN_COLLAB_FUND);
                 var collabAccount = _context.AccountCollab
                     .Where(ca => ca.CollabFundID == collabFundID
                         && ca.ActiveStateID == ActiveStateConst.ACTIVE)
@@ -409,8 +415,7 @@ namespace pbms_be.DataAccess
                                              && ca.AccountID == item.AccountID
                                              && ca.ActiveStateID == ActiveStateConst.ACTIVE)
                                             .Include(ca => ca.ActiveState)
-                                            .FirstOrDefault();
-                    if (inCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                                            .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
                     var accountDetailInCollabFundDTO = new AccountDetailInCollabFundDTO
                     {
                         AccountID = item.AccountID,
@@ -421,7 +426,7 @@ namespace pbms_be.DataAccess
                         IsFundholder = inCollab.IsFundholder,
                         ActiveStateID = inCollab.ActiveStateID,
                         ActiveState = inCollab.ActiveState,
-                        LastTime = LConvertVariable.ConvertUtcToLocalTime(inCollab.LastTime)
+                        LastTime = inCollab.LastTime
                     };
                     accountDetailInCollabFundDTOs.Add(accountDetailInCollabFundDTO);
                 }
@@ -463,7 +468,7 @@ namespace pbms_be.DataAccess
                         IsFundholder = inCollab.IsFundholder,
                         ActiveStateID = inCollab.ActiveStateID,
                         ActiveState = inCollab.ActiveState,
-                        LastTime = LConvertVariable.ConvertUtcToLocalTime(inCollab.LastTime)
+                        LastTime = inCollab.LastTime
                     };
                     accountDetailInCollabFundDTOs.Add(accountDetailInCollabFundDTO);
                 }
@@ -677,14 +682,10 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal object AcceptMemberCollabFund(MemberCollabFundDTO acceptMemberCollabFundDTO)
+        internal object AcceptMemberCollabFund(AcceptMemberCollabFundDTO acceptMemberCollabFundDTO)
         {
             try
             {
-                // 1. check if account is fundholder
-                var isFundholder = IsFundholderCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountFundholderID);
-                if (!isFundholder) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
-
                 // 2. check if account is already invited
                 var isInvited = IsAlreadyInvitedCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountMemberID);
                 if (!isInvited) throw new Exception(Message.ACCOUNT_WAS_NOT_INVITED);
@@ -692,15 +693,15 @@ namespace pbms_be.DataAccess
                 // 3. accept account as member
                 var accountCollab = _context.AccountCollab
                     .Where(ca => ca.CollabFundID == acceptMemberCollabFundDTO.CollabFundID
-                                       && ca.AccountID == acceptMemberCollabFundDTO.AccountMemberID)
+                     && ca.AccountID == acceptMemberCollabFundDTO.AccountMemberID)
                     .FirstOrDefault();
                 if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
                 accountCollab.ActiveStateID = ActiveStateConst.ACTIVE;
-                accountCollab.LastTime = DateTime.UtcNow;
+                accountCollab.LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 _context.SaveChanges();
 
                 // 4. return all member
-                return GetAllMemberWithDetailCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountFundholderID);
+                return GetAllMemberWithDetailCollabFund(acceptMemberCollabFundDTO.CollabFundID, acceptMemberCollabFundDTO.AccountMemberID);
             }
             catch (Exception e)
             {
@@ -708,7 +709,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal object DeclineMemberCollabFund(MemberCollabFundDTO declineMemberCollabFundDTO)
+        internal object DeclineMemberCollabFund(AcceptMemberCollabFundDTO declineMemberCollabFundDTO)
         {
             try
             {
@@ -720,14 +721,13 @@ namespace pbms_be.DataAccess
                 var accountCollab = _context.AccountCollab
                     .Where(ca => ca.CollabFundID == declineMemberCollabFundDTO.CollabFundID
                                                           && ca.AccountID == declineMemberCollabFundDTO.AccountMemberID)
-                    .FirstOrDefault();
-                if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
-                accountCollab.ActiveStateID = ActiveStateConst.INACTIVE;
-                accountCollab.LastTime = DateTime.UtcNow;
+                    .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                accountCollab.ActiveStateID = ActiveStateConst.DELETED;
+                accountCollab.LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 _context.SaveChanges();
 
                 // 4. return all member
-                return GetAllMemberWithDetailCollabFund(declineMemberCollabFundDTO.CollabFundID, declineMemberCollabFundDTO.AccountFundholderID);
+                return GetAllMemberWithDetailCollabFund(declineMemberCollabFundDTO.CollabFundID, declineMemberCollabFundDTO.AccountMemberID);
             }
             catch (Exception e)
             {
@@ -841,7 +841,7 @@ namespace pbms_be.DataAccess
                     {
                         itemDetail.FromAccount = _authDA.GetAccount(itemDetail.FromAccountID);
                         itemDetail.ToAccount = _authDA.GetAccount(itemDetail.ToAccountID);
-                        var time = LConvertVariable.ConvertUtcToLocalTime(itemDetail.LastTime);
+                        var time = itemDetail.LastTime;
                         itemDetail.LastTime = time;
                     }
                     dividingMoneyDetail.AddRange(detail);
@@ -1011,7 +1011,7 @@ namespace pbms_be.DataAccess
                     Note = "Chia tiền",
                     TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID,
                     ActiveStateID = ActiveStateConst.ACTIVE,
-                    CreateTime = LConvertVariable.ConvertUtcToLocalTime(DateTime.UtcNow)
+                    CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime(),
                 };
 
                 _context.CollabFundActivity.Add(cf_activity);
@@ -1044,7 +1044,7 @@ namespace pbms_be.DataAccess
                         FromAccountTransactionCount = item.FromAccountTransactionCount,
                         ToAccountID = item.ToAccountID,
                         DividingAmount = item.DividingAmount,
-                        LastTime = LConvertVariable.ConvertUtcToLocalTime(DateTime.UtcNow)
+                        LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime()
                     };
                     list_cfdm_detail.Add(cfdm_detail);
                 }
@@ -1120,7 +1120,7 @@ namespace pbms_be.DataAccess
                     ToAccountID = item.ToAccountID,
                     ToAccount = authDA.GetAccount(item.ToAccountID),
                     DividingAmount = Math.Abs(item.ActualAmount),
-                    LastTime = LConvertVariable.ConvertUtcToLocalTime(DateTime.UtcNow)
+                    LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime()
                 };
                 listDividingMoneyDetail.Add(detail);
                 count++;
@@ -1277,21 +1277,69 @@ namespace pbms_be.DataAccess
                          AND (cf.collab_fun_activity_id > ft.min_id OR ft.min_id IS NULL)
                      GROUP BY cf.account_id;
                  */
-                var rawQuery = $"WITH FirstTrue AS (" +
-                    $"SELECT account_id, collab_fun_activity_id, MIN(collab_fun_activity_id) as min_id " +
-                    $"FROM collab_fun_activity " +
-                    $"WHERE isBeforeDivide = true " +
-                    $"GROUP BY account_id, collab_fun_activity_id " +
-                    $") " +
-                    $"SELECT cf.account_id, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(COUNT(t.transaction_id), 0) as transaction_count " +
-                    $"FROM collab_fun_activity as cf " +
-                    $"LEFT JOIN transaction as t ON cf.transaction_id = t.transaction_id " +
-                    $"LEFT JOIN FirstTrue as ft ON cf.account_id = ft.account_id " +
-                    $"WHERE cf.collabfund_id = {collabFundID} " +
-                    $"AND cf.isBeforeDivide = false " +
-                    $"AND t.transaction_id != {ConstantConfig.DEFAULT_NULL_TRANSACTION_ID} " +
-                    $"AND (cf.collab_fun_activity_id > ft.min_id OR ft.min_id IS NULL) " +
-                    $"GROUP BY cf.account_id;";
+
+                //var rawQuery = $"WITH FirstTrue AS (" +
+                //    $"SELECT account_id, collab_fun_activity_id, MIN(collab_fun_activity_id) as min_id " +
+                //    $"FROM collab_fun_activity " +
+                //    $"WHERE isBeforeDivide = true " +
+                //    $"GROUP BY account_id, collab_fun_activity_id " +
+                //    $") " +
+                //    $"SELECT cf.account_id, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(COUNT(t.transaction_id), 0) as transaction_count " +
+                //    $"FROM collab_fun_activity as cf " +
+                //    $"LEFT JOIN transaction as t ON cf.transaction_id = t.transaction_id " +
+                //    $"LEFT JOIN FirstTrue as ft ON cf.account_id = ft.account_id " +
+                //    $"WHERE cf.collabfund_id = {collabFundID} " +
+                //    $"AND cf.isBeforeDivide = false " +
+                //    $"AND t.transaction_id != {ConstantConfig.DEFAULT_NULL_TRANSACTION_ID} " +
+                //    $"AND (cf.collab_fun_activity_id > ft.min_id OR ft.min_id IS NULL) " +
+                //    $"GROUP BY cf.account_id;";
+
+                /* ver 2, 12/4/2024
+                 WITH LastTrue AS (
+                    SELECT DISTINCT ON (account_id) account_id, collab_fun_activity_id
+                    FROM collab_fun_activity 
+                    WHERE collabfund_id = 1 AND isBeforeDivide = true 
+                    ORDER BY account_id, collab_fun_activity_id DESC
+                )
+                SELECT cf.account_id, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(COUNT(t.transaction_id), 0) as transaction_count
+                FROM collab_fun_activity as cf
+                LEFT JOIN transaction as t ON cf.transaction_id = t.transaction_id
+                LEFT JOIN LastTrue as ft ON cf.account_id = ft.account_id
+                WHERE cf.collabfund_id = 1
+                    AND cf.isBeforeDivide = false
+                    AND (cf.collab_fun_activity_id > ft.collab_fun_activity_id OR ft.collab_fun_activity_id IS NULL)
+                    AND t.transaction_id != 14887
+                GROUP BY cf.account_id;
+                 */
+                var rawQuery = $"WITH LastTrue AS (" +
+                            $"\r\n    SELECT DISTINCT ON (account_id) account_id, collab_fun_activity_id" +
+                            $"\r\n    FROM collab_fun_activity " +
+                            $"\r\n    WHERE collabfund_id = {collabFundID} AND isBeforeDivide = true " +
+                            $"\r\n    ORDER BY account_id, collab_fun_activity_id DESC" +
+                            $"\r\n)" +
+                            $"\r\nSELECT cf.account_id, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(COUNT(t.transaction_id), 0) as transaction_count" +
+                            $"\r\nFROM collab_fun_activity as cf" +
+                            $"\r\nLEFT JOIN transaction as t ON cf.transaction_id = t.transaction_id" +
+                            $"\r\nLEFT JOIN LastTrue as ft ON cf.account_id = ft.account_id" +
+                            $"\r\nWHERE cf.collabfund_id = {collabFundID}" +
+                            $"\r\n    AND cf.isBeforeDivide = false" +
+                            $"\r\n    AND (cf.collab_fun_activity_id > ft.collab_fun_activity_id OR ft.collab_fun_activity_id IS NULL)" +
+                            $"\r\n    AND t.transaction_id != {ConstantConfig.DEFAULT_NULL_TRANSACTION_ID}" +
+                            $"\r\nGROUP BY cf.account_id;WITH LastTrue AS (" +
+                            $"\r\n    SELECT DISTINCT ON (account_id) account_id, collab_fun_activity_id" +
+                            $"\r\n    FROM collab_fun_activity " +
+                            $"\r\n    WHERE collabfund_id = {collabFundID} AND isBeforeDivide = true " +
+                            $"\r\n    ORDER BY account_id, collab_fun_activity_id DESC" +
+                            $"\r\n)" +
+                            $"\r\nSELECT cf.account_id, COALESCE(SUM(total_amount), 0) as total_amount, COALESCE(COUNT(t.transaction_id), 0) as transaction_count" +
+                            $"\r\nFROM collab_fun_activity as cf" +
+                            $"\r\nLEFT JOIN transaction as t ON cf.transaction_id = t.transaction_id" +
+                            $"\r\nLEFT JOIN LastTrue as ft ON cf.account_id = ft.account_id" +
+                            $"\r\nWHERE cf.collabfund_id = {collabFundID}" +
+                            $"\r\n    AND cf.isBeforeDivide = false" +
+                            $"\r\n    AND (cf.collab_fun_activity_id > ft.collab_fun_activity_id OR ft.collab_fun_activity_id IS NULL)" +
+                            $"\r\n    AND t.transaction_id != {ConstantConfig.DEFAULT_NULL_TRANSACTION_ID}" +
+                            $"\r\nGROUP BY cf.account_id";
                 var result = _context.DivideMoneyInfo.FromSqlRaw(rawQuery).ToList();
                 return result;
             }
@@ -1340,8 +1388,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var collabFund = GetCollabFund(deleteCollabFundDTO.CollabFundID);
-                if (collabFund is null) throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+                var collabFund = GetCollabFund(deleteCollabFundDTO.CollabFundID) ?? throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
                 collabFund.ActiveStateID = ActiveStateConst.DELETED;
                 _context.SaveChanges();
                 // return list collab fund
@@ -1360,9 +1407,7 @@ namespace pbms_be.DataAccess
                 var totalAmount = _context.CF_DividingMoneyDetail
                     .Where(cfdmd => cfdmd.CF_DividingMoneyDetailID == cfdm_detailID
                                     && cfdmd.FromAccountID == fromAccountID
-                                    && cfdmd.ToAccountID == toAccountID).FirstOrDefault();
-                if (totalAmount is null) throw new Exception(Message.CFDM_DETAIL_NOT_FOUND);
-
+                                    && cfdmd.ToAccountID == toAccountID).FirstOrDefault() ?? throw new Exception(Message.CFDM_DETAIL_NOT_FOUND);
                 totalAmountString = LConvertVariable.ConvertToMoneyFormat(totalAmount.DividingAmount);
 
                 var walletDA = new WalletDA(_context);
@@ -1384,8 +1429,7 @@ namespace pbms_be.DataAccess
                 var result = _context.CF_DividingMoneyDetail
                    .Where(cfdmd => cfdmd.CF_DividingMoneyDetailID == cfdm_detail.CF_DividingMoneyDetailID
                                    && cfdmd.FromAccountID == cfdm_detail.FromAccountID
-                                   && cfdmd.ToAccountID == cfdm_detail.ToAccountID).FirstOrDefault();
-                if (result is null) throw new Exception(Message.CFDM_DETAIL_NOT_FOUND);
+                                   && cfdmd.ToAccountID == cfdm_detail.ToAccountID).FirstOrDefault() ?? throw new Exception(Message.CFDM_DETAIL_NOT_FOUND);
                 result.IsDone = true;
                 _context.SaveChanges();
                 return result;
@@ -1453,7 +1497,20 @@ namespace pbms_be.DataAccess
                 {
                     if (item.TransactionID is not ConstantConfig.DEFAULT_NULL_TRANSACTION_ID)
                     {
-                        item.Transaction = transDA.GetTransaction(item.TransactionID);
+                        var transaction = _context.Transaction
+                                        .Where(t => t.TransactionID == item.TransactionID && t.ActiveStateID == ActiveStateConst.ACTIVE)
+                                        .Include(t => t.ActiveState)
+                                        .Include(t => t.Category)
+                                        .Include(t => t.Wallet)
+                                        .FirstOrDefault();
+                        if (transaction is not null)
+                        {
+                            item.Transaction = transaction;
+                        }
+                        else
+                        {
+                            item.TransactionID = ConstantConfig.DEFAULT_ZERO_VALUE;
+                        }
                     }
                     else
                     {
@@ -1486,6 +1543,7 @@ namespace pbms_be.DataAccess
                     if (cfdm is not null)
                     {
                         var cfdmDTO = _mapper.Map<CF_DivideMoney_DTO_VM>(cfdm);
+                        if (cfdmDTO.CF_DividingMoneyDetails is null) continue;
                         foreach (var account in cfdmDTO.CF_DividingMoneyDetails)
                         {
                             var fromAccount = _context.Account.Find(account.FromAccountID);
@@ -1500,6 +1558,22 @@ namespace pbms_be.DataAccess
                             }
                         }
                         item.CFDividingMoneyVMDTO = cfdmDTO;
+                    }
+                    if (item.TransactionID is not ConstantConfig.DEFAULT_NULL_TRANSACTION_ID)
+                    {
+                        if (item.TransactionID is not ConstantConfig.DEFAULT_ZERO_VALUE)
+                        {
+                            var invoice = _context.Invoice
+                                .Where(i => i.TransactionID == item.TransactionID)
+                                .Include(i => i.ActiveState)
+                                .Include(i => i.ProductInInvoices)
+                                .FirstOrDefault();
+                            if (invoice is not null)
+                            {
+                                var invoiceEntity = _mapper.Map<Invoice_VM_DTO>(invoice);
+                                item.Transaction.Invoice = invoiceEntity;
+                            }
+                        }
                     }
                 }
 
@@ -1529,6 +1603,8 @@ namespace pbms_be.DataAccess
                 // get fromAccount and toAccount of each CF_DividingMoneyDetail
                 foreach (var item in list_DM_DTO)
                 {
+                    // continue if item.CF_DividingMoneyDetails is null
+                    if (item.CF_DividingMoneyDetails is null) continue;
                     foreach (var detail in item.CF_DividingMoneyDetails)
                     {
                         var fromAccount = _context.Account.Find(detail.FromAccountID);

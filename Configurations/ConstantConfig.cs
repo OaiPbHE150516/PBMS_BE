@@ -46,7 +46,7 @@
         // default primary key
         public const int DEFAULT_PRIMARY_KEY = 1;
         // default value for zero
-        public const int DEFAULT_ZERO_VALUE  = 0;
+        public const int DEFAULT_ZERO_VALUE = 0;
 
         // VN_TIMEZONE_UTC
         public const int VN_TIMEZONE_UTC = 7;
@@ -88,6 +88,9 @@
         public const int DEFAULT_CATEGORY_TYPE_ID_INCOME = 1;
         public const int DEFAULT_CATEGORY_TYPE_ID_EXPENSE = 2;
         public const int DEFAULT_CATEGORY_TYPE_ID_OTHER = 3;
+
+        // default DEFAULT_CURRENCY_VN
+        public const int DEFAULT_CURRENCY_VN = 2;
 
         // default Sort & Filter
         // public const string ascending sort
@@ -159,6 +162,7 @@
 
         // Category type
         public const string CATEGORY_TYPE_NOT_FOUND = " Category type not found";
+        public const string VALUE_TYPE_IS_NOT_VALID = " Value type is not valid ( must 1: income, 2: expense)";
 
         // email address is required
         public const string EMAIL_ADDRESS_REQUIRED = " Email address is required";
@@ -177,7 +181,7 @@
         public const string ACCOUNT_IS_NOT_IN_COLLAB_FUND = " Account is not in collab fund";
         public const string ACCOUNT_ALREADY_INVITED = " Account is already invited";
         public const string ACCOUNT_ALREADY_ACCEPTED = " Account is already accepted";
-        public const string ACCOUNT_ALREADY_REJECTED =  "Account is already rejected";
+        public const string ACCOUNT_ALREADY_REJECTED = "Account is already rejected";
         public const string ACCOUNT_WAS_NOT_INVITED = " Account was not invited";
         public const string ACCOUNT_FROM_NOT_FOUND = " Account from not found";
         public const string ACCOUNT_TO_NOT_FOUND = " Account to not found";
@@ -342,6 +346,7 @@
         public const string PBMS_BUCKET_NAME = "pbms-user";
         public const string INVOICE_FOLDER = "invoice";
         public const string COLLAB_FUND_FOLDER = "collabfund";
+        public const string ACCOUNT_FOLDER = "account";
         public const string FILE_FOLDER = "file";
         // pbms-user/invoice default = public_url + pbms-user/invoice
         public const string INVOICE_DEFAULT_FOLDER = PUBLIC_URL + "/" + PBMS_BUCKET_NAME + "/" + INVOICE_FOLDER;
@@ -352,7 +357,7 @@
         public const int DEFAULT_FILE_NAME_LENGTH = 15;
     }
 
-    public class  CurrencyConst
+    public class CurrencyConst
     {
         public const string dVND = "đ";
         public const int DEFAULT_CURRENCY_ID_VND = 2;

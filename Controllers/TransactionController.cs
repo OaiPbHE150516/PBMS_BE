@@ -183,8 +183,8 @@ namespace pbms_be.Controllers
                 // check if fromDate is greater than toDate
                 if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
                 // from dateTime with utc time kind
-                var fromDateTime = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day, 0, 0, 0).ToUniversalTime();
-                var toDateTime = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59).ToUniversalTime();
+                var fromDateTime = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day, 0, 0, 0);
+                var toDateTime = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
                 var result = _transactionDA.GetTransactionsDayByDay(accountID, fromDateTime, toDateTime, _mapper);
                 //if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 //var resultDTO = _mapper.Map<List<TransactionInList_VM_DTO>>(result);
@@ -230,14 +230,19 @@ namespace pbms_be.Controllers
                 if (string.IsNullOrEmpty(fromDateStr)) return BadRequest(Message.FROM_DATE_REQUIRED);
                 if (string.IsNullOrEmpty(toDateStr)) return BadRequest(Message.TO_DATE_REQUIRED);
 
-                var fromDate = DateTime.ParseExact(fromDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
-                var toDate = DateTime.ParseExact(toDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                var fromDateArr = fromDateStr.Split("-");
+                var toDateArr = toDateStr.Split("-");
+
+                var fromDate = new DateTime(int.Parse(fromDateArr[2]), int.Parse(fromDateArr[1]), int.Parse(fromDateArr[0]), 0, 0, 0);
+                var toDate = new DateTime(int.Parse(toDateArr[2]), int.Parse(toDateArr[1]), int.Parse(toDateArr[0]), 23, 59, 59);
                 if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
 
-                var fromDateTime = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day, 0, 0, 0).ToUniversalTime();
-                var toDateTime = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59).ToUniversalTime();
 
-                var result = _transactionDA.GetTransactionsWeekByWeek(accountID, fromDateTime, toDateTime, _mapper);
+                //var fromDate = DateTime.ParseExact(fromDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                //var toDate = DateTime.ParseExact(toDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                //if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
+
+                var result = _transactionDA.GetTransactionsWeekByWeek(accountID, fromDate, toDate, _mapper);
                 return Ok(result);
             }
             catch (System.Exception e)
@@ -245,6 +250,32 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet("get/raw/data/{accountID}/{fromDateStr}/{toDateStr}")]
+        public IActionResult GetRawData(string accountID, string fromDateStr, string toDateStr)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (string.IsNullOrEmpty(fromDateStr)) return BadRequest(Message.FROM_DATE_REQUIRED);
+                if (string.IsNullOrEmpty(toDateStr)) return BadRequest(Message.TO_DATE_REQUIRED);
+
+                var fromDate = DateTime.ParseExact(fromDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                var toDate = DateTime.ParseExact(toDateStr, ConstantConfig.DEFAULT_DATE_FORMAT_DASH, null);
+                if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
+
+                var result = _transactionDA.GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
+                // sort result by date
+                result = [.. result.OrderByDescending(x => x.TransactionDate)];
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+
 
         [HttpGet("get/daybyday/specific/{accountID}/{datetimestr}")]
         public IActionResult GetTransactionsDayByDaySpecific(string accountID, string datetimestr)

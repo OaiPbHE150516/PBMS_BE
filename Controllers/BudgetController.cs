@@ -117,7 +117,6 @@ namespace pbms_be.Controllers
                 // check budget name exist, if exist return error
                 var result = _budgetDA.CreateBudget(budgetDTO);
                 return Ok(result);
-
             }
             catch (System.Exception e)
             {
@@ -128,8 +127,54 @@ namespace pbms_be.Controllers
         #endregion
 
         #region Put Methods
-        
+
         // update budget
+        [HttpPut("update")]
+        public IActionResult UpdateBudget([FromBody] UpdateBudgetDTO budgetDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (string.IsNullOrEmpty(budgetDTO.AccountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (budgetDTO.BudgetID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.BUDGET_ID_REQUIRED);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                // check budget exist, if not exist return error
+                if (!_budgetDA.IsBudgetExist(budgetDTO.AccountID, budgetDTO.BudgetID)) return BadRequest(Message.BUDGET_NOT_FOUND);
+                // check budget name exist, if exist return error
+                var result = _budgetDA.UpdateBudget(budgetDTO);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        // update budget category
+        [HttpPut("update/category")]
+        public IActionResult UpdateBudgetCategory([FromBody] UpdateBudgetCategoryDTO budgetCategoryDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (string.IsNullOrEmpty(budgetCategoryDTO.AccountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                if (budgetCategoryDTO.BudgetID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.BUDGET_ID_REQUIRED);
+                if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
+                // check budget exist, if not exist return error
+                if (!_budgetDA.IsBudgetExist(budgetCategoryDTO.AccountID, budgetCategoryDTO.BudgetID)) return BadRequest(Message.BUDGET_NOT_FOUND);
+                // check category exist, if not exist return error
+                var listCategoryIDs = _budgetDA.FilterExistCategories(budgetCategoryDTO.CategoryIDs, budgetCategoryDTO.AccountID);
+                if (listCategoryIDs.Count == ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.CATEGORY_NOT_FOUND);
+                //var listCategoryIDsFilter = _budgetDA.FilterBudgetCategories(listCategoryIDs, budgetCategoryDTO.BudgetID);
+                //if (listCategoryIDsFilter.Count > ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.CATEGORY_NOT_FOUND);
+                budgetCategoryDTO.CategoryIDs = listCategoryIDs;
+                var result = _budgetDA.UpdateBudgetCategory(budgetCategoryDTO);
+                return Ok(result);
+            } catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
         #endregion
 

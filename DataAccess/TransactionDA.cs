@@ -10,6 +10,7 @@ using pbms_be.Data.Trans;
 using pbms_be.DTOs;
 using pbms_be.Library;
 using System.Collections.Generic;
+using System.Transactions;
 
 namespace pbms_be.DataAccess
 {
@@ -21,26 +22,24 @@ namespace pbms_be.DataAccess
             _context = context;
         }
 
-        public List<Transaction> GetTransactions(string AccountID, int pageNumber, int pageSize, string sortType)
+        public List<Data.Trans.Transaction> GetTransactions(string AccountID, int pageNumber, int pageSize, string sortType)
         {
             try
             {
-                var now = DateTime.UtcNow;
+                var now = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 int skip = (pageNumber - 1) * pageSize;
                 var result = _context.Transaction
-                            .Where(t => t.AccountID == AccountID && t.TransactionDate <= now)
+                            .Where(t => t.AccountID == AccountID && t.TransactionDate <= now && t.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(t => t.ActiveState)
                             .Include(t => t.Category)
                             .Include(t => t.Wallet)
                             .OrderByDescending(t => t.TransactionDate)
-                            .ToList();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                            .ToList() ?? throw new Exception(Message.TRANSACTION_NOT_FOUND);
                 var cateDA = new CategoryDA(_context);
                 var cates = cateDA.GetCategoryTypes();
                 foreach (var transaction in result)
                 {
-                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
-                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID) ?? throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
                     transaction.Category.CategoryType = cateType;
                 }
                 result = result.Skip(skip).Take(pageSize).ToList();
@@ -52,18 +51,17 @@ namespace pbms_be.DataAccess
             }
         }
 
-        public Transaction GetTransaction(int TransactionID)
+        public Data.Trans.Transaction GetTransaction(int TransactionID)
         {
             try
             {
                 var result = _context.Transaction
-                .Where(t => t.TransactionID == TransactionID)
+                .Where(t => t.TransactionID == TransactionID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                 .Include(t => t.ActiveState)
                 .Include(t => t.Category)
                 .Include(t => t.Wallet)
                 .FirstOrDefault();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
-                return result;
+                return result is null ? throw new Exception(Message.TRANSACTION_NOT_FOUND) : result;
             }
             catch (Exception e)
             {
@@ -71,10 +69,10 @@ namespace pbms_be.DataAccess
             }
         }
 
-        public List<Transaction> GetTransactionsByCategory(int CategoryID)
+        public List<Data.Trans.Transaction> GetTransactionsByCategory(int CategoryID)
         {
             var result = _context.Transaction
-                .Where(t => t.CategoryID == CategoryID)
+                .Where(t => t.CategoryID == CategoryID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                 .Include(t => t.ActiveState)
                 .Include(t => t.Category)
                 .Include(t => t.Wallet)
@@ -82,10 +80,10 @@ namespace pbms_be.DataAccess
             return result;
         }
 
-        public List<Transaction> GetTransactionsByWallet(int WalletID)
+        public List<Data.Trans.Transaction> GetTransactionsByWallet(int WalletID)
         {
             var result = _context.Transaction
-                .Where(t => t.WalletID == WalletID)
+                .Where(t => t.WalletID == WalletID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                 .Include(t => t.ActiveState)
                 .Include(t => t.Category)
                 .Include(t => t.Wallet)
@@ -98,7 +96,7 @@ namespace pbms_be.DataAccess
             try
             {
                 var totalRecord = _context.Transaction
-                                .Where(t => t.AccountID == accountID)
+                                .Where(t => t.AccountID == accountID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                                 .Count();
                 var totalPage = totalRecord / pageSize;
                 if (totalRecord % pageSize != 0) totalPage++;
@@ -115,7 +113,7 @@ namespace pbms_be.DataAccess
             try
             {
                 var result = _context.Transaction
-                            .Where(t => t.TransactionID == transactionID && t.AccountID == accountID)
+                            .Where(t => t.TransactionID == transactionID && t.AccountID == accountID && t.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(t => t.ActiveState)
                             .Include(t => t.Category)
                             .Include(t => t.Wallet)
@@ -140,32 +138,31 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal Transaction CreateTransaction(Transaction transaction)
+        //internal Transaction CreateTransaction(Transaction transaction)
+        //{
+        //    try
+        //    {
+        //        transaction.TransactionDate = DateTime.UtcNow;
+        //        transaction.ActiveStateID = ActiveStateConst.ACTIVE;
+        //        _context.Transaction.Add(transaction);
+        //        _context.SaveChanges();
+        //        return transaction;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new Exception(e.Message);
+        //    }
+        //}
+        internal Data.Trans.Transaction CreateTransactionV2(Data.Trans.Transaction transaction, DateTime transactionDate)
         {
-            try
-            {
-                transaction.TransactionDate = DateTime.UtcNow;
-                transaction.ActiveStateID = ActiveStateConst.ACTIVE;
-                _context.Transaction.Add(transaction);
-                _context.SaveChanges();
-                return transaction;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
-        internal Transaction CreateTransactionV2(Transaction transaction, DateTime transactionDate)
-        {
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             try
             {
                 if (transaction is null) throw new Exception(Message.TRANSACTION_IS_NULL);
                 var wallet = _context.Wallet
                             .Where(w => w.WalletID == transaction.WalletID && w.AccountID == transaction.AccountID && w.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(w => w.ActiveState)
-                            .FirstOrDefault();
-                if (wallet is null) throw new Exception(Message.WALLET_NOT_BELONG_ACCOUNT + ": " + transaction.AccountID);
-
+                            .FirstOrDefault() ?? throw new Exception(Message.WALLET_NOT_BELONG_ACCOUNT + ": " + transaction.AccountID);
                 var category = _context.Category
                             .Where(c => c.CategoryID == transaction.CategoryID && c.AccountID == transaction.AccountID && c.ActiveStateID == ActiveStateConst.ACTIVE)
                             .Include(c => c.ActiveState)
@@ -173,17 +170,14 @@ namespace pbms_be.DataAccess
                             .FirstOrDefault() ?? throw new Exception(Message.CATEGORY_NOT_BELONG_ACCOUNT + ": " + transaction.AccountID);
 
                 // transactionDate - 7 hours to get correct date
-                //transaction.TransactionDate = transactionDate.AddHours(-7);
+                transaction.TransactionDate = transactionDate.ToUniversalTime();
                 transaction.ActiveStateID = ActiveStateConst.ACTIVE;
                 _context.Transaction.Add(transaction);
                 _context.SaveChanges();
 
                 var walletDA = new WalletDA(_context);
-                var threadW = new Thread(() => walletDA.UpdateWalletAmount(transaction.WalletID, transaction.TotalAmount, category.CategoryTypeID));
-                threadW.Start();
-                threadW.Join();
-
-
+                walletDA.UpdateWalletAmount(transaction.WalletID, transaction.TotalAmount, category.CategoryTypeID);
+                
                 var balanceHisLogDA = new BalanceHisLogDA(_context);
                 var balancehislog = new BalanceHistoryLog
                 {
@@ -191,21 +185,25 @@ namespace pbms_be.DataAccess
                     WalletID = transaction.WalletID,
                     Balance = wallet.Balance,
                     TransactionID = transaction.TransactionID,
-                    HisLogDate = DateTime.UtcNow,
+                    HisLogDate = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC),
                     ActiveStateID = ActiveStateConst.ACTIVE
                 };
-                var threadB = new Thread(() => balanceHisLogDA.CreateBalanceHistoryLog(balancehislog));
-                threadB.Start();
-                threadB.Join();
+                 balanceHisLogDA.CreateBalanceHistoryLog(balancehislog);
+                
+                var budgetDA = new BudgetDA(_context);
+                budgetDA.UpdateBudgetAmount(transaction.AccountID, transaction.TotalAmount, category.CategoryID);
+                
+                scope.Complete();
                 return transaction;
             }
             catch (Exception e)
             {
+                scope.Dispose();
                 throw new Exception(e.Message);
             }
         }
 
-        internal Transaction CreateTransactionRaw(Transaction transaction)
+        internal Data.Trans.Transaction CreateTransactionRaw(Data.Trans.Transaction transaction)
         {
             try
             {
@@ -221,7 +219,7 @@ namespace pbms_be.DataAccess
         }
 
         // create transaction by list of transactions raw
-        internal List<Transaction> CreateTransactionsRaw(List<Transaction> transactions)
+        internal List<Data.Trans.Transaction> CreateTransactionsRaw(List<Data.Trans.Transaction> transactions)
         {
             try
             {
@@ -235,11 +233,11 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal bool IsTransactionExist(Transaction transaction)
+        internal bool IsTransactionExist(Data.Trans.Transaction transaction)
         {
             try
             {
-                transaction.TransactionDate = DateTime.UtcNow;
+                transaction.TransactionDate = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 transaction.ActiveStateID = ActiveStateConst.ACTIVE;
                 var result = _context.Transaction
                             .Any(t => t.AccountID == transaction.AccountID
@@ -259,7 +257,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal List<Transaction> GetTransactionsByMonth(string accountID, int month, int year)
+        internal List<Data.Trans.Transaction> GetTransactionsByMonth(string accountID, int month, int year)
         {
             try
             {
@@ -270,15 +268,15 @@ namespace pbms_be.DataAccess
                                     .Include(t => t.ActiveState)
                                     .Include(t => t.Category)
                                     .Include(t => t.Wallet)
-                                    .ToList();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                                    .ToList() ?? throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                // remove list transaction that is not active
+                result = result.FindAll(t => t.ActiveStateID == ActiveStateConst.ACTIVE);
                 var cateDA = new CategoryDA(_context);
                 var cates = cateDA.GetCategoryTypes();
                 foreach (var transaction in result)
                 {
-                    transaction.TransactionDate = LConvertVariable.ConvertUtcToLocalTime(transaction.TransactionDate);
-                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
-                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    transaction.TransactionDate = transaction.TransactionDate;
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID) ?? throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
                     transaction.Category.CategoryType = cateType;
                 }
                 return result;
@@ -289,7 +287,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal List<Transaction> GetTransactionsByDay(string accountID, int day, int month, int year)
+        internal List<Data.Trans.Transaction> GetTransactionsByDay(string accountID, int day, int month, int year)
         {
             try
             {
@@ -301,14 +299,12 @@ namespace pbms_be.DataAccess
                                     .Include(t => t.ActiveState)
                                     .Include(t => t.Category)
                                     .Include(t => t.Wallet)
-                                    .ToList();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                                    .ToList() ?? throw new Exception(Message.TRANSACTION_NOT_FOUND);
                 var cateDA = new CategoryDA(_context);
                 var cates = cateDA.GetCategoryTypes();
                 foreach (var transaction in result)
                 {
-                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
-                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID) ?? throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
                     transaction.Category.CategoryType = cateType;
                 }
                 return result;
@@ -319,28 +315,62 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal List<Transaction> GetTransactionsByDateTimeRange(string accountID, DateTime fromDate, DateTime toDate)
+        internal List<Data.Trans.Transaction> GetTransactionsByDateTimeRange(string accountID, DateTime fromDate, DateTime toDate)
         {
             try
             {
-                var result = _context.Transaction
-                                    .Where(t => t.AccountID == accountID
-                                    && t.TransactionDate >= fromDate
-                                    && t.TransactionDate <= toDate)
+                //var newFromDate = fromDate.AddDays(-1).ToUniversalTime();
+                //var newToDate = toDate.AddDays(1).ToUniversalTime();
+                //int toDay = toDate.Day + 1;
+
+
+                //var result = _context.Transaction
+                //                    .Where(t => t.AccountID == accountID
+                //                    && t.TransactionDate >= newFromDate
+                //                    && t.TransactionDate <= newToDate)
+                //                    .Include(t => t.ActiveState)
+                //                    .Include(t => t.Category)
+                //                    .Include(t => t.Wallet)
+                //                    .ToList() ?? throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                //// remove transaction that is not in range of fromDate and toDate by using CompareTo method
+                //var listTran = new List<Transaction>();
+                //foreach (var tran in result)
+                //{
+                //    int tranDay = tran.TransactionDate.Day;
+                //    if (tranDay < toDay)
+                //    {
+                //        listTran.Add(tran);
+                //    }                    
+                //}
+                var fromDateTimeUtc = fromDate.ToUniversalTime();
+                var toDateTimeUtc = toDate.ToUniversalTime();
+                // log fromDateTimeUtc and toDateTimeUtc
+                Console.WriteLine("fromDateTimeUtc: " + fromDateTimeUtc);
+                Console.WriteLine("toDateTimeUtc: " + toDateTimeUtc);
+
+                //var fromDateStr = fromDate.ToString("yyyy-MM-dd");
+                //var toDateStr = toDate.ToString("yyyy-MM-dd");
+
+                // var listTran is by excute sql query raw to get transactions in range of fromDate and toDate
+                var listTran = _context.Transaction
+                                    .FromSql($"SELECT * FROM transaction WHERE account_id = {accountID} AND transaction_date BETWEEN {fromDateTimeUtc} AND {toDateTimeUtc}")
                                     .Include(t => t.ActiveState)
                                     .Include(t => t.Category)
                                     .Include(t => t.Wallet)
                                     .ToList();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                // remove which transaction not have activestateID = 1
+                listTran = listTran.FindAll(t => t.ActiveStateID == ActiveStateConst.ACTIVE);
+
+                // sort listTran by date
+                listTran = [.. listTran.OrderByDescending(t => t.TransactionDate)];
                 var cateDA = new CategoryDA(_context);
                 var cates = cateDA.GetCategoryTypes();
-                foreach (var transaction in result)
+                foreach (var transaction in listTran)
                 {
-                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
-                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID) ?? throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
                     transaction.Category.CategoryType = cateType;
                 }
-                return result;
+                return listTran;
             }
             catch (Exception e)
             {
@@ -372,7 +402,7 @@ namespace pbms_be.DataAccess
                             Date = new DateOnly(transaction.TransactionDate.Year, transaction.TransactionDate.Month, transaction.TransactionDate.Day),
                             isHasTransaction = true,
                             TransactionCount = 1,
-                            Transactions = new List<TransactionDetail_VM_DTO> { _mapper.Map<TransactionDetail_VM_DTO>(transaction) }
+                            Transactions = [_mapper.Map<TransactionDetail_VM_DTO>(transaction)]
                         };
                         transactionsByDay.Add(day, transactionInDayCalendar);
                     }
@@ -408,7 +438,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var now = DateTime.UtcNow;
+                var now = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 var result = _context.Transaction
                             .Where(t => t.AccountID == accountID && t.TransactionDate <= now)
                             .Include(t => t.ActiveState)
@@ -416,15 +446,13 @@ namespace pbms_be.DataAccess
                             .Include(t => t.Wallet)
                             .OrderByDescending(t => t.TransactionDate)
                             .Take(number)
-                            .ToList();
-                if (result is null) throw new Exception(Message.TRANSACTION_NOT_FOUND);
+                            .ToList() ?? throw new Exception(Message.TRANSACTION_NOT_FOUND);
                 var cateDA = new CategoryDA(_context);
 
                 var cates = cateDA.GetCategoryTypes();
                 foreach (var transaction in result)
                 {
-                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID);
-                    if (cateType is null) throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
+                    var cateType = cates.Find(c => c.CategoryTypeID == transaction.Category.CategoryTypeID) ?? throw new Exception(Message.CATEGORY_TYPE_NOT_FOUND);
                     transaction.Category.CategoryType = cateType;
                 }
                 return result;
@@ -489,17 +517,17 @@ namespace pbms_be.DataAccess
                 foreach (var tran in transactions)
                 {
                     var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
-                    if (transactionsDict.ContainsKey(dateonly))
+                    if (transactionsDict.TryGetValue(dateonly, out TransactionInLastDays? value))
                     {
                         if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
                         {
-                            transactionsDict[dateonly].TotalAmountIn += tran.TotalAmount;
-                            transactionsDict[dateonly].NumberOfTransactionIn++;
+                            value.TotalAmountIn += tran.TotalAmount;
+                            value.NumberOfTransactionIn++;
                         }
                         else
                         {
-                            transactionsDict[dateonly].TotalAmountOut += tran.TotalAmount;
-                            transactionsDict[dateonly].NumberOfTransactionOut++;
+                            value.TotalAmountOut += tran.TotalAmount;
+                            value.NumberOfTransactionOut++;
                         }
                     }
                     else
@@ -613,19 +641,18 @@ namespace pbms_be.DataAccess
                 foreach (var tran in transactions)
                 {
                     var dateonly = new DateOnly(tran.TransactionDate.Year, tran.TransactionDate.Month, tran.TransactionDate.Day);
-                    if (transactionsDict.ContainsKey(dateonly))
+                    if (transactionsDict.TryGetValue(dateonly, out TransactionDayByDay? value))
                     {
-                        // add transaction to list of transactions
-                        transactionsDict[dateonly].Transactions.Add(_mapper.Map<TransactionInList_VM_DTO>(tran));
+                        value.Transactions.Add(_mapper.Map<TransactionInList_VM_DTO>(tran));
                         if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
                         {
-                            transactionsDict[dateonly].TotalAmountIn += tran.TotalAmount;
-                            transactionsDict[dateonly].NumberOfTransactionIn++;
+                            value.TotalAmountIn += tran.TotalAmount;
+                            value.NumberOfTransactionIn++;
                         }
                         else
                         {
-                            transactionsDict[dateonly].TotalAmountOut += tran.TotalAmount;
-                            transactionsDict[dateonly].NumberOfTransactionOut++;
+                            value.TotalAmountOut += tran.TotalAmount;
+                            value.NumberOfTransactionOut++;
                         }
                     }
                     else
@@ -798,7 +825,7 @@ namespace pbms_be.DataAccess
         }
 
         //         internal Transaction CreateTransactionV2(Transaction transaction, DateTime transactionDate)
-        internal object CreateTransactionWithImage(Transaction transaction, TransactionCreateWithImageDTO transactionDTO, IFormFile image)
+        internal object CreateTransactionWithImage(Data.Trans.Transaction transaction, TransactionCreateWithImageDTO transactionDTO, IFormFile image)
         {
             try
             {
@@ -824,7 +851,7 @@ namespace pbms_be.DataAccess
             {
                 if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var fromDate = DateTime.UtcNow.AddDays(-numdays);
-                var toDate = DateTime.UtcNow;
+                var toDate = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 var transactions = GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
                 var transactionsExpenses = transactions.Where(t => t.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_EXPENSE).ToList();
                 // group by day
@@ -953,7 +980,10 @@ namespace pbms_be.DataAccess
                             .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
                 // 2. get all transactions by month and year, include category
                 var transactionsByMonth = _context.Transaction
-                            .Where(t => t.AccountID == accountID && t.TransactionDate.Month == month && t.TransactionDate.Year == year)
+                            .Where(t => t.AccountID == accountID 
+                            && t.ActiveStateID == ActiveStateConst.ACTIVE
+                            && t.TransactionDate.Month == month 
+                            && t.TransactionDate.Year == year)
                             .Include(t => t.Category)
                             .ToList();
                 // 3. group by category type

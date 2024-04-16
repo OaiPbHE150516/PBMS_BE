@@ -21,6 +21,7 @@ namespace pbms_be.DTOs
         public string FromPerson { get; set; } = String.Empty;
         public string ToPerson { get; set; } = String.Empty;
         public string ImageURL { get; set; } = String.Empty;
+        public virtual Invoice_VM_DTO Invoice { get; set; } = null!;
     }
 
     public class TransactionInList_VM_DTO
@@ -32,6 +33,7 @@ namespace pbms_be.DTOs
         public virtual CategoryInTransaction_VM_DTO Category { get; set; } = null!;
         public long TotalAmount { get; set; }
         public string TotalAmountStr { get; set; } = String.Empty;
+        public string CurrencySymbol { get; set; } = "₫";
         public string Note { get; set; } = String.Empty;
         public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
         public string TransactionDateStr { get; set; } = String.Empty;

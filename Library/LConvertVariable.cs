@@ -1,6 +1,7 @@
 ﻿using pbms_be.Configurations;
 using pbms_be.Data.Custom;
 using System.Globalization;
+using System.Text;
 
 namespace pbms_be.Library
 {
@@ -35,7 +36,10 @@ namespace pbms_be.Library
 
         public static string ConvertMinusTimeNowMonthString(DateTime time)
         {
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
+            // log now and time
+            Console.WriteLine("now: " + now);
+            Console.WriteLine("time: " + time);
             var minusTime = now - time;
             var minusTimeNowString = string.Empty;
             if (minusTime.TotalMinutes < ConstantConfig.MIN_MINUTES_AGO)
@@ -377,6 +381,29 @@ namespace pbms_be.Library
                 return DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
             }
 
+        }
+
+        internal static object ConvertToPercentFormat(double v)
+        {
+            // convert double to string with 2 digits after dot and add % at the end
+            return v.ToString("0.00") + "%";
+        }
+
+        public static string RemoveDiacritics(string input)
+        {
+            string normalizedString = input.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+
+            foreach (char t in normalizedString)
+            {
+                UnicodeCategory uc = CharUnicodeInfo.GetUnicodeCategory(t);
+                if (uc != UnicodeCategory.NonSpacingMark)
+                {
+                    sb.Append(t);
+                }
+            }
+
+            return sb.ToString().Normalize(NormalizationForm.FormC);
         }
     }
 

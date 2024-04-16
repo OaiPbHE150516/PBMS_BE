@@ -7,7 +7,7 @@ using pbms_be.DataAccess;
 
 namespace pbms_be.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/balanceHisLogController")]
     [ApiController]
     public class BalanceHisLogController : ControllerBase
     {

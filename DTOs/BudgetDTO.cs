@@ -23,6 +23,7 @@ namespace pbms_be.DTOs
         public long TargetAmount { get; set; }
         public string TargetAmountStr { get; set; } = string.Empty;
         public double PercentProgress { get; set; }
+        public string PercentProgressStr { get; set; } = string.Empty;
         public DateTime BeginDate { get; set; } = DateTime.UtcNow;
         public string BeginDateStr { get; set; } = string.Empty;
         public DateTime EndDate { get; set; } = DateTime.UtcNow;
@@ -54,10 +55,18 @@ namespace pbms_be.DTOs
     //Update Budget
     public class UpdateBudgetDTO
     {
+        public string AccountID { get; set; } = string.Empty;
         public int BudgetID { get; set; }
         public string BudgetName { get; set; } = string.Empty;
-        public long BudgetAmount { get; set; }
+        public long TargetAmount { get; set; }
         public string Note { get; set; } = string.Empty;
+    }
+
+    public class UpdateBudgetCategoryDTO
+    {
+        public string AccountID { get; set; } = string.Empty;
+        public int BudgetID { get; set; }
+        public List<int> CategoryIDs { get; set; } = null!;
     }
 
     public class DeleteBudgetDTO

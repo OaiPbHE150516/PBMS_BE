@@ -5,6 +5,7 @@ using Microsoft.Identity.Client;
 using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Auth;
+using pbms_be.Library;
 using System.IdentityModel.Tokens.Jwt;
 namespace pbms_be.DataAccess
 {
@@ -33,7 +34,7 @@ namespace pbms_be.DataAccess
                     account.EmailAddress = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_EMAIL).Value;
                     account.RoleID = ConstantConfig.USER_ROLE_ID;
                     account.PictureURL = token.Claims.First(c => c.Type == ConstantConfig.TOKEN_CLIENT_PICTURE).Value;
-                    account.CreateTime = DateTime.UtcNow;
+                    account.CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                     var resultAccount = CreateAccount(account);
                     GenerateDefaultInformation(resultAccount);
                     return resultAccount;
@@ -136,10 +137,23 @@ namespace pbms_be.DataAccess
             }
         }
 
+        //internal object SearchAccount(string keyword)
+        //{
+        //    // search by keyword is a part of  email or account name
+        //    var keywordLower = keyword.ToLower();
+        //    var result = _context.Account.Where(a => a.EmailAddress.ToLower().Contains(keywordLower) || a.AccountName.ToLower().Contains(keywordLower)).ToList();
+        //    return result;
+        //}
+
         internal object SearchAccount(string keyword)
         {
-            // search by keyword is a part of  email or account name
-            var result = _context.Account.Where(a => a.EmailAddress.Contains(keyword) || a.AccountName.Contains(keyword)).ToList();
+            // Tìm kiếm tài khoản bằng keyword, loại bỏ dấu và chuyển về chữ thường
+            var normalizedKeyword = LConvertVariable.RemoveDiacritics(keyword.ToLower());
+            var allAccount = _context.Account.ToList();
+            var result = allAccount.Where(a =>
+                    a.EmailAddress.ToLower().Contains(normalizedKeyword, StringComparison.CurrentCultureIgnoreCase) ||
+                    LConvertVariable.RemoveDiacritics(a.AccountName.ToLower()).Contains(normalizedKeyword))
+                .ToList();
             return result;
         }
     }
