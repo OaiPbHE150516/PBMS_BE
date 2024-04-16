@@ -1,4 +1,8 @@
-﻿using pbms_be.DTOs;
+﻿using pbms_be.Data.Auth;
+using pbms_be.Data.Balance;
+using pbms_be.Data.CollabFund;
+using pbms_be.Data.Filter;
+using pbms_be.DTOs;
 using pbms_be.Library;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,12 +15,38 @@ public class DivideMoneyInfo
     [Column("account_id")]
     [Key]
     public string AccountID { get; set; } = String.Empty;
+    //public virtual Account Account { get; set; } = null!;
 
     [Column("total_amount")]
     public long TotalAmount { get; set; }
 
     [Column("transaction_count")]
     public int TransactionCount { get; set; }
+
+}
+
+public class DivideMoneyInfoWithAccount : DivideMoneyInfo
+{
+    public virtual Account Account { get; set; } = null!;
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public long RemainAmount { get; set; }
+    public string RemainAmountStr { get; set; } = String.Empty;
+    public string MoneyActionStr { get; set; } = String.Empty;
+}
+
+public class CF_DivideMoney_DTO_VM : CF_DividingMoney
+{
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public string AverageAmountStr { get; set; } = String.Empty;
+    public string RemainAmountStr { get; set; } = String.Empty;
+    public virtual DayDetail CreateTimeDetail { get; set; } = null!;
+    public virtual List<CF_DividingMoneyDetail_DTO_VM> List_CFDM_Detail_VM_DTO { get; set; } = null!;
+}
+
+public class CF_DividingMoneyDetail_DTO_VM : CF_DividingMoneyDetail
+{
+    public string FromAccountTotalAmountStr { get; set; } = String.Empty;
+    public string DividingAmountStr { get; set; } = String.Empty;
 }
 
 public class DivideMoneyExecute
@@ -64,6 +94,103 @@ public class TransactionInDayCalendar
     public virtual List<TransactionDetail_VM_DTO> Transactions { get; set; } = null!;
 }
 
+public class TransactionInLastDays
+{
+    public DayDetail DayDetail { get; set; } = null!;
+    public int NumberOfTransactionIn { get; set; } = 0;
+    public long TotalAmountIn { get; set; } = 0;
+    public string TotalAmountInStr { get; set; } = String.Empty;
+    public int NumberOfTransactionOut { get; set; } = 0;
+    public long TotalAmountOut { get; set; } = 0;
+    public string TotalAmountOutStr { get; set; } = String.Empty;
+    public int TransactionCount { get; set; } = 0;
+    public long TotalAmount { get; set; } = 0;
+    public string TotalAmountStr { get; set; } = String.Empty;
+}
+
+public class TransactionDayByDay
+{
+    public DayDetail DayDetail { get; set; } = null!;
+    public int NumberOfTransactionIn { get; set; } = 0;
+    public long TotalAmountIn { get; set; } = 0;
+    public string TotalAmountInStr { get; set; } = String.Empty;
+    public int NumberOfTransactionOut { get; set; } = 0;
+    public long TotalAmountOut { get; set; } = 0;
+    public string TotalAmountOutStr { get; set; } = String.Empty;
+    public int TransactionCount { get; set; } = 0;
+    public long TotalAmount { get; set; } = 0;
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public virtual List<TransactionInList_VM_DTO> Transactions { get; set; } = null!;
+}
+
+public class TransactionWeekByWeek
+{
+    public WeekDetail WeekDetail { get; set; } = null!;
+    public int NumberOfTransactionIn { get; set; } = 0;
+    public long TotalAmountIn { get; set; } = 0;
+    public string TotalAmountInStr { get; set; } = String.Empty;
+    public int NumberOfTransactionOut { get; set; } = 0;
+    public long TotalAmountOut { get; set; } = 0;
+    public string TotalAmountOutStr { get; set; } = String.Empty;
+    public int TransactionCount { get; set; } = 0;
+    public long TotalAmount { get; set; } = 0;
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public virtual Dictionary<DateOnly, DayInByWeek> TransactionsByDay { get; set; } = null!;
+}
+
+public class TransactionWeekByWeek2
+{
+    public WeekDetail WeekDetail { get; set; } = null!;
+    public int NumberOfTransactionIn { get; set; } = 0;
+    public long TotalAmountIn { get; set; } = 0;
+    public string TotalAmountInStr { get; set; } = String.Empty;
+    public int NumberOfTransactionOut { get; set; } = 0;
+    public long TotalAmountOut { get; set; } = 0;
+    public string TotalAmountOutStr { get; set; } = String.Empty;
+    public int TransactionCount { get; set; } = 0;
+    public long TotalAmount { get; set; } = 0;
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public virtual List<DayInByWeek> TransactionByDayW { get; set; } = null!;
+}
+
+public class DayInByWeek
+{
+    public DayDetail DayDetail { get; set; } = null!;
+    public long TotalAmountIn { get; set; } = 0;
+    public string TotalAmountInStr { get; set; } = String.Empty;
+    public long TotalAmountOut { get; set; } = 0;
+    public string TotalAmountOutStr { get; set; } = String.Empty;
+    public long TotalAmount { get; set; } = 0;
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public virtual List<TransactionInList_VM_DTO> Transactions { get; set; } = null!;
+}
+
+public class DayDetail
+{
+    public DayOfWeek DayOfWeek { get; set; }
+    public string Short_EN { get; set; } = String.Empty;
+    public string Full_EN { get; set; } = String.Empty;
+    public string Short_VN { get; set; } = String.Empty;
+    public string Full_VN { get; set; } = String.Empty;
+    public string ShortDate { get; set; } = String.Empty;
+    public string FullDate { get; set; } = String.Empty;
+
+    public string DayStr { get; set; } = String.Empty;
+    public string MonthYearStr { get; set; } = String.Empty;
+}
+
+public class WeekDetail
+{
+    public DateOnly StartDate { get; set; }
+    public string StartDateStrShort { get; set; } = String.Empty;
+    public string StartDateStrFull { get; set; } = String.Empty;
+    public string DayOfWeekStartStr { get; set; } = String.Empty;
+    public DateOnly EndDate { get; set; }
+    public string EndDateStrShort { get; set; } = String.Empty;
+    public string EndDateStrFull { get; set; } = String.Empty;
+    public string DayOfWeekEndStr { get; set; } = String.Empty;
+}
+
 public class GenerateRandomTransactions
 {
     public string AccountID { get; set; } = String.Empty;
@@ -90,5 +217,102 @@ public class GenerateRandomTransactions
     [Range(1000, 100000000)]
     public long maxAmount { get; set; } = 5000000;
     public bool isRoundAmount { get; set; } = true;
+
+}
+
+public class CustomBalanceHisLogByDate
+{
+    public DateOnly Date { get; set; }
+    public long TotalAmount { get; set; }
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public int TransactionCount { get; set; }
+    public virtual List<BalanceHisLog_VM_DTO> BalanceHistoryLogs { get; set; } = null!;
+
+}
+
+public class ADateOnly
+{
+    public DateOnly Date { get; set; }
+}
+
+public class KeyExtractor
+{
+    public string Key { get; set; } = String.Empty;
+}
+
+public class FileWithAccountID
+{
+    public string AccountID { get; set; } = String.Empty;
+    public IFormFile File { get; set; } = null!;
+    public string FileName { get; set; } = String.Empty;
+}
+
+public class FileWithTextPrompt
+{
+    public IFormFile File { get; set; } = null!;
+    public string TextPrompt { get; set; } = String.Empty;
+}
+
+public class InvoiceCustom_VM_Scan
+{
+    public string SupplierAddress { get; set; } = String.Empty;
+    public string SupplierPhone { get; set; } = String.Empty;
+    public string SupplierName { get; set; } = String.Empty;
+    public long TotalAmount { get; set; }
+    public long NetAmount { get; set; }
+    public long TaxAmount { get; set; }
+    public string IDOfInvoice { get; set; } = String.Empty;
+    public string InvoiceDate { get; set; } = String.Empty;
+    public List<ProductInInvoice_VM_Scan> ProductInInvoices { get; set; } = null!;
+}
+
+public class ProductInInvoice_VM_Scan
+{
+    public int ProductID { get; set; }
+    public string ProductName { get; set; } = String.Empty;
+    public int Quanity { get; set; } = 1;
+    public long UnitPrice { get; set; } = 1;
+    public long TotalAmount { get; set; }
+    public string Tag { get; set; } = String.Empty;
+}
+
+public class MoneyInvoice
+{
+    public long NetAmount { get; set; }
+    public long TaxAmount { get; set; }
+    public long TotalAmount { get; set; }
+}
+
+//public class CategoryWithAllTransaction
+//{
+//    public int CategoryID { get; set; }
+//    public string NameVN { get; set; } = String.Empty;
+//    public string NameEN { get; set; } = String.Empty;
+//    public long TotalAmount { get; set; }
+//    public string TotalAmountStr { get; set; } = String.Empty;
+//    public int NumberOfTransaction { get; set; }
+//    //public virtual List<TransactionDetail_VM_DTO> Transactions { get; set; } = null!;
+//}
+
+public class CategoryWithTransactionData
+{
+    public int CategoryNumber { get; set; }
+    public CategoryDetail_VM_DTO Category { get; set; } = null!;
+    public long TotalAmount { get; set; }
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public int NumberOfTransaction { get; set; }
+    public double Percentage { get; set; }
+    public string PercentageStr { get; set; } = String.Empty;
+}
+
+public class CategoryWithTransactionData2
+{
+    public int CategoryTypeNumber { get; set; }
+    public CategoryType CategoryType { get; set; } = null!;
+    public long TotalAmount { get; set; }
+    public string TotalAmountStr { get; set; } = String.Empty;
+    public int NumberOfTransaction { get; set; }
+    public double Percentage { get; set; }
+    public string PercentageStr { get; set; } = String.Empty;
 
 }

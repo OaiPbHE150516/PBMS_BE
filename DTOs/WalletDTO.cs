@@ -1,4 +1,5 @@
-﻿using pbms_be.Data.WalletF;
+﻿using pbms_be.Data.Status;
+using pbms_be.Data.WalletF;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace pbms_be.DTOs
@@ -13,7 +14,21 @@ namespace pbms_be.DTOs
         public string AccountID { get; set; } = String.Empty;
         public string Name { get; set; } = String.Empty;
         public long Balance { get; set; }
-        public int CurrencyID { get; set; }
+        public string Note { get; set; } = String.Empty;
+        public bool? IsBanking { get; set; } = false;
+        public string? QRCodeURL { get; set; } = String.Empty;
+        public string? BankName { get; set; } = String.Empty;
+        public string? BankAccount { get; set; } = String.Empty;
+        public string? BankUsername { get; set; } = String.Empty;
+        //public int CurrencyID { get; set; }
+    }
+
+    public class Currency_VM_DTO
+    {
+        public string Name { get; set; } = String.Empty;
+        public string Country { get; set; } = String.Empty;
+        public string Symbol { get; set; } = String.Empty;
+
     }
 
     public class Wallet_VM_DTO
@@ -22,8 +37,8 @@ namespace pbms_be.DTOs
         public string Name { get; set; } = String.Empty;
         public long Balance { get; set; }
         public string BalanceStr { get; set; } = String.Empty;
-        public int CurrencyID { get; set; }
-        public virtual Currency Currency { get; set; } = null!;
+        public virtual Currency_VM_DTO Currency { get; set; } = null!;
+        public virtual ActiveState ActiveState { get; set; } = null!;
         public string Note { get; set; } = String.Empty;
         public bool IsBanking { get; set; } = false;
         public string QRCodeURL { get; set; } = String.Empty;

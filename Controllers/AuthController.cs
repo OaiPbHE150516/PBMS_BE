@@ -47,26 +47,6 @@ namespace pbms_be.Controllers
 
         // POST: api/<AuthController>
         // update account info
-        [HttpPut("update")]
-        public IActionResult Update([FromBody] AccountUpdateDTO account)
-        {
-            try
-            {
-                AuthDA authDA = new AuthDA(_context);
-                if (authDA.IsAccountExist(account.AccountID))
-                {
-                    var accountEntity = _mapper.Map<Account>(account);
-                    var resultAccount = authDA.UpdateAccount(accountEntity);
-                    return Ok(resultAccount);
-                }
-                else
-                {
-                    return NotFound();
-                }
-            } catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+       
     }
 }

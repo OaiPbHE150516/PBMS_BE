@@ -10,6 +10,8 @@ namespace pbms_be.Data
         public DbSet<Auth.Account> Account { get; set; }
         public DbSet<Auth.Role> Role { get; set; }
 
+        public DbSet<Balance.BalanceHistoryLog> BalanceHistoryLogs { get; set; }
+
         public DbSet<WalletF.Currency> Currency { get; set; }
 
         public DbSet<WalletF.Wallet> Wallet { get; set; }
@@ -45,6 +47,9 @@ namespace pbms_be.Data
 
 
         public DbSet<Custom.DivideMoneyInfo> DivideMoneyInfo { get; set; }
+
+        // TextPrompt
+        public DbSet<TextPro.TextPrompt> TextPrompt { get; set; }
 
 
         // end of collab fund

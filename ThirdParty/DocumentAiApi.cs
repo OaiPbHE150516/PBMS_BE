@@ -2,6 +2,7 @@
 using Google.Protobuf;
 using Google.Protobuf.Collections;
 using pbms_be.Configurations;
+using pbms_be.Data.Custom;
 using pbms_be.Data.Invo;
 
 namespace pbms_be.ThirdParty
@@ -46,11 +47,15 @@ namespace pbms_be.ThirdParty
                 var entities = document.Entities;
                 Invoice invoice = new Invoice();
                 // loop through entities
+                var countProduct = 0;
                 foreach (var entity in entities)
                 {
                     if (entity.Properties.Count > 0)
                     {
-                        invoice.ProductInInvoices.Add(GetProductInInvoice(entity.Properties));
+                        countProduct++;
+                        var productInInvoice = GetProductInInvoice(entity.Properties);
+                        productInInvoice.ProductID = countProduct;
+                        invoice.ProductInInvoices.Add(productInInvoice);
                         continue;
                     }
                     var type = entity.Type;
@@ -238,6 +243,81 @@ namespace pbms_be.ThirdParty
                 Console.WriteLine(e.Message);
                 return false;
             }
+        }
+
+        internal static async Task<InvoiceCustom_VM_Scan> GetMoney(ByteString fileByteString, string fileMineType)
+        {
+            // create client
+            var client = new DocumentProcessorServiceClientBuilder
+            {
+                Endpoint = $"{ConstantConfig.LOCATION}-documentai.googleapis.com"
+            }.Build();
+
+            // read file
+            //var content = file.OpenReadStream();
+            var rawDocument = new RawDocument
+            {
+                Content = fileByteString,
+                MimeType = fileMineType
+            };
+
+            // Initialize request argument(s)
+            var request = new ProcessRequest
+            {
+                Name = ProcessorName.FromProjectLocationProcessor(ConstantConfig.PROJECT_ID, ConstantConfig.LOCATION, ConstantConfig.PROCESSOR_ID).ToString(),
+                RawDocument = rawDocument
+            };
+
+            // Make the request
+            var response = await client.ProcessDocumentAsync(request);
+
+            var invoiceDocumentAI = new InvoiceCustom_VM_Scan();
+            foreach (var entity in response.Document.Entities)
+            {
+                switch (entity.Type)
+                {
+                    case "net_amount":
+                        if (TryConvertStringToLong(entity.MentionText, out long resultNetAmount))
+                        {
+                            invoiceDocumentAI.NetAmount = resultNetAmount;
+                        }
+                        else
+                        {
+                            invoiceDocumentAI.NetAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
+                        }
+                        break;
+                    case "total_amount":
+                        if (TryConvertStringToLong(entity.MentionText, out long resultTotalAmount))
+                        {
+                            invoiceDocumentAI.TotalAmount = resultTotalAmount;
+                        }
+                        else
+                        {
+                            invoiceDocumentAI.TotalAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
+                        }
+                        break;
+                    case "total_tax_amount":
+                        if (TryConvertStringToLong(entity.MentionText, out long resultTaxAmount))
+                        {
+                            invoiceDocumentAI.TaxAmount = resultTaxAmount;
+                        }
+                        else
+                        {
+                            invoiceDocumentAI.TaxAmount = ConstantConfig.DEFAULT_ZERO_VALUE;
+                        }
+                        break;
+                    case "supplier_name":
+                        invoiceDocumentAI.SupplierName = entity.MentionText;
+                        break;
+                    case "supplier_address":
+                        invoiceDocumentAI.SupplierAddress = entity.MentionText;
+                        break;
+                    case "supplier_phone":
+                        invoiceDocumentAI.SupplierPhone = entity.MentionText;
+                        break;
+                }
+            }
+            return invoiceDocumentAI;
         }
     }
 }

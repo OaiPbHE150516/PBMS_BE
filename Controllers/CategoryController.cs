@@ -40,6 +40,22 @@ namespace pbms_be.Controllers
             }
         }
 
+        // get categories type by type
+        [HttpGet("get/typebytype/{accountID}/")]
+        public IActionResult GetCategoriesTypeByType(string accountID)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+                var result = _categoryDA.GetCategoriesTypeByType(accountID, _mapper);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         // get default categories
         [HttpGet("get/default")]
         public IActionResult GetDefaultCategories()

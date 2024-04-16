@@ -66,6 +66,8 @@ namespace pbms_be.DataAccess
             }
         }
 
+        //public static string UploadFileCustomV2(IFormFile file, string bucketname, string folder, string filename)
+
         //public static string UploadFileInternal(IFormFile file, )
 
         //public static string DownloadFile(string fileName)

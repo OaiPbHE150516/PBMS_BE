@@ -22,7 +22,8 @@ namespace pbms_be.DataAccess
             try
             {
                 var result = _context.Category
-                            .Where(c => c.AccountID == AccountID)
+                            .Where(c => c.AccountID == AccountID
+                            && c.ActiveStateID == ActiveStateConst.ACTIVE || c.ActiveStateID == ActiveStateConst.INACTIVE)
                             .Include(c => c.ActiveState)
                             .Include(c => c.CategoryType)
                             .OrderBy(c => c.CategoryID)
@@ -124,8 +125,7 @@ namespace pbms_be.DataAccess
             try
             {
                 var result = _context.CategoryType.Where(c => c.CategoryTypeID == categoryTypeID).FirstOrDefault();
-                if (result is null) throw new Exception(categoryTypeID + Message.CATEGORY_TYPE_NOT_FOUND);
-                return result;
+                return result is null ? throw new Exception(categoryTypeID + Message.CATEGORY_TYPE_NOT_FOUND) : result;
             }
             catch (Exception e)
             {
@@ -178,8 +178,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var parent = GetCategory(category.ParentCategoryID, category.AccountID);
-                if (parent is null) throw new Exception(Message.CATEGORY_PARENT_NOT_FOUND);
+                var parent = GetCategory(category.ParentCategoryID, category.AccountID) ?? throw new Exception(Message.CATEGORY_PARENT_NOT_FOUND);
                 category.CategoryTypeID = parent.CategoryTypeID;
                 category.ActiveStateID = ActiveStateConst.ACTIVE;
                 category.IsRoot = false;
@@ -202,8 +201,7 @@ namespace pbms_be.DataAccess
                             .Include(c => c.ActiveState)
                             .Include(c => c.CategoryType)
                             .FirstOrDefault();
-                if (result is null) throw new Exception(Message.CATEGORY_NOT_FOUND);
-                return result;
+                return result is null ? throw new Exception(Message.CATEGORY_NOT_FOUND) : result;
             }
             catch (Exception e)
             {
@@ -215,17 +213,16 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var categoryUpdate = GetCategory(category.CategoryID, category.AccountID);
-                if (categoryUpdate is null) throw new Exception(Message.CATEGORY_NOT_FOUND);
+                var categoryUpdate = GetCategory(category.CategoryID, category.AccountID) ?? throw new Exception(Message.CATEGORY_NOT_FOUND);
                 categoryUpdate.NameEN = category.NameEN;
                 categoryUpdate.NameVN = category.NameVN;
                 categoryUpdate.ParentCategoryID = category.ParentCategoryID;
-                var parent = GetCategory(category.ParentCategoryID, category.AccountID);
-                if (parent is null) throw new Exception(Message.CATEGORY_PARENT_NOT_FOUND);
+                var parent = GetCategory(category.ParentCategoryID, category.AccountID) ?? throw new Exception(Message.CATEGORY_PARENT_NOT_FOUND);
                 categoryUpdate.CategoryTypeID = parent.CategoryTypeID;
                 _context.SaveChanges();
                 return GetCategory(category.CategoryID, category.AccountID);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
@@ -235,11 +232,45 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                var category = GetCategory(categoryID, accountID);
-                if (category is null) throw new Exception(Message.CATEGORY_NOT_FOUND);
+                var category = GetCategory(categoryID, accountID) ?? throw new Exception(Message.CATEGORY_NOT_FOUND);
                 category.ActiveStateID = ActiveStateConst.DELETED;
                 _context.SaveChanges();
                 return category;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetCategoriesTypeByType(string accountID, AutoMapper.IMapper? _mapper)
+        {
+            try
+            {
+                //var categoriesDict = new Dictionary<string, List<Category>>();
+                var categories = GetCategories(accountID);
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var categoriesDTO = _mapper.Map<List<CategoryTree_VM_DTO>>(categories);
+
+                var categoryMap = categoriesDTO.ToDictionary(c => c.CategoryID, c => c);
+                var rootCategories = new List<CategoryTree_VM_DTO>();
+
+                // add children to parent category
+                foreach (var category in categoriesDTO)
+                {
+                    if (category.ParentCategoryID == 0)
+                    {
+                        rootCategories.Add(category);
+                    }
+                    else
+                    {
+                        if (categoryMap.TryGetValue(category.ParentCategoryID, out CategoryTree_VM_DTO? value))
+                        {
+                            value.Children.Add(category);
+                        }
+                    }
+                }
+                return rootCategories;
             }
             catch (Exception e)
             {

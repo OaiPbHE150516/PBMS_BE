@@ -61,6 +61,34 @@ namespace pbms_be.Controllers
             return Ok(fileURL);
         }
 
+        [HttpPost("upload/transaction/invoice/filename")]
+        public IActionResult UploadInvoiceFileWithName([FromForm] FileWithAccountID fileWithAccountID)
+        {
+            // only accept image, pdf, doc, docx, xls, xlsx, ppt, pptx, txt
+            if (fileWithAccountID.File is null) return BadRequest(Message.FILE_IS_NULL_);
+            if (fileWithAccountID.FileName is null) return BadRequest(Message.FILE_NAME_IS_NULL);
+            if (LValidation.IsCorrectPDFJPGPNG(fileWithAccountID.File)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
+            //var filename = LConvertVariable.GenerateRandomString(CloudStorageConfig.DEFAULT_FILE_NAME_LENGTH, Path.GetFileNameWithoutExtension(file.FileName));
+            var folderName = CloudStorageConfig.INVOICE_FOLDER + "/" + fileWithAccountID.AccountID;
+            var fileURL = GCP_BucketDA.UploadFileCustom(fileWithAccountID.File, CloudStorageConfig.PBMS_BUCKET_NAME, folderName,
+                                                        "invoice", fileWithAccountID.FileName, "file", false);
+            return Ok(fileURL);
+        }
+
+        // upload file to account folder in default bucket
+        [HttpPost("upload/file/{accountID}")]
+        public IActionResult UploadFileToAccountFolder(string accountID, IFormFile file)
+        {
+            // only accept image, pdf, doc, docx, xls, xlsx, ppt, pptx, txt
+            if (file is null) return BadRequest(Message.FILE_IS_NULL_);
+            if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
+            var filename = LConvertVariable.GenerateRandomString(CloudStorageConfig.DEFAULT_FILE_NAME_LENGTH, Path.GetFileNameWithoutExtension(file.FileName));
+            var folderName = CloudStorageConfig.ACCOUNT_FOLDER + "/" + accountID;
+            var fileURL = GCP_BucketDA.UploadFileCustom(file, CloudStorageConfig.PBMS_BUCKET_NAME, folderName,
+                                                                       "file", filename, "file", true);
+            return Ok(fileURL);
+        }
+
         // generate data
         [HttpGet("generatesqlquery")]
         public IActionResult GenerateData()

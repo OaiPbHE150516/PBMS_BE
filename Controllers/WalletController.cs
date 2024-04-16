@@ -125,6 +125,8 @@ namespace pbms_be.Controllers
 
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var walletEntity = _mapper.Map<Wallet>(wallet);
+                walletEntity.CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
+                walletEntity.CurrencyID = ConstantConfig.DEFAULT_CURRENCY_VN;
                 var result = _walletDA.CreateWallet(walletEntity);
 
                 if (result is null) return BadRequest();
@@ -170,10 +172,8 @@ namespace pbms_be.Controllers
                 var authDA = new AuthDA(_context);
                 if (!authDA.IsAccountExist(changeActiveStateDTO.AccountID)) return BadRequest(Message.ACCOUNT_NOT_FOUND);
 
-                if (_walletDA.IsWalletExist(changeActiveStateDTO.AccountID, changeActiveStateDTO.WalletID))
+                if (!_walletDA.IsWalletExist(changeActiveStateDTO.AccountID, changeActiveStateDTO.WalletID))
                     return BadRequest(Message.WALLET_NOT_FOUND);
-
-
                 var result = _walletDA.ChangeWalletActiveState(changeActiveStateDTO);
                 return Ok(result);
             }
@@ -193,7 +193,7 @@ namespace pbms_be.Controllers
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
-                if (_walletDA.IsWalletExist(deleteDTO.AccountID, deleteDTO.WalletID)) return BadRequest(Message.WALLET_NOT_FOUND);
+                if (!_walletDA.IsWalletExist(deleteDTO.AccountID, deleteDTO.WalletID)) return BadRequest(Message.WALLET_NOT_FOUND);
                 var authDA = new AuthDA(_context);
                 if (!authDA.IsAccountExist(deleteDTO.AccountID)) return BadRequest(Message.ACCOUNT_NOT_FOUND);
                 var result = _walletDA.DeleteWallet(deleteDTO);

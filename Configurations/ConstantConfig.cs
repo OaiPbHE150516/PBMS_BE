@@ -29,6 +29,8 @@
         public const string MINE_TYPE_JPEG = "image/jpeg";
         public const string MINE_TYPE_PNG = "image/png";
         public const string MINE_TYPE_JPG = "image/jpg";
+        // heic
+        public const string MINE_TYPE_HEIC = "image/heic";
 
         // NUMBER_LAST_DAYS
         public const int NUMBER_LAST_DAYS = 7;
@@ -40,11 +42,11 @@
         public const long NEGATIVE_VALUE = -1;
         public const int DEFAULT_ACTIVE_STATE_VALUE = 1;
         // Dùng trong trường hợp không có transaction id
-        public const int DEFAULT_NULL_TRANSACTION_ID = 1;
+        public const int DEFAULT_NULL_TRANSACTION_ID = 14887;
         // default primary key
         public const int DEFAULT_PRIMARY_KEY = 1;
         // default value for zero
-        public const int DEFAULT_ZERO_VALUE  = 0;
+        public const int DEFAULT_ZERO_VALUE = 0;
 
         // VN_TIMEZONE_UTC
         public const int VN_TIMEZONE_UTC = 7;
@@ -58,13 +60,22 @@
         // min months ago to know it days ago
         public const int MIN_MONTHS_AGO = 30;
 
-        public const string DEFAULT_DATETIME_FORMAT = "HH:mm, dd/MM/yyyy";
+        public const string DEFAULT_DATETIME_FORMAT = "dd/MM/yyyy";
 
         public const string DEFAULT_UTC_DATETIME_FORMAT = "yyyy-MM-ddTHH:mm:ssZ";
         // default time format
         public const string DEFAULT_TIME_FORMAT = "HH:mm";
         // default date format
         public const string DEFAULT_DATE_FORMAT = "dd/MM/yyyy";
+
+        public const string DEFAULT_DATE_FORMAT_DASH = "dd-MM-yyyy";
+        // DEFAULT_DATE_FORMAT_SLASH
+        public const string DEFAULT_DATE_FORMAT_SLASH = "dd/MM/yy";
+
+        // DEFAULT_DATE_FORMAT_SHORT
+        public const string DEFAULT_DATE_FORMAT_SHORT = "dd thg MM";
+
+        public const string DEFAULT_DAY_THG_MONTH = " thg ";
 
         // default category name en
         public const string DEFAULT_CATEGORY_NAME_EN_INCOME = "Income";
@@ -77,6 +88,9 @@
         public const int DEFAULT_CATEGORY_TYPE_ID_INCOME = 1;
         public const int DEFAULT_CATEGORY_TYPE_ID_EXPENSE = 2;
         public const int DEFAULT_CATEGORY_TYPE_ID_OTHER = 3;
+
+        // default DEFAULT_CURRENCY_VN
+        public const int DEFAULT_CURRENCY_VN = 2;
 
         // default Sort & Filter
         // public const string ascending sort
@@ -99,6 +113,12 @@
         public const string FILE_IS_NULL = " File is null or not of type pdf";
         public const string FILE_IS_NOT_PDF_JPG_PNG = " File is null or not of type pdf, jpg or png";
 
+        // profile 
+        public const string KEYWORD_REQUIRED = " Keyword is required";
+
+        // DATE_TIME_REQUIRED
+        public const string DATE_TIME_REQUIRED = " Date time is required";
+
         public const string NUMBER_REQUIRED = " Number is required";
 
         // Page
@@ -119,7 +139,9 @@
         public const string YEAR_REQUIRED = " Year is required";
         public const string FROM_DATE_REQUIRED = " From date is required";
         public const string TO_DATE_REQUIRED = " To date is required";
-
+        public const string TRANSACTION_IS_NULL = " Transaction is null";
+        public const string WALLET_NOT_BELONG_ACCOUNT = " Wallet not belong to account";
+        public const string CATEGORY_NOT_BELONG_ACCOUNT = " Category not belong to account";
 
 
         // Budget
@@ -127,6 +149,10 @@
         public const string BUDGET_ID_REQUIRED = " BudgetID is required";
         public const string BUDGET_NOT_FOUND = " Budget not found";
         public const string BUDGET_TYPE_NOT_FOUND = " Budget type not found";
+
+        // Balance
+        public const string BALANCE_HISTORY_LOG_NOT_FOUND = "No balance history log found for this account";
+        public const string BALANCE_HISTORY_LOG_INVALID = "Balance history log is invalid";
 
         // Category
         public const string CATEGORY_ALREADY_EXIST = " Category already exist";
@@ -136,6 +162,7 @@
 
         // Category type
         public const string CATEGORY_TYPE_NOT_FOUND = " Category type not found";
+        public const string VALUE_TYPE_IS_NOT_VALID = " Value type is not valid ( must 1: income, 2: expense)";
 
         // email address is required
         public const string EMAIL_ADDRESS_REQUIRED = " Email address is required";
@@ -154,12 +181,15 @@
         public const string ACCOUNT_IS_NOT_IN_COLLAB_FUND = " Account is not in collab fund";
         public const string ACCOUNT_ALREADY_INVITED = " Account is already invited";
         public const string ACCOUNT_ALREADY_ACCEPTED = " Account is already accepted";
-        public const string ACCOUNT_ALREADY_REJECTED =  "Account is already rejected";
+        public const string ACCOUNT_ALREADY_REJECTED = "Account is already rejected";
         public const string ACCOUNT_WAS_NOT_INVITED = " Account was not invited";
         public const string ACCOUNT_FROM_NOT_FOUND = " Account from not found";
         public const string ACCOUNT_TO_NOT_FOUND = " Account to not found";
         public const string COLLAB_FUND_ACTIVITY_NOT_FOUND = " Collab fund activity not found";
-
+        public const string COLLAB_FUND_NOTFOUND_ANY_MONEY = " Collab fund not found any money";
+        public const string COLLAB_FUND_NOTFOUND_DATA = " Collab fund not found data";
+        // not found any collab fund dividing money
+        public const string COLLAB_FUND_NOTFOUND_ANY_DIVIDING_MONEY = " Collab fund not found any dividing money";
         // cfdm detail not found
         public const string CFDM_DETAIL_NOT_FOUND = " Collab Fund dividing money detail not found";
 
@@ -187,6 +217,7 @@
         public const string FILE_IS_NULL_ = " File is null";
         public const string FILE_IS_TOO_LARGE = " File is too large";
         public const string FILE_IS_NOT_JPG_PNG = " File is not of type jpg or png";
+        public const string FILE_NAME_IS_NULL = " File name is null";
 
         // Datetime
         public const string FROM_DATE_GREATER_THAN_TO_DATE = " From date greater than to date";
@@ -315,6 +346,7 @@
         public const string PBMS_BUCKET_NAME = "pbms-user";
         public const string INVOICE_FOLDER = "invoice";
         public const string COLLAB_FUND_FOLDER = "collabfund";
+        public const string ACCOUNT_FOLDER = "account";
         public const string FILE_FOLDER = "file";
         // pbms-user/invoice default = public_url + pbms-user/invoice
         public const string INVOICE_DEFAULT_FOLDER = PUBLIC_URL + "/" + PBMS_BUCKET_NAME + "/" + INVOICE_FOLDER;
@@ -325,7 +357,7 @@
         public const int DEFAULT_FILE_NAME_LENGTH = 15;
     }
 
-    public class  CurrencyConst
+    public class CurrencyConst
     {
         public const string dVND = "đ";
         public const int DEFAULT_CURRENCY_ID_VND = 2;
