@@ -8,12 +8,13 @@ using pbms_be.Data.CollabFund;
 using pbms_be.Data.WalletF;
 using pbms_be.DataAccess;
 using pbms_be.DTOs;
+using pbms_be.Interface;
 
 namespace pbms_be.Controllers
 {
     [Route("api/wallet/")]
     [ApiController]
-    public class WalletController : ControllerBase
+    public class WalletController : ControllerBase, IWallet
     {
         private readonly PbmsDbContext _context;
         private readonly IMapper? _mapper;
