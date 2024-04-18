@@ -5,9 +5,14 @@ using pbms_be.Data.Log;
 
 namespace pbms_be.ThirdParty
 {
-    public class HandleScanLog(PbmsDbContext context)
+    public class HandleScanLog
     {
-        private readonly PbmsDbContext _context = context;
+        private readonly PbmsDbContext _context;
+
+        public HandleScanLog(PbmsDbContext context)
+        {
+            _context = context;
+        }
 
         // a function to handle scan log
         public ScanLog CreateScanLog(string accountID, string scanType, string scanResult)
