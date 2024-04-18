@@ -2,6 +2,7 @@
 using pbms_be.Data.Balance;
 using pbms_be.Data.CollabFund;
 using pbms_be.Data.Filter;
+using pbms_be.Data.LogModel;
 using pbms_be.DTOs;
 using pbms_be.Library;
 using System.ComponentModel.DataAnnotations;
@@ -321,4 +322,21 @@ public class CategoryWithTransactionData2
     public double Percentage { get; set; }
     public string PercentageStr { get; set; } = String.Empty;
 
+}
+
+public class LogWithDetailAccount
+{
+    public int ID { get; set; }
+    public int NumberOfLogs { get; set; }
+    public string AccountID { get; set; } = String.Empty;
+    public virtual Account? Account { get; set; } = null!;
+    public virtual List<ScanLog> ScanLogs { get; set; } = null!;
+}
+
+public class LogWithDayDetail
+{
+    public int ID { get; set; }
+    public int NumberOfLogs { get; set; }
+    public DateOnly Date { get; set; }
+    public virtual List<ScanLog> ScanLogs { get; set; } = null!;
 }
