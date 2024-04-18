@@ -51,97 +51,37 @@ namespace pbms_be.Controllers
             if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
             var result = """
                             {
-                              "invoiceID": 0,
-                              "transactionID": 0,
-                              "supplierAddress": "Thôn Cánh Chú, Bình Yên - Thạch Thất",
-                              "supplierEmail": "",
-                              "supplierName": "SIÊU THỊ ĐỨC THÀNH",
-                              "supplierPhone": "0865 90 9598 /",
-                              "receiverAddress": "",
-                              "receiverEmail": "",
-                              "receiverName": "",
-                              "idOfInvoice": "HDX070124-38",
-                              "invoiceDate": "2024-07-01T00:00:00",
-                              "invoiceType": "",
-                              "paymentTerms": "",
-                              "currencyID": 0,
-                              "currency": null,
-                              "netAmount": 0,
-                              "totalAmount": "347.000 đ",
-                              "taxAmount": 0,
-                              "discount": 0,
-                              "invoiceImageURL": "url",
-                              "note": "",
-                              "activeStateID": 1,
-                              "activeState": null,
+                              "idOfInvoice": "SON1026374",
+                              "invoiceDate": "12/04/2024",
+                              "netAmount": 45200,
                               "productInInvoices": [
                                 {
                                   "productID": 1,
-                                  "invoiceID": 0,
-                                  "productName": "",
+                                  "productName": "Bột giặt OMO tinh dầu thơm nồng nàn, túi (700g)",
                                   "quanity": 1,
-                                  "unitPrice": 198000,
-                                  "totalAmount": 198000,
-                                  "note": "",
-                                  "tagID": 1,
-                                  "activeStateID": 0,
-                                  "activeState": null
+                                  "tag": "Bột giặt",
+                                  "totalAmount": 36000,
+                                  "unitPrice": 36000
                                 },
                                 {
                                   "productID": 2,
-                                  "invoiceID": 0,
-                                  "productName": "Bánh bao nhân khoai môn Malai",
+                                  "productName": "Nước giải khát latte đào, chai (350ml)",
                                   "quanity": 1,
-                                  "unitPrice": 26500,
-                                  "totalAmount": 26500,
-                                  "note": "",
-                                  "tagID": 1,
-                                  "activeStateID": 0,
-                                  "activeState": null
-                                },
-                                {
-                                  "productID": 3,
-                                  "invoiceID": 0,
-                                  "productName": "Thit san vai CP",
-                                  "quanity": 1,
-                                  "unitPrice": 105000,
-                                  "totalAmount": 108150,
-                                  "note": "",
-                                  "tagID": 1,
-                                  "activeStateID": 0,
-                                  "activeState": null
-                                },
-                                {
-                                  "productID": 4,
-                                  "invoiceID": 0,
-                                  "productName": "Phiều quà tặng (",
-                                  "quanity": 1,
-                                  "unitPrice": 0,
-                                  "totalAmount": 0,
-                                  "note": "",
-                                  "tagID": 1,
-                                  "activeStateID": 0,
-                                  "activeState": null
-                                },
-                                {
-                                  "productID": 5,
-                                  "invoiceID": 0,
-                                  "productName": "NN Sting vang pet 330ml",
-                                  "quanity": 1,
-                                  "unitPrice": 7000,
-                                  "totalAmount": 14000,
-                                  "note": "",
-                                  "tagID": 1,
-                                  "activeStateID": 0,
-                                  "activeState": null
+                                  "tag": "Nước giải khát",
+                                  "totalAmount": 9200,
+                                  "unitPrice": 9200
                                 }
                               ],
-                            "invoiceRawDatalog": "rawdata"
+                              "supplierAddress": "Thon 3 - Thach Hoa - Thach That - Ha Noi",
+                              "supplierName": "Sieu thi Manh Quan",
+                              "supplierPhone": "0332578356, 0982645136, 0916658855",
+                              "taxAmount": 0,
+                              "totalAmount": 45200
                             }
                             """;
 
             // wait 5 seconds to simulate processing
-            System.Threading.Thread.Sleep(5000);
+            System.Threading.Thread.Sleep(10000);
             return Ok(result);
             //var result = DocumentAiApi.ProcessDocument(file);
             //var imageURL = GCP_BucketDA.UploadFile(file);
