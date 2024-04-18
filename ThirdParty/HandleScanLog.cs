@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using pbms_be.Configurations;
 using pbms_be.Data;
-using pbms_be.Data.Log;
+using pbms_be.Data.LogModel;
 
 namespace pbms_be.ThirdParty
 {

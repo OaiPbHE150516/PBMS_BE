@@ -8,7 +8,7 @@ using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Custom;
 using pbms_be.Data.Invo;
-using pbms_be.Data.Log;
+using pbms_be.Data.LogModel;
 using pbms_be.Data.Material;
 using pbms_be.DataAccess;
 using pbms_be.Library;
