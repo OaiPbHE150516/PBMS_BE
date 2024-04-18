@@ -253,6 +253,12 @@ public class FileWithTextPrompt
     public string TextPrompt { get; set; } = String.Empty;
 }
 
+public class AccountIDWithFile
+{
+    public string AccountID { get; set; } = String.Empty;
+    public IFormFile File { get; set; } = null!;
+}
+
 public class InvoiceCustom_VM_Scan
 {
     public string SupplierAddress { get; set; } = String.Empty;

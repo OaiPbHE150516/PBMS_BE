@@ -51,6 +51,9 @@ namespace pbms_be.Data
         // TextPrompt
         public DbSet<TextPro.TextPrompt> TextPrompt { get; set; }
 
+        // ScanLog
+        public DbSet<Log.ScanLog> ScanLogs { get; set; }
+
 
         // end of collab fund
 

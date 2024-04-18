@@ -8,6 +8,7 @@ using pbms_be.Configurations;
 using pbms_be.Data;
 using pbms_be.Data.Custom;
 using pbms_be.Data.Invo;
+using pbms_be.Data.Log;
 using pbms_be.Data.Material;
 using pbms_be.DataAccess;
 using pbms_be.Library;
@@ -162,6 +163,60 @@ namespace pbms_be.Controllers
             taskProduct.Dispose();
 
             return Ok(invoiceByGemi);
+        }
+
+        [HttpPost("scan/v5")]
+        public async Task<IActionResult> ScanInvoiceV5([FromForm] AccountIDWithFile file)
+        {
+            try
+            {
+                var TextPromptDA = new TextPromptDA(_context);
+                var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
+                if (textPrompt == null) return BadRequest("prom is not found");
+
+                var fileByteString = ByteString.FromStream(file.File.OpenReadStream());
+                var fileMineType = GetMimeType(file.File.FileName);
+
+
+                Task<InvoiceCustom_VM_Scan> taskMoney = Task.Run(async () => await DocumentAiApi.GetMoney(fileByteString, fileMineType));
+                Task<string> taskProduct = Task.Run(() => VertextAiMultimodalApi.GenerateContent(fileByteString, fileMineType, textPrompt));
+                Task<ScanLog> taskLog = Task.Run(() => new HandleScanLog(_context).CreateScanLog(file.AccountID, "MANUAL", "SUCCESS"));
+
+                await Task.WhenAll(taskMoney, taskProduct);
+
+                var invoiceByDoc = taskMoney.Result;
+                var rawData = taskProduct.Result;
+                rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
+                var invoiceByGemi = VertextAiMultimodalApi.ProcessDataGemini(rawData);
+
+                if (invoiceByDoc.TotalAmount != 0) invoiceByGemi.TotalAmount = invoiceByDoc.TotalAmount;
+                if (invoiceByDoc.NetAmount != 0) invoiceByGemi.NetAmount = invoiceByDoc.NetAmount;
+                if (invoiceByDoc.TaxAmount != 0) invoiceByGemi.TaxAmount = invoiceByDoc.TaxAmount;
+
+                if (string.IsNullOrEmpty(invoiceByGemi.SupplierPhone))
+                {
+                    invoiceByGemi.SupplierPhone = invoiceByDoc.SupplierPhone;
+                }
+                if (string.IsNullOrEmpty(invoiceByGemi.SupplierName))
+                {
+                    invoiceByGemi.SupplierName = invoiceByDoc.SupplierName;
+                }
+                if (string.IsNullOrEmpty(invoiceByGemi.SupplierAddress))
+                {
+                    invoiceByGemi.SupplierAddress = invoiceByDoc.SupplierAddress;
+                }
+                // destroy 2 task if it success and return result
+                taskMoney.Dispose();
+                taskProduct.Dispose();
+
+                return Ok(invoiceByGemi);
+            }
+            catch (Exception e)
+            {
+                Task<ScanLog> taskLogFail = Task.Run(() => new HandleScanLog(_context).CreateScanLog(file.AccountID, "MANUAL", "FAIL"));
+                await taskLogFail;
+                return BadRequest(e.Message);
+            }
         }
 
         // scan/v5/custom
