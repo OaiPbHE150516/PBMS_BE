@@ -170,6 +170,9 @@ namespace pbms_be.Controllers
         {
             try
             {
+                // get current time stamp to calculate the time to process
+                var startTime = DateTime.UtcNow;
+
                 var TextPromptDA = new TextPromptDA(_context);
                 var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
                 if (textPrompt == null) return BadRequest("prom is not found");
@@ -209,7 +212,16 @@ namespace pbms_be.Controllers
                 taskMoney.Dispose();
                 taskProduct.Dispose();
 
-                return Ok(invoiceByGemi);
+                // get the end time to calculate the time to process
+                var endTime = DateTime.UtcNow;
+                var timeToProcess = endTime - startTime;
+                // return the time to process
+                return Ok(new
+                {
+                    TimeProcess = timeToProcess,
+                    GeminiRawData = rawData,
+                    Invoice = invoiceByGemi
+                });
             }
             catch (Exception e)
             {
