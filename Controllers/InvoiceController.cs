@@ -136,46 +136,57 @@ namespace pbms_be.Controllers
         [HttpPost("scan/v4")]
         public async Task<IActionResult> ScanInvoiceV4(IFormFile file)
         {
-            //var money = await DocumentAiApi.GetMoney(file);
-            var TextPromptDA = new TextPromptDA(_context);
-            var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
-            if (textPrompt == null) return BadRequest("prom is not found");
-
-            var fileByteString = ByteString.FromStream(file.OpenReadStream());
-            var fileMineType = GetMimeType(file.FileName);
-
-
-            Task<InvoiceCustom_VM_Scan> taskMoney = Task.Run(async () => await DocumentAiApi.GetMoney(fileByteString, fileMineType));
-            Task<string> taskProduct = Task.Run(() => VertextAiMultimodalApi.GenerateContent(fileByteString, fileMineType, textPrompt));
-
-            await Task.WhenAll(taskMoney, taskProduct);
-
-            var invoiceByDoc = taskMoney.Result;
-            var rawData = taskProduct.Result;
-            rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
-            var invoiceByGemi = VertextAiMultimodalApi.ProcessDataGemini(rawData);
-
-            if (invoiceByDoc.TotalAmount != 0) invoiceByGemi.TotalAmount = invoiceByDoc.TotalAmount;
-            if (invoiceByDoc.NetAmount != 0) invoiceByGemi.NetAmount = invoiceByDoc.NetAmount;
-            if (invoiceByDoc.TaxAmount != 0) invoiceByGemi.TaxAmount = invoiceByDoc.TaxAmount;
-
-            if (string.IsNullOrEmpty(invoiceByGemi.SupplierPhone))
+            try
             {
-                invoiceByGemi.SupplierPhone = invoiceByDoc.SupplierPhone;
-            }
-            if (string.IsNullOrEmpty(invoiceByGemi.SupplierName))
-            {
-                invoiceByGemi.SupplierName = invoiceByDoc.SupplierName;
-            }
-            if (string.IsNullOrEmpty(invoiceByGemi.SupplierAddress))
-            {
-                invoiceByGemi.SupplierAddress = invoiceByDoc.SupplierAddress;
-            }
-            // destroy 2 task if it success and return result
-            taskMoney.Dispose();
-            taskProduct.Dispose();
+                //var money = await DocumentAiApi.GetMoney(file);
+                var TextPromptDA = new TextPromptDA(_context);
+                var textPrompt = TextPromptDA.GetTextPrompt("scan_invoice");
+                if (textPrompt == null) return BadRequest("prom is not found");
 
-            return Ok(invoiceByGemi);
+                var fileByteString = ByteString.FromStream(file.OpenReadStream());
+                var fileMineType = GetMimeType(file.FileName);
+
+
+                Task<InvoiceCustom_VM_Scan> taskMoney = Task.Run(async () => await DocumentAiApi.GetMoney(fileByteString, fileMineType));
+                Task<string> taskProduct = Task.Run(() => VertextAiMultimodalApi.GenerateContent(fileByteString, fileMineType, textPrompt));
+                Task<ScanLog> taskLog = Task.Run(() => new HandleScanLog(_context).CreateScanLog("scanV4", "MANUAL", "SUCCESS"));
+
+                await Task.WhenAll(taskMoney, taskProduct);
+
+                var invoiceByDoc = taskMoney.Result;
+                var rawData = taskProduct.Result;
+                rawData = VertextAiMultimodalApi.ProcessRawDataGemini(rawData);
+                var invoiceByGemi = VertextAiMultimodalApi.ProcessDataGemini(rawData);
+
+                if (invoiceByDoc.TotalAmount != 0) invoiceByGemi.TotalAmount = invoiceByDoc.TotalAmount;
+                if (invoiceByDoc.NetAmount != 0) invoiceByGemi.NetAmount = invoiceByDoc.NetAmount;
+                if (invoiceByDoc.TaxAmount != 0) invoiceByGemi.TaxAmount = invoiceByDoc.TaxAmount;
+
+                if (string.IsNullOrEmpty(invoiceByGemi.SupplierPhone))
+                {
+                    invoiceByGemi.SupplierPhone = invoiceByDoc.SupplierPhone;
+                }
+                if (string.IsNullOrEmpty(invoiceByGemi.SupplierName))
+                {
+                    invoiceByGemi.SupplierName = invoiceByDoc.SupplierName;
+                }
+                if (string.IsNullOrEmpty(invoiceByGemi.SupplierAddress))
+                {
+                    invoiceByGemi.SupplierAddress = invoiceByDoc.SupplierAddress;
+                }
+                // destroy 2 task if it success and return result
+                taskMoney.Dispose();
+                taskProduct.Dispose();
+
+                return Ok(invoiceByGemi);
+            }
+            catch (Exception e)
+            {
+                Task<ScanLog> taskLogFail = Task.Run(() => new HandleScanLog(_context).CreateScanLog("scanV4", "MANUAL", "FAIL"));
+                await taskLogFail;
+                return BadRequest(e.Message);
+            }
+
         }
 
         [HttpPost("scan/v5")]
