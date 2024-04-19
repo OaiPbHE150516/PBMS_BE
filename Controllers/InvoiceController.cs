@@ -54,32 +54,88 @@ namespace pbms_be.Controllers
             var startTime = DateTime.UtcNow;
             var result = """
                             {
-                              "idOfInvoice": "SON1026374",
-                              "invoiceDate": "12/04/2024",
-                              "netAmount": 45200,
+                              "idOfInvoice": "SON230538",
+                              "invoiceDate": "18/04/2024 12:00",
+                              "netAmount": 208000,
                               "productInInvoices": [
                                 {
                                   "productID": 1,
-                                  "productName": "Bột giặt OMO tinh dầu thơm nồng nàn, túi (700g)",
+                                  "productName": "Giấy rút gắu trúc Sipiao 300 tở",
                                   "quanity": 1,
-                                  "tag": "Bột giặt",
-                                  "totalAmount": 36000,
-                                  "unitPrice": 36000
+                                  "tag": "Giấy",
+                                  "totalAmount": 5000,
+                                  "unitPrice": 5000
                                 },
                                 {
                                   "productID": 2,
-                                  "productName": "Nước giải khát latte đào, chai (350ml)",
+                                  "productName": "Sưả đặc ông Thợ 380g",
                                   "quanity": 1,
-                                  "tag": "Nước giải khát",
-                                  "totalAmount": 9200,
-                                  "unitPrice": 9200
+                                  "tag": "Sưả đặc",
+                                  "totalAmount": 28000,
+                                  "unitPrice": 28000
+                                },
+                                {
+                                  "productID": 3,
+                                  "productName": "Cafe G7 288g",
+                                  "quanity": 1,
+                                  "tag": "Cà phê",
+                                  "totalAmount": 48000,
+                                  "unitPrice": 48000
+                                },
+                                {
+                                  "productID": 4,
+                                  "productName": "Snickers Hạch nhân 40g",
+                                  "quanity": 1,
+                                  "tag": "Sóc-la",
+                                  "totalAmount": 25000,
+                                  "unitPrice": 25000
+                                },
+                                {
+                                  "productID": 5,
+                                  "productName": "Kẹo socola Snickers 516",
+                                  "quanity": 1,
+                                  "tag": "Sóc-la",
+                                  "totalAmount": 22000,
+                                  "unitPrice": 22000
+                                },
+                                {
+                                  "productID": 6,
+                                  "productName": "Bánh sáy bơ mật Phương Trang",
+                                  "quanity": 1,
+                                  "tag": "Bánh",
+                                  "totalAmount": 20000,
+                                  "unitPrice": 20000
+                                },
+                                {
+                                  "productID": 7,
+                                  "productName": "Redbull Thái 250ml",
+                                  "quanity": 3,
+                                  "tag": "Nước uống lượng",
+                                  "totalAmount": 36000,
+                                  "unitPrice": 12000
+                                },
+                                {
+                                  "productID": 8,
+                                  "productName": "Bánh mì Mexico Phương Trang",
+                                  "quanity": 1,
+                                  "tag": "Bánh",
+                                  "totalAmount": 12000,
+                                  "unitPrice": 12000
+                                },
+                                {
+                                  "productID": 9,
+                                  "productName": "Bánh ruốc Phương Trang",
+                                  "quanity": 1,
+                                  "tag": "Bánh",
+                                  "totalAmount": 12000,
+                                  "unitPrice": 12000
                                 }
                               ],
-                              "supplierAddress": "Thon 3 - Thach Hoa - Thach That - Ha Noi",
-                              "supplierName": "Sieu thi Manh Quan",
-                              "supplierPhone": "0332578356, 0982645136, 0916658855",
+                              "supplierAddress": "",
+                              "supplierName": "Ohio Mart Thạch Hòa",
+                              "supplierPhone": "0931121996",
                               "taxAmount": 0,
-                              "totalAmount": 45200
+                              "totalAmount": 208000
                             }
                             """;
 
