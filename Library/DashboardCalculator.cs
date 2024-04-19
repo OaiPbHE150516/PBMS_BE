@@ -82,6 +82,80 @@ namespace pbms_be.Library
             }
         }
 
+        internal object GetTotalAmountByTag(string accountID, DateTime fromDate, DateTime toDate, IMapper? mapper)
+        {
+            try
+            {
+                var transDA = new TransactionDA(_context);
+                var listTrans = transDA.GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
+                // new list to store transactionID
+                var listTransID = listTrans.Select(x => x.TransactionID).ToList();
+                // select all invoice have transactionID in listTransID
+                var listInvoice = _context.Invoice
+                    .Where(i => listTransID.Contains(i.TransactionID))
+                    .Include(i => i.ProductInInvoices)
+                    .ToList();
+                // new dictionary to store total amount of each tag
+                // tag like 'food', 'food animal', 'food vegetable' to same group 'food'
+                var result = new List<TagWithTransactionData>();
+                long totalAmountOfRange = 0;
+                var countTag = 1;
+                foreach (var invoice in listInvoice)
+                {
+                    var tag = invoice.ProductInInvoices[0].Tag;
+                    var totalAmount = invoice.TotalAmount;
+                    var totalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount);
+                    var numberOfTransaction = 1;
+                    if (result.Any(x => x.Tag.ChildTags.Contains(tag)))
+                    {
+                        var index = result.FindIndex(x => x.Tag.ChildTags.Contains(tag));
+                        result[index].TotalAmount += totalAmount;
+                        result[index].TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(result[index].TotalAmount);
+                        result[index].NumberOfTransaction++;
+                    }
+                    else
+                    {
+                        var newTag = new TagDetail_VM_DTO
+                        {
+                            PrimaryTag = tag,
+                            ChildTags = [tag]
+                        };
+                        var TagWithAllTransaction = new TagWithTransactionData
+                        {
+                            TagNumber = countTag++,
+                            Tag = newTag,
+                            TotalAmount = totalAmount,
+                            TotalAmountStr = totalAmountStr,
+                            NumberOfTransaction = numberOfTransaction
+                        };
+                        result.Add(TagWithAllTransaction);
+                    }
+                    totalAmountOfRange += totalAmount;
+                }
+                // foreach to calculate percentage of each tag
+                foreach (var item in result)
+                {
+                    // calculate percentage to 2 decimal places
+                    item.Percentage = ((double)item.TotalAmount / totalAmountOfRange * 100);
+                    item.PercentageStr = item.Percentage.ToString("0.00") + "%";
+                }
+                // sort list by total amount
+                result.Sort((x, y) => y.TotalAmount.CompareTo(x.TotalAmount));
+                return new
+                {
+                    TotalAmountOfRange = totalAmountOfRange,
+                    TotalAmountOfRangeStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOfRange),
+                    TotalNumberOfTransaction = listTrans.Count,
+                    TotalNumberOfTag = result.Count,
+                    TagWithTransactionData = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
         internal object GetTotalAmountByType(string accountID, DateTime fromDate, DateTime toDate, IMapper? _mapper)
         {
             try
