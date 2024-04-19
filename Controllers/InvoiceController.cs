@@ -50,6 +50,8 @@ namespace pbms_be.Controllers
         {
             if (file == null) return BadRequest(Message.FILE_IS_NULL_);
             if (LValidation.IsCorrectPDFJPGPNG(file)) return BadRequest(Message.FILE_IS_NOT_JPG_PNG);
+            // get current time stamp to calculate the time to process
+            var startTime = DateTime.UtcNow;
             var result = """
                             {
                               "idOfInvoice": "SON1026374",
@@ -83,7 +85,16 @@ namespace pbms_be.Controllers
 
             // wait 5 seconds to simulate processing
             System.Threading.Thread.Sleep(10000);
-            return Ok(result);
+            // get the end time to calculate the time to process
+            var endTime = DateTime.UtcNow;
+            var timeToProcess = endTime - startTime;
+            // return the time to process
+            return Ok(new
+            {
+                TimeProcess = timeToProcess,
+                GeminiRawData = "Test Raw Data",
+                Invoice = result
+            });
             //var result = DocumentAiApi.ProcessDocument(file);
             //var imageURL = GCP_BucketDA.UploadFile(file);
             //Invoice invoice = DocumentAiApi.GetInvoiceFromDocument(result);
