@@ -670,7 +670,7 @@ namespace pbms_be.DataAccess
                     .FirstOrDefault();
                 if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
                 accountCollab.ActiveStateID = ActiveStateConst.INACTIVE;
-                accountCollab.LastTime = DateTime.UtcNow;
+                accountCollab.LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 _context.SaveChanges();
 
                 // 4. return all member
@@ -746,7 +746,7 @@ namespace pbms_be.DataAccess
                     .FirstOrDefault();
                 if (accountCollab is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
                 accountCollab.ActiveStateID = ActiveStateConst.INACTIVE;
-                accountCollab.LastTime = DateTime.UtcNow;
+                accountCollab.LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 _context.SaveChanges();
 
                 // 4. return all member
@@ -862,9 +862,7 @@ namespace pbms_be.DataAccess
                 var result = _context.AccountCollab
                     .Any(ca => ca.AccountID == accountID
                                 && ca.CollabFundID == collabFundID
-                                && ca.ActiveStateID == ActiveStateConst.ACTIVE
-                                || ca.ActiveStateID == ActiveStateConst.PENDING
-                                || ca.ActiveStateID == ActiveStateConst.INACTIVE);
+                                && ca.ActiveStateID != ActiveStateConst.DELETED);
                 return result;
             }
             catch (Exception e)

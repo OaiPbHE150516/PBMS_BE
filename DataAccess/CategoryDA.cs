@@ -23,7 +23,7 @@ namespace pbms_be.DataAccess
             {
                 var result = _context.Category
                             .Where(c => c.AccountID == AccountID
-                            && c.ActiveStateID == ActiveStateConst.ACTIVE || c.ActiveStateID == ActiveStateConst.INACTIVE)
+                            && c.ActiveStateID != ActiveStateConst.DELETED)
                             .Include(c => c.ActiveState)
                             .Include(c => c.CategoryType)
                             .OrderBy(c => c.CategoryID)

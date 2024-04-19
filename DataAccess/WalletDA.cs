@@ -27,9 +27,7 @@ namespace pbms_be.DataAccess
                 var result = _context.Wallet
                 .Where(w => w.WalletID == WalletID
                 && w.AccountID == AccountID
-                && w.ActiveStateID == ActiveStateConst.ACTIVE
-                || w.ActiveStateID == ActiveStateConst.INACTIVE
-                )
+                && w.ActiveStateID != ActiveStateConst.DELETED)
                 .Include(w => w.Currency)
                 .Include(w => w.ActiveState)
                 .FirstOrDefault();
@@ -48,8 +46,7 @@ namespace pbms_be.DataAccess
             {
                 var result = _context.Wallet
                             .Where(w => w.AccountID == AccountID
-                            && w.ActiveStateID == ActiveStateConst.ACTIVE
-                            || w.ActiveStateID == ActiveStateConst.INACTIVE
+                            && w.ActiveStateID != ActiveStateConst.DELETED
                             )
                             .Include(w => w.Currency)
                             .Include(w => w.ActiveState)
@@ -85,8 +82,7 @@ namespace pbms_be.DataAccess
             {
                 var result = _context.Wallet.Any(w => w.WalletID == WalletID
                 && w.AccountID == AccountID
-                && w.ActiveStateID == ActiveStateConst.ACTIVE 
-                || w.ActiveStateID == ActiveStateConst.INACTIVE);
+                && w.ActiveStateID != ActiveStateConst.DELETED);
                 return result;
             }
             catch (Exception e)
@@ -288,9 +284,7 @@ namespace pbms_be.DataAccess
                 //    .ToList();
                 var result = _context.Wallet
                             .Where(w => w.AccountID == accountID
-                            && w.ActiveStateID == ActiveStateConst.ACTIVE
-                            || w.ActiveStateID == ActiveStateConst.INACTIVE
-                            )
+                            && w.ActiveStateID != ActiveStateConst.DELETED)
                             .ToList();
                 result = [.. result.OrderBy(w => w.ActiveStateID).ThenByDescending(w => w.Balance)];
 

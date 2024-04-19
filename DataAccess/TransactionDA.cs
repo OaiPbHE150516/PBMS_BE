@@ -510,7 +510,7 @@ namespace pbms_be.DataAccess
             try
             {
                 var fromDate = DateTime.UtcNow.AddDays(-ConstantConfig.NUMBER_LAST_DAYS);
-                var toDate = DateTime.UtcNow;
+                var toDate = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 var transactions = GetTransactionsByDateTimeRange(accountID, fromDate, toDate);
                 var transactionsDict = new Dictionary<DateOnly, TransactionInLastDays>();
 
