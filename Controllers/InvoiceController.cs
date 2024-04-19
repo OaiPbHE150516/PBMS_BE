@@ -83,8 +83,10 @@ namespace pbms_be.Controllers
                             }
                             """;
 
-            // wait 5 seconds to simulate processing
-            System.Threading.Thread.Sleep(10000);
+            // get random time to process
+            var random = new Random();
+            var randomTime = random.Next(10000, 30000);
+            System.Threading.Thread.Sleep(randomTime);
             // get the end time to calculate the time to process
             var endTime = DateTime.UtcNow;
             var timeToProcess = endTime - startTime;
