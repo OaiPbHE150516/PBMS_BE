@@ -240,6 +240,8 @@ namespace pbms_be.Library
                     {
                         item.TagWithTotalAmounts.AddRange(listTagWithTotalAmount.Where(x => x.Tag == tag).ToList());
                     }
+                    // sort list by total amount
+                    item.TagWithTotalAmounts.Sort((x, y) => y.TotalAmount.CompareTo(x.TotalAmount));
                     // add tagNumber from 1 to end of list TagWithTotalAmount
                     var countTagNumber = 1;
                     foreach (var tag in item.TagWithTotalAmounts)
