@@ -104,25 +104,121 @@ namespace pbms_be.Library
                     .ToList();
                 // new dictionary to store total amount of each tag
                 // tag like 'food', 'food animal', 'food vegetable' to same group 'food'
-                var result = new List<TagWithProductData>();
+                var listTagWithProductData = new List<TagWithProductData>();
                 long totalAmountOfRange = 0;
-                var countTag = 1;
                 // get all product in invoice and group by tag
                 var listProduct = listInvoice.SelectMany(x => x.ProductInInvoices).ToList();
                 // remove product have tag is ""
                 listProduct = listProduct.Where(x => x.Tag != "").ToList();
                 var listTag = listProduct.Select(x => x.Tag).Distinct().ToList();
-                var dictTag = new Dictionary<string, List<string>>();
-
                 var textprompt = _context.TextPrompt.Where(x => x.TextAction == "classify_tag").FirstOrDefault() ?? throw new Exception("not found text prompt");
-                // convert listTag to string json
+                //// convert listTag to string json
                 var listTagJson = JsonConvert.SerializeObject(listTag);
                 // call api to classify tag
                 var response = VertextAiMultimodalApi.ClassifyTag(textprompt.Text_Prompt, listTagJson);
+
+                //var response = """ 
+                //                                                {
+                //                    "đồ ăn": [
+                //                        "đồ ăn",
+                //                        "Thực phẩm",
+                //                        "food",
+                //                        "snack",
+                //                        "sữa",
+                //                        "trái cây",
+                //                        "đồ hộp",
+                //                        "Bánh",
+                //                        "Thịt",
+                //                        "snack"
+                //                    ],
+                //                    "đồ dùng": [
+                //                        "đồ dùng",
+                //                        "Nong nan, tui (700g)",
+                //                        "Khổ giấy",
+                //                        "Vật dùng",
+                //                        "Khăn giấy",
+                //                        "Dụng cụ ăn uống"
+                //                    ],
+                //                    "đồ uống": [
+                //                        "đồ uống",
+                //                        "do uong",
+                //                        "drink",
+                //                        "Nuoc giai khat",
+                //                        "Trà Sơt",
+                //                        "Trà Sữa",
+                //                        "Hồng trà",
+                //                        "Cà phê",
+                //                        "Nước tăng lực",
+                //                        "Nước khoáng",
+                //                        "Đồ uống đóng chai",
+                //                        "Thực uống",
+                //                        "Nước Chanh",
+                //                        "Nước Cacao",
+                //                        "Đồ uống đóng chai",
+                //                        "THẠCH DỪA"
+                //                    ],
+                //                    "other": [
+                //                        "Latte dao, chai (350ml)",
+                //                        "CAFE",
+                //                        "1",
+                //                        "Sưả đẬ’c",
+                //                        "Đồ án vật",
+                //                        "Hướng Dương",
+                //                        "Dịch vụ chuyển tiền",
+                //                        "BÒ KOBE"
+                //                    ]
+                //                }
+                //                """;
                 // convert response to dictioary list of tag
                 var dictTagResponse = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>((string)response);
                 if (dictTagResponse is null) throw new Exception("dictTagResponse is null");
-                return dictTagResponse;
+                //return dictTagResponse;
+
+                // push key and value of dictTagResponse to listTagWithProductData
+                var countTag = 1;
+                foreach ( var item in dictTagResponse)
+                {
+                    listTagWithProductData.Add(new TagWithProductData
+                    {
+                        TagNumber = countTag++,
+                        Tag = new TagDetail_VM_DTO
+                        {
+                            PrimaryTag = item.Key,
+                            ChildTags = item.Value
+                        }
+                    });
+                }
+
+                foreach(var item in listTagWithProductData)
+                {
+                    // find all product in listProduct have same tag with item.Tag.PrimaryTag or item.Tag.ChildTags, then sum total amount
+                    var totalAmount = listProduct.Where(x => item.Tag.ChildTags.Contains(x.Tag)).Sum(x => x.TotalAmount);
+                    item.TotalAmount = totalAmount;
+                    item.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount);
+                    item.NumberOfProduct = listProduct.Count(x => item.Tag.ChildTags.Contains(x.Tag));
+                    totalAmountOfRange += totalAmount;
+                }
+
+                // foreach to calculate percentage of each tag
+                foreach (var item in listTagWithProductData)
+                {
+                    // calculate percentage to 2 decimal places
+                    item.Percentage = ((double)item.TotalAmount / totalAmountOfRange * 100);
+                    item.PercentageStr = item.Percentage.ToString("0.00") + "%";
+                }
+
+                // sort list by total amount
+                listTagWithProductData.Sort((x, y) => y.TotalAmount.CompareTo(x.TotalAmount));
+                return new
+                {
+                    TotalAmountOfRange = totalAmountOfRange,
+                    TotalAmountOfRangeStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOfRange),
+                    TotalNumberOfTransaction = listTrans.Count,
+                    TotalNumberOfProduct = listProduct.Count,
+                    TotalNumberOfTag = listTagWithProductData.Count,
+                    TagWithProductData = listTagWithProductData,
+                    ListTag = listTag
+                };
 
 
                 //foreach (var product in listProduct)
