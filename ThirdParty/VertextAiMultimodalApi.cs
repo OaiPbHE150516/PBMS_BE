@@ -158,7 +158,7 @@ namespace pbms_be.ThirdParty
         }
 
         // classify tag by using Vertext AI Multimodal API
-        public static string ClassifyTag(string text_prompt, string data)
+        public static object ClassifyTag(string text_prompt, string data)
         {
             string projectId = ConstantConfig.PROJECT_ID;
             string location = "us-central1";
@@ -195,7 +195,13 @@ namespace pbms_be.ThirdParty
             };
             generateContentRequest.Contents.Add(content);
             GenerateContentResponse response = predictionServiceClient.GenerateContent(generateContentRequest);
-            return ProcessRawDataGemini(response.Candidates[0].Content.Parts[0].Text);
+
+            var result = response.Candidates[0].Content.Parts[0].Text;
+            return new
+            {
+                RawData = result,
+                ProcessData = ProcessRawDataGemini(result)
+            };
         }
     }
 }
