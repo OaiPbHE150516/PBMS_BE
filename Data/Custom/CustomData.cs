@@ -345,6 +345,7 @@ public class TagWithProductData
 {
     public int TagNumber { get; set; }
     public TagDetail_VM_DTO Tag { get; set; } = null!;
+    public List<TagWithTotalAmount> TagWithTotalAmounts { get; set; } = null!;
     public long TotalAmount { get; set; }
     public string TotalAmountStr { get; set; } = String.Empty;
     public int NumberOfProduct { get; set; }
@@ -356,4 +357,13 @@ public class TagDetail_VM_DTO
 {
     public string PrimaryTag { get; set; } = String.Empty;
     public virtual List<string> ChildTags { get; set; } = null!;
+}
+
+public class TagWithTotalAmount
+{
+    public int TagNumber { get; set; }
+    public string Tag { get; set; } = String.Empty;
+    public int NumberOfProduct { get; set; }
+    public long TotalAmount { get; set; }
+    public string TotalAmountStr { get; set; } = String.Empty;
 }

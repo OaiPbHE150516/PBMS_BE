@@ -89,6 +89,59 @@ namespace pbms_be.Library
             }
         }
 
+        //var response = """ 
+        //                                                {
+        //                    "đồ ăn": [
+        //                        "đồ ăn",
+        //                        "Thực phẩm",
+        //                        "food",
+        //                        "snack",
+        //                        "sữa",
+        //                        "trái cây",
+        //                        "đồ hộp",
+        //                        "Bánh",
+        //                        "Thịt",
+        //                        "snack"
+        //                    ],
+        //                    "đồ dùng": [
+        //                        "đồ dùng",
+        //                        "Nong nan, tui (700g)",
+        //                        "Khổ giấy",
+        //                        "Vật dùng",
+        //                        "Khăn giấy",
+        //                        "Dụng cụ ăn uống"
+        //                    ],
+        //                    "đồ uống": [
+        //                        "đồ uống",
+        //                        "do uong",
+        //                        "drink",
+        //                        "Nuoc giai khat",
+        //                        "Trà Sơt",
+        //                        "Trà Sữa",
+        //                        "Hồng trà",
+        //                        "Cà phê",
+        //                        "Nước tăng lực",
+        //                        "Nước khoáng",
+        //                        "Đồ uống đóng chai",
+        //                        "Thực uống",
+        //                        "Nước Chanh",
+        //                        "Nước Cacao",
+        //                        "Đồ uống đóng chai",
+        //                        "THẠCH DỪA"
+        //                    ],
+        //                    "other": [
+        //                        "Latte dao, chai (350ml)",
+        //                        "CAFE",
+        //                        "1",
+        //                        "Sưả đẬ’c",
+        //                        "Đồ án vật",
+        //                        "Hướng Dương",
+        //                        "Dịch vụ chuyển tiền",
+        //                        "BÒ KOBE"
+        //                    ]
+        //                }
+        //                """;
+
         internal object GetTotalAmountByTag(string accountID, DateTime fromDate, DateTime toDate, IMapper? mapper)
         {
             try
@@ -117,58 +170,7 @@ namespace pbms_be.Library
                 // call api to classify tag
                 var response = VertextAiMultimodalApi.ClassifyTag(textprompt.Text_Prompt, listTagJson);
 
-                //var response = """ 
-                //                                                {
-                //                    "đồ ăn": [
-                //                        "đồ ăn",
-                //                        "Thực phẩm",
-                //                        "food",
-                //                        "snack",
-                //                        "sữa",
-                //                        "trái cây",
-                //                        "đồ hộp",
-                //                        "Bánh",
-                //                        "Thịt",
-                //                        "snack"
-                //                    ],
-                //                    "đồ dùng": [
-                //                        "đồ dùng",
-                //                        "Nong nan, tui (700g)",
-                //                        "Khổ giấy",
-                //                        "Vật dùng",
-                //                        "Khăn giấy",
-                //                        "Dụng cụ ăn uống"
-                //                    ],
-                //                    "đồ uống": [
-                //                        "đồ uống",
-                //                        "do uong",
-                //                        "drink",
-                //                        "Nuoc giai khat",
-                //                        "Trà Sơt",
-                //                        "Trà Sữa",
-                //                        "Hồng trà",
-                //                        "Cà phê",
-                //                        "Nước tăng lực",
-                //                        "Nước khoáng",
-                //                        "Đồ uống đóng chai",
-                //                        "Thực uống",
-                //                        "Nước Chanh",
-                //                        "Nước Cacao",
-                //                        "Đồ uống đóng chai",
-                //                        "THẠCH DỪA"
-                //                    ],
-                //                    "other": [
-                //                        "Latte dao, chai (350ml)",
-                //                        "CAFE",
-                //                        "1",
-                //                        "Sưả đẬ’c",
-                //                        "Đồ án vật",
-                //                        "Hướng Dương",
-                //                        "Dịch vụ chuyển tiền",
-                //                        "BÒ KOBE"
-                //                    ]
-                //                }
-                //                """;
+
                 // convert response to dictioary list of tag
                 var dictTagResponse = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>((string)response);
                 if (dictTagResponse is null) throw new Exception("dictTagResponse is null");
@@ -184,7 +186,7 @@ namespace pbms_be.Library
                         Tag = new TagDetail_VM_DTO
                         {
                             PrimaryTag = item.Key,
-                            ChildTags = item.Value
+                            ChildTags = item.Value,
                         }
                     });
                 }
@@ -209,6 +211,43 @@ namespace pbms_be.Library
 
                 // sort list by total amount
                 listTagWithProductData.Sort((x, y) => y.TotalAmount.CompareTo(x.TotalAmount));
+
+                // select all product have same tag to a list TagWithTotalAmount
+                var listTagWithTotalAmount = new List<TagWithTotalAmount>();
+                // group product in listProduct by tag
+                var listProductGroupByTag = listProduct.GroupBy(x => x.Tag).ToList();
+                foreach (var item in listProductGroupByTag)
+                {
+                    var totalAmount = item.Sum(x => x.TotalAmount);
+                    var totalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount);
+                    var numberOfProduct = item.Count();
+                    listTagWithTotalAmount.Add(new TagWithTotalAmount
+                    {
+                        Tag = item.Key,
+                        TotalAmount = totalAmount,
+                        TotalAmountStr = totalAmountStr,
+                        NumberOfProduct = numberOfProduct
+                    });
+                }
+                // sort list by total amount
+                listTagWithTotalAmount.Sort((x, y) => y.TotalAmount.CompareTo(x.TotalAmount));
+
+                // loop through listTagWithProductData, if ChildTags contain tag in listTagWithTotalAmount, then add total amount of tag in listTagWithTotalAmount to total amount of tag in listTagWithProductData
+                foreach (var item in listTagWithProductData)
+                {
+                    item.TagWithTotalAmounts = [];
+                    foreach (var tag in item.Tag.ChildTags)
+                    {
+                        item.TagWithTotalAmounts.AddRange(listTagWithTotalAmount.Where(x => x.Tag == tag).ToList());
+                    }
+                    // add tagNumber from 1 to end of list TagWithTotalAmount
+                    var countTagNumber = 1;
+                    foreach (var tag in item.TagWithTotalAmounts)
+                    {
+                        tag.TagNumber = countTagNumber++;
+                    }
+                }
+
                 return new
                 {
                     TotalAmountOfRange = totalAmountOfRange,
@@ -218,77 +257,7 @@ namespace pbms_be.Library
                     TotalNumberOfTag = listTagWithProductData.Count,
                     TagWithProductData = listTagWithProductData,
                     ListTag = listTag,
-                    ListProduct = listProduct
                 };
-
-
-                //foreach (var product in listProduct)
-                //{
-                //    var tag = product.Tag;
-                //    var totalAmount = product.TotalAmount;
-                //    var totalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount);
-                //    var numberOfProduct = 1;
-
-                //    // compare tag with all tag in dictTag
-                //    var isExist = false;
-                //    foreach (var key in dictTag.Keys)
-                //    {
-                //        if (IsContainTag(key, tag))
-                //        {
-                //            dictTag[key].Add(tag);
-                //            isExist = true;
-                //            break;
-                //        }
-                //    }
-                //    if (!isExist)
-                //    {
-                //        dictTag.Add(tag, [tag]);
-                //    }
-
-                //    if (result.Any(x => x.Tag.ChildTags.Contains(tag)))
-                //    {
-                //        var index = result.FindIndex(x => x.Tag.ChildTags.Contains(tag));
-                //        result[index].TotalAmount += totalAmount;
-                //        result[index].TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(result[index].TotalAmount);
-                //        result[index].NumberOfProduct++;
-                //    }
-                //    else
-                //    {
-                //        var newTag = new TagDetail_VM_DTO
-                //        {
-                //            PrimaryTag = tag,
-                //            ChildTags = [tag]
-                //        };
-                //        var TagWithAllTransaction = new TagWithProductData
-                //        {
-                //            TagNumber = countTag++,
-                //            Tag = newTag,
-                //            TotalAmount = totalAmount,
-                //            TotalAmountStr = totalAmountStr,
-                //            NumberOfProduct = numberOfProduct
-                //        };
-                //        result.Add(TagWithAllTransaction);
-                //    }
-                //    totalAmountOfRange += totalAmount;
-                //}
-                //// foreach to calculate percentage of each tag
-                //foreach (var item in result)
-                //{
-                //    // calculate percentage to 2 decimal places
-                //    item.Percentage = ((double)item.TotalAmount / totalAmountOfRange * 100);
-                //    item.PercentageStr = item.Percentage.ToString("0.00") + "%";
-                //}
-                //// sort list by total amount
-                //result.Sort((x, y) => y.TotalAmount.CompareTo(x.TotalAmount));
-                //return new
-                //{
-                //    TotalAmountOfRange = totalAmountOfRange,
-                //    TotalAmountOfRangeStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOfRange),
-                //    TotalNumberOfTransaction = listTrans.Count,
-                //    TotalNumberOfTag = result.Count,
-                //    TagWithProductData = result,
-                //    ListTag = listTag
-                //};
             }
             catch (Exception ex)
             {
