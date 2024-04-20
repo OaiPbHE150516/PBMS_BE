@@ -341,13 +341,13 @@ public class LogWithDayDetail
     public virtual List<ScanLog> ScanLogs { get; set; } = null!;
 }
 
-public class TagWithTransactionData
+public class TagWithProductData
 {
     public int TagNumber { get; set; }
     public TagDetail_VM_DTO Tag { get; set; } = null!;
     public long TotalAmount { get; set; }
     public string TotalAmountStr { get; set; } = String.Empty;
-    public int NumberOfTransaction { get; set; }
+    public int NumberOfProduct { get; set; }
     public double Percentage { get; set; }
     public string PercentageStr { get; set; } = String.Empty;
 }

@@ -156,5 +156,46 @@ namespace pbms_be.ThirdParty
             }
             return contentType;
         }
+
+        // classify tag by using Vertext AI Multimodal API
+        public static string ClassifyTag(string text_prompt, string data)
+        {
+            string projectId = ConstantConfig.PROJECT_ID;
+            string location = "us-central1";
+            string publisher = "google";
+            string model = "gemini-1.0-pro-vision";
+
+
+            // Create client
+            var predictionServiceClient = new PredictionServiceClientBuilder
+            {
+                Endpoint = $"{location}-aiplatform.googleapis.com"
+            }.Build();
+
+            // Initialize request argument(s)
+            var content = new Content
+            {
+                Role = "USER"
+            };
+            content.Parts.AddRange(new List<Part>()
+            {
+                new()
+                {
+                    Text = text_prompt
+                },
+                new()
+                {
+                    Text = data
+                },
+            });
+
+            var generateContentRequest = new GenerateContentRequest
+            {
+                Model = $"projects/{projectId}/locations/{location}/publishers/{publisher}/models/{model}"
+            };
+            generateContentRequest.Contents.Add(content);
+            GenerateContentResponse response = predictionServiceClient.GenerateContent(generateContentRequest);
+            return ProcessRawDataGemini(response.Candidates[0].Content.Parts[0].Text);
+        }
     }
 }
