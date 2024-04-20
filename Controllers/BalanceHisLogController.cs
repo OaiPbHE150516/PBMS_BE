@@ -57,6 +57,35 @@ namespace pbms_be.Controllers
             }
         }
 
+        // get by walletID and accountID and time range
+        [HttpGet("get/each/{accountID}/{walletID}/{fromDateStr}/{toDateStr}")]
+        public async Task<IActionResult> GetBalanceHistoryLog(string accountID, int walletID, string fromDateStr, string toDateStr)
+        {
+            try
+            {
+                // check if accountID is null or empty, then throw exception
+                if (string.IsNullOrEmpty(accountID)) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                if (string.IsNullOrEmpty(fromDateStr)) return BadRequest(Message.FROM_DATE_REQUIRED);
+                if (string.IsNullOrEmpty(toDateStr)) return BadRequest(Message.TO_DATE_REQUIRED);
+                var fromDateArr = fromDateStr.Split("-");
+                var toDateArr = toDateStr.Split("-");
+
+                var fromDate = new DateTime(int.Parse(fromDateArr[2]), int.Parse(fromDateArr[1]), int.Parse(fromDateArr[0]), 0, 0, 0).ToUniversalTime();
+                var toDate = new DateTime(int.Parse(toDateArr[2]), int.Parse(toDateArr[1]), int.Parse(toDateArr[0]), 23, 59, 59).ToUniversalTime();
+                if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
+                // log to console fromDate and toDate
+                Console.WriteLine("fromDate: " + fromDate.ToString());
+                Console.WriteLine("toDate: " + toDate.ToString());
+
+                var result = await _balanceHisLogDA.GetBalanceHistoryLog(accountID, walletID, fromDate, toDate, _mapper);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         // get all balance history log by accountID
         [HttpGet("get/all/byday/{accountID}")]
         public async Task<IActionResult> GetBalanceHistoryLogByDay(string accountID)

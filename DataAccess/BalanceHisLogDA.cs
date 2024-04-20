@@ -143,7 +143,6 @@ namespace pbms_be.DataAccess
             {
                 throw new Exception(ex.Message);
             }
-            throw new NotImplementedException();
         }
 
         internal async Task<object> GetBalanceHistoryLogByDay(string accountID, AutoMapper.IMapper? _mapper)
@@ -298,6 +297,78 @@ namespace pbms_be.DataAccess
                 }
 
                 var result = balanceLogDict.Values.ToList();
+                result.Sort((x, y) => x.Date.CompareTo(y.Date));
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        internal async Task<object> GetBalanceHistoryLog(string accountID, int walletID, DateTime fromDate, DateTime toDate, IMapper? _mapper)
+        {
+            try
+            {
+                // get all balance history log by accountID and walletID
+                var listlog = await _context.BalanceHistoryLogs.Where(x => x.AccountID == accountID 
+                && x.WalletID == walletID
+                && x.HisLogDate >= fromDate && x.HisLogDate <= toDate).ToListAsync();
+                // check if result is null or empty or not found by accountID and walletID, then throw exception
+                if (listlog is null || listlog.Count == 0)
+                {
+                    throw new Exception(Message.BALANCE_HISTORY_LOG_NOT_FOUND);
+                }
+                if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
+                var listLogDTO = _mapper.Map<List<BalanceHisLog_VM_DTO>>(listlog);
+                var balanceLogDict = new Dictionary<DateOnly, CustomBalanceHisLogByDate>();
+                // group by date, if same date then sum the balance
+                foreach (var log in listLogDTO)
+                {
+                    //var logDateOnly = new DateOnly();
+                    // create new date only by log date day, month, year
+                    var logDateOnly = new DateOnly(log.HisLogDate.Year, log.HisLogDate.Month, log.HisLogDate.Day);
+                    if (balanceLogDict.TryGetValue(logDateOnly, out CustomBalanceHisLogByDate? value))
+                    {
+                        value.TotalAmount += log.Balance;
+                        value.TransactionCount++;
+                        value.BalanceHistoryLogs.Add(log);
+                        value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(value.TotalAmount);
+                    }
+                    else
+                    {
+                        balanceLogDict.Add(logDateOnly, new CustomBalanceHisLogByDate
+                        {
+                            Date = logDateOnly,
+                            TotalAmount = log.Balance,
+                            TransactionCount = 1,
+                            BalanceHistoryLogs = [log],
+                            TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(log.Balance)
+                        });
+                    }
+                }
+
+                // loop through balance log dict each day, get last log of wallet in each day
+                foreach (var item in balanceLogDict)
+                {
+                    var balanceLog = item.Value.BalanceHistoryLogs;
+                    // get last log of wallet in each day
+                    var lastLog = balanceLog.Last();
+                    item.Value.BalanceHistoryLogs = [lastLog];
+                }
+
+                // loop through balance log dict each day, to re calculate total amount of each day
+                foreach (var item in balanceLogDict)
+                {
+                    var balanceLog = item.Value.BalanceHistoryLogs;
+                    var totalAmount = balanceLog.Sum(x => x.Balance);
+                    item.Value.TotalAmount = totalAmount;
+                    item.Value.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount);
+                }
+
+                // convert balance log dict to list
+                var result = balanceLogDict.Values.ToList();
+                // sort by date
                 result.Sort((x, y) => x.Date.CompareTo(y.Date));
                 return result;
             }
