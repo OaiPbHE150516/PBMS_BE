@@ -197,11 +197,12 @@ namespace pbms_be.ThirdParty
             GenerateContentResponse response = predictionServiceClient.GenerateContent(generateContentRequest);
 
             var result = response.Candidates[0].Content.Parts[0].Text;
-            return new
-            {
-                RawData = result,
-                ProcessData = ProcessRawDataGemini(result)
-            };
+            return "{" + ProcessRawDataGemini(result);
+            //return new
+            //{
+            //    RawData = result,
+            //    ProcessData = "{"+ ProcessRawDataGemini(result)
+            //};
         }
     }
 }
