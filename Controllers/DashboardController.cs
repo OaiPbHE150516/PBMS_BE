@@ -42,8 +42,8 @@ namespace pbms_be.Controllers
                 var fromDateArr = fromDateStr.Split("-");
                 var toDateArr = toDateStr.Split("-");
 
-                var fromDate = new DateTime(int.Parse(fromDateArr[2]), int.Parse(fromDateArr[1]), int.Parse(fromDateArr[0]), 0, 0, 0);
-                var toDate = new DateTime(int.Parse(toDateArr[2]), int.Parse(toDateArr[1]), int.Parse(toDateArr[0]), 23, 59, 59);
+                var fromDate = new DateTime(int.Parse(fromDateArr[2]), int.Parse(fromDateArr[1]), int.Parse(fromDateArr[0]), 0, 0, 0).ToUniversalTime();
+                var toDate = new DateTime(int.Parse(toDateArr[2]), int.Parse(toDateArr[1]), int.Parse(toDateArr[0]), 23, 59, 59).ToUniversalTime();
                 if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
 
                 var result = _dashboardCalculator.GetTotalAmountByCategory(type, accountID, fromDate, toDate, _mapper);
@@ -68,8 +68,8 @@ namespace pbms_be.Controllers
                 var fromDateArr = fromDateStr.Split("-");
                 var toDateArr = toDateStr.Split("-");
 
-                var fromDate = new DateTime(int.Parse(fromDateArr[2]), int.Parse(fromDateArr[1]), int.Parse(fromDateArr[0]), 0, 0, 0);
-                var toDate = new DateTime(int.Parse(toDateArr[2]), int.Parse(toDateArr[1]), int.Parse(toDateArr[0]), 23, 59, 59);
+                var fromDate = new DateTime(int.Parse(fromDateArr[2]), int.Parse(fromDateArr[1]), int.Parse(fromDateArr[0]), 0, 0, 0).ToUniversalTime();
+                var toDate = new DateTime(int.Parse(toDateArr[2]), int.Parse(toDateArr[1]), int.Parse(toDateArr[0]), 23, 59, 59).ToUniversalTime();
                 if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
 
                 var result = _dashboardCalculator.GetTotalAmountByType(accountID, fromDate, toDate, _mapper);
@@ -95,8 +95,8 @@ namespace pbms_be.Controllers
                 var fromDateArr = fromDateStr.Split("-");
                 var toDateArr = toDateStr.Split("-");
 
-                var fromDate = new DateTime(int.Parse(fromDateArr[2]), int.Parse(fromDateArr[1]), int.Parse(fromDateArr[0]), 0, 0, 0);
-                var toDate = new DateTime(int.Parse(toDateArr[2]), int.Parse(toDateArr[1]), int.Parse(toDateArr[0]), 23, 59, 59);
+                var fromDate = new DateTime(int.Parse(fromDateArr[2]), int.Parse(fromDateArr[1]), int.Parse(fromDateArr[0]), 0, 0, 0).ToUniversalTime();
+                var toDate = new DateTime(int.Parse(toDateArr[2]), int.Parse(toDateArr[1]), int.Parse(toDateArr[0]), 23, 59, 59).ToUniversalTime();
                 if (fromDate > toDate) return BadRequest(Message.FROM_DATE_GREATER_THAN_TO_DATE);
 
                 var result = _dashboardCalculator.GetTotalAmountByTag(accountID, fromDate, toDate, _mapper);
