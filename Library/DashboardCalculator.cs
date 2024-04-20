@@ -217,7 +217,8 @@ namespace pbms_be.Library
                     TotalNumberOfProduct = listProduct.Count,
                     TotalNumberOfTag = listTagWithProductData.Count,
                     TagWithProductData = listTagWithProductData,
-                    ListTag = listTag
+                    ListTag = listTag,
+                    ListProduct = listProduct
                 };
 
 
