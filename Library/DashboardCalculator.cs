@@ -229,6 +229,9 @@ namespace pbms_be.Library
                         NumberOfProduct = numberOfProduct
                     });
                 }
+                // remove item in listTagWithTotalAmount have duplicate item in its
+                listTagWithTotalAmount = listTagWithTotalAmount.Where(x => !listTagWithTotalAmount.Any(y => x.Tag == y.Tag)).ToList();
+
                 // sort list by total amount
                 listTagWithTotalAmount.Sort((x, y) => y.TotalAmount.CompareTo(x.TotalAmount));
 
