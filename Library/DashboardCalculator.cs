@@ -340,13 +340,20 @@ namespace pbms_be.Library
                 // sort result by total amount
                 result = [.. result.OrderByDescending(x => x.TotalAmount)];
 
+                // thu -> chi 
                 var result2 = result.OrderBy(x => x.CategoryType.CategoryTypeID).ToList();
+                var minusAmount = result2[0].TotalAmount - result2[^1].TotalAmount;
+                // if result2 just have 1 element, if it is income, then minusAmount = income.TotalAmount, else minusAmount = -expense.TotalAmount
+                if (result2.Count == 1)
+                {
+                    minusAmount = result2[0].CategoryType.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME ? result2[0].TotalAmount : -result2[0].TotalAmount;
+                }
                 return new
                 {
                     TotalAmountOfRange = totalAmountOfRange,
                     TotalAmountOfRangeStr = LConvertVariable.ConvertToMoneyFormat(totalAmountOfRange),
-                    MinusAmountOfRange = result2[0].TotalAmount - result2[^1].TotalAmount,
-                    MinusAmountOfRangeStr = LConvertVariable.ConvertToMoneyFormat(result2[0].TotalAmount - result2[^1].TotalAmount),
+                    MinusAmountOfRange = minusAmount,
+                    MinusAmountOfRangeStr = LConvertVariable.ConvertToMoneyFormat(minusAmount),
                     TotalNumberOfTransaction = listTrans.Count,
                     TotalNumberOfCategory = listTransByType.Count,
                     CategoryWithTransactionData = result
