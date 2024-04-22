@@ -178,6 +178,8 @@ public class DayDetail
 
     public string DayStr { get; set; } = String.Empty;
     public string MonthYearStr { get; set; } = String.Empty;
+
+    public DateOnly Date { get; set; }
 }
 
 public class WeekDetail

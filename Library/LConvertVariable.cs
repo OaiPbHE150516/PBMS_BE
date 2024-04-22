@@ -258,7 +258,8 @@ namespace pbms_be.Library
                 ShortDate = ConvertDateOnlyToVN_ng_thg(dateonly),
                 FullDate = ConvertDateOnlyToVN_ngay_thang(dateonly),
                 DayStr = dateonly.Day.ToString(),
-                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}",
+                Date = dateonly
             };
             return dayDetail;
         }

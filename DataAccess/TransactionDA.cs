@@ -544,7 +544,8 @@ namespace pbms_be.DataAccess
                                 ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
                                 FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
                                 DayStr = dateonly.Day.ToString(),
-                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}",
+                                Date = dateonly
                             }
                         };
                         if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
@@ -593,7 +594,8 @@ namespace pbms_be.DataAccess
                                 ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
                                 FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
                                 DayStr = dateonly.Day.ToString(),
-                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}",
+                                Date = dateonly
                             }
                         };
                         transactionsDict.Add(dateonly, transin);
@@ -669,7 +671,8 @@ namespace pbms_be.DataAccess
                                 ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
                                 FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
                                 DayStr = dateonly.Day.ToString(),
-                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}",
+                                Date = dateonly
                             }
                         };
                         if (tran.Category.CategoryTypeID == ConstantConfig.DEFAULT_CATEGORY_TYPE_ID_INCOME)
@@ -750,7 +753,8 @@ namespace pbms_be.DataAccess
                             ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
                             FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
                             DayStr = dateonly.Day.ToString(),
-                            MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+                            MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}",
+                            Date = dateonly
                         };
                         value.Transactions.Add(tran);
                     }
@@ -768,7 +772,8 @@ namespace pbms_be.DataAccess
                                 ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateonly),
                                 FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateonly),
                                 DayStr = dateonly.Day.ToString(),
-                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}"
+                                MonthYearStr = $"tháng {dateonly.Month}, {dateonly.Year}",
+                                Date = dateonly
                             },
                             Transactions = [tran]
                         });

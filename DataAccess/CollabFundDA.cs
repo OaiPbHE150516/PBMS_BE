@@ -1628,7 +1628,8 @@ namespace pbms_be.DataAccess
                         ShortDate = LConvertVariable.ConvertDateOnlyToVN_ng_thg(dateOnly),
                         FullDate = LConvertVariable.ConvertDateOnlyToVN_ngay_thang(dateOnly),
                         DayStr = dateOnly.Day.ToString(),
-                        MonthYearStr = $"tháng {dateOnly.Month}, {dateOnly.Year}"
+                        MonthYearStr = $"tháng {dateOnly.Month}, {dateOnly.Year}",
+                        Date = dateOnly
                     };
                     item.List_CFDM_Detail_VM_DTO = _mapper.Map<List<CF_DividingMoneyDetail_DTO_VM>>(item.CF_DividingMoneyDetails);
                     item.CF_DividingMoneyDetails = null;
