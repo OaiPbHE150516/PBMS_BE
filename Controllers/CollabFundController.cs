@@ -38,7 +38,10 @@ namespace pbms_be.Controllers
             try
             {
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
-                var result = _collabFundDA.GetCollabFunds(accountID, _mapper); 
+                var result = _collabFundDA.GetCollabFunds(accountID, _mapper);
+                // log the result to console
+                Console.WriteLine("get all collab fund by account id");
+                Console.WriteLine(result.ToString());
                 return Ok(result);
             }
             catch (System.Exception e)
