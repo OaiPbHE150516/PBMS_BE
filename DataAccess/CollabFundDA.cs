@@ -195,7 +195,7 @@ namespace pbms_be.DataAccess
                 //    //    item.TotalAmount = cfdividingmoney_resultEntity.TotalAmount;
                 //    //    item.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(cfdividingmoney_resultEntity.TotalAmount);
                 //    //}
-                    
+
 
                 //}
 
@@ -409,7 +409,7 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                if (IsCollabFundActivityDuplicate(collabFundActivityEntity))
+                if (IsExistTransactionID(collabFundActivityEntity.CollabFundID, collabFundActivityEntity.TransactionID))
                     throw new Exception(Message.COLLAB_FUND_ACTIVITY_DUPLICATE);
                 _context.CollabFundActivity.Add(collabFundActivityEntity);
                 _context.SaveChanges();
@@ -421,6 +421,26 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+
+
+        // a function to check duplicate activity if transactionID of it already exist and not default value
+        private bool IsExistTransactionID(int collabFundID, int transactionID)
+        {
+            try
+            {
+                var isExist = _context.CollabFundActivity
+                    .Any(cfa => cfa.CollabFundID == collabFundID
+                         && cfa.TransactionID == transactionID
+                         && cfa.ActiveStateID == ActiveStateConst.ACTIVE
+                         && cfa.TransactionID != ConstantConfig.DEFAULT_NULL_TRANSACTION_ID);
+                return isExist;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
 
         private bool IsCollabFundActivityDuplicate(CollabFundActivity collabFundActivityEntity)
         {
@@ -561,14 +581,13 @@ namespace pbms_be.DataAccess
         {
             try
             {
-                // 1. check if account is fundholder
-                var collabAccount = IsFundholderCollabFund(InviteMemberDTO.CollabFundID, InviteMemberDTO.AccountFundholderID);
-                if (!collabAccount) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
+                //// 1. check if account is fundholder
+                //var collabAccount = IsFundholderCollabFund(InviteMemberDTO.CollabFundID, InviteMemberDTO.AccountFundholderID);
+                //if (!collabAccount) throw new Exception(Message.ACCOUNT_IS_NOT_FUNDHOLDER);
 
                 // 2. check if account is exist
                 var authDA = new AuthDA(_context);
-                var account = authDA.GetAccount(InviteMemberDTO.AccountMemberID);
-                if (account is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                var account = authDA.GetAccount(InviteMemberDTO.AccountMemberID) ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
 
                 // 3. check if account is already invited
                 var isInvited = IsAlreadyInvitedCollabFund(InviteMemberDTO.CollabFundID, InviteMemberDTO.AccountMemberID);
@@ -578,19 +597,53 @@ namespace pbms_be.DataAccess
                 var isExist = IsAlreadyMemberCollabFund(InviteMemberDTO.CollabFundID, InviteMemberDTO.AccountMemberID);
                 if (isExist) throw new Exception(Message.ACCOUNT_ALREADY_IS_MEMBER);
 
-                // 5. add account as member
-                var accountCollab = new AccountCollab
+                // check if account is already in collab fund as an inactive member
+                var isInactive = IsAlreadyInactiveMemberCollabFund(InviteMemberDTO.CollabFundID, InviteMemberDTO.AccountMemberID);
+                if (isInactive)
                 {
-                    AccountID = InviteMemberDTO.AccountMemberID,
-                    CollabFundID = InviteMemberDTO.CollabFundID,
-                    IsFundholder = false,
-                    ActiveStateID = ActiveStateConst.PENDING
-                };
-                _context.AccountCollab.Add(accountCollab);
-                _context.SaveChanges();
-
+                    // change to pending
+                    var accountCollabInactive = _context.AccountCollab
+                        .Where(ca => ca.CollabFundID == InviteMemberDTO.CollabFundID
+                                                && ca.AccountID == InviteMemberDTO.AccountMemberID)
+                        .FirstOrDefault();
+                    if (accountCollabInactive is null) throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                    accountCollabInactive.ActiveStateID = ActiveStateConst.PENDING;
+                    accountCollabInactive.LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    // 5. add account as member
+                    var accountCollab = new AccountCollab
+                    {
+                        AccountID = InviteMemberDTO.AccountMemberID,
+                        CollabFundID = InviteMemberDTO.CollabFundID,
+                        IsFundholder = false,
+                        ActiveStateID = ActiveStateConst.PENDING
+                    };
+                    _context.AccountCollab.Add(accountCollab);
+                    _context.SaveChanges();
+                }
                 // 6. return all member
                 return GetAllMemberWithDetailCollabFund(InviteMemberDTO.CollabFundID, InviteMemberDTO.AccountFundholderID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        // a fucntion to check a member is already in collab fund as an inactive member
+        internal bool IsAlreadyInactiveMemberCollabFund(int collabFundID, string accountID)
+        {
+            try
+            {
+                var isExist = _context.AccountCollab
+                    .Where(ca => ca.CollabFundID == collabFundID
+                     && ca.AccountID == accountID
+                     && ca.ActiveStateID == ActiveStateConst.INACTIVE)
+                    .FirstOrDefault();
+                return isExist != null;
             }
             catch (Exception e)
             {

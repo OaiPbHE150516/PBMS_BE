@@ -173,6 +173,7 @@
         public const string COLLAB_FUND_NOT_EXIST = " Collab fund not exist";
         public const string COLLAB_FUND_DUPLICATE = " Collab fund duplicate";
         public const string COLLAB_FUND_ACTIVITY_DUPLICATE = " Collab fund activity duplicate";
+        public const string COLLAB_FUND_ACTIVITY_DUPLICATE_TRANSACTION = " Collab fund activity duplicate transaction";
         public const string ACCOUNT_IS_NOT_FUNDHOLDER = " Account is not fundholder";
         public const string ACCOUNT_NOT_FOUND = " Account not found";
         public const string ACCOUNT_IS_NOT_MEMBER = " Account is not member";
