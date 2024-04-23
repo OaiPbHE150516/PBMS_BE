@@ -431,7 +431,8 @@ namespace pbms_be.DataAccess
                     .Where(cfa => cfa.CollabFundID == collabFundActivityEntity.CollabFundID
                                         && cfa.AccountID == collabFundActivityEntity.AccountID
                                         && cfa.Note == collabFundActivityEntity.Note
-                                        && cfa.Filename == collabFundActivityEntity.Filename)
+                                        && cfa.Filename == collabFundActivityEntity.Filename
+                                        && cfa.ActiveStateID == ActiveStateConst.ACTIVE)
                     .FirstOrDefault();
                 return collabFundActivity != null;
             }
