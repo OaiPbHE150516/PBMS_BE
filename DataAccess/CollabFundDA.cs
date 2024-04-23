@@ -144,7 +144,7 @@ namespace pbms_be.DataAccess
             }
         }
 
-        internal object GetCollabFunds(string accountID, AutoMapper.IMapper? _mapper)
+        internal List<CollabFund_VM_DTO> GetCollabFunds(string accountID, AutoMapper.IMapper? _mapper)
         {
             try
             {
@@ -163,6 +163,14 @@ namespace pbms_be.DataAccess
                 {
                     var divideMoneyInfor = GetDivideMoneyCollabFund(item.CollabFundID);
                     item.TotalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                    //if (item.CollabFundID == 89)
+                    //{
+                    //    var divideMoneyInfor2 = GetDivideMoneyCollabFund(item.CollabFundID);
+                    //    Console.WriteLine("CollabFundID: " + item.CollabFundID);
+                    //}
+                    //Console.WriteLine("CollabFundID: " + item.CollabFundID);
+                    //var divideMoneyInfor = GetDivideMoneyCollabFund(item.CollabFundID);
+                    //Console.WriteLine("divideMoneyInfor: " + divideMoneyInfor);
                 }
                 if (_mapper is null) throw new Exception(Message.MAPPER_IS_NULL);
                 var collabFundDTOs = _mapper.Map<List<CollabFund_VM_DTO>>(result);
@@ -177,7 +185,68 @@ namespace pbms_be.DataAccess
                         .Select(ca => ca.ActiveState)
                         .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
                 }
+
+                //foreach (var item in collabFundDTOs)
+                //{
+                //    //var cfdividingmoney_resultEntity = GetTotalAmountCollabFund(item.CollabFundID);
+                //    // change TotalAmount and TotalAmountStr of item if cfdividingmoney_resultEntity is not null
+                //    //if (cfdividingmoney_resultEntity is not null)
+                //    //{
+                //    //    item.TotalAmount = cfdividingmoney_resultEntity.TotalAmount;
+                //    //    item.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(cfdividingmoney_resultEntity.TotalAmount);
+                //    //}
+                    
+
+                //}
+
                 return collabFundDTOs;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public CF_DividingMoney? GetTotalAmountCollabFund(int collabFundID)
+        {
+            try
+            {
+                var divideMoneyInfor = GetDivideMoneyCollabFund(collabFundID);
+                if (divideMoneyInfor is null || divideMoneyInfor.Count == 0) return null;
+                var totalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                //var numberParticipant = divideMoneyInfor.Count;
+                var allMember = GetParticipantsInCollabFund(collabFundID);
+                var numberParticipant = allMember.Count;
+                //var averageAmount = (totalAmount / ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR / numberParticipant) * ConstantConfig.DEFAULT_VND_THOUSAND_SEPARATOR;
+                var averageAmount = (totalAmount / numberParticipant);
+                var remainAmount = totalAmount - averageAmount * numberParticipant;
+
+                // add the member dont in the divideMoneyInfor of allMember
+                var listMember = divideMoneyInfor.Select(p => p.AccountID).ToList();
+                var listMemberNotIn = allMember.Where(p => !listMember.Contains(p.AccountID)).ToList();
+                foreach (var item in listMemberNotIn)
+                {
+                    var dmInfor = new DivideMoneyInfo
+                    {
+                        AccountID = item.AccountID,
+                        TotalAmount = 0,
+                        TransactionCount = 0
+                    };
+                    divideMoneyInfor.Add(dmInfor);
+                }
+
+                var listDetail = CalculateTheAdditionalAmount(divideMoneyInfor, averageAmount);
+                var listDetailResult = DivideMoney(listDetail);
+                var listDividingMoneyDetail = CalculateTheDividingMoneyDetail(divideMoneyInfor, listDetailResult);
+                var cfmoney = new CF_DividingMoney
+                {
+                    CollabFundID = collabFundID,
+                    TotalAmount = totalAmount,
+                    NumberParticipant = numberParticipant,
+                    AverageAmount = averageAmount,
+                    RemainAmount = remainAmount
+                };
+                return cfmoney;
             }
             catch (Exception e)
             {
@@ -904,7 +973,7 @@ namespace pbms_be.DataAccess
         }
 
 
-        internal void GetDivideMoneyInfo(int collabFundID, string accountID, out CF_DividingMoney cfdividingmoney_result,
+        internal void GetDivideMoneyInfo(int collabFundID, out CF_DividingMoney? cfdividingmoney_result,
             out List<CF_DividingMoneyDetail>? cfdm_detail_result, out List<DivideMoneyInfoWithAccount>? divideMoneyInfos)
         {
             try
@@ -912,7 +981,10 @@ namespace pbms_be.DataAccess
                 var divideMoneyInfor = GetDivideMoneyCollabFund(collabFundID);
                 if (divideMoneyInfor is null || divideMoneyInfor.Count == 0)
                 {
-                    throw new Exception(Message.COLLAB_FUND_NOTFOUND_ANY_MONEY);
+                    cfdividingmoney_result = null;
+                    cfdm_detail_result = null;
+                    divideMoneyInfos = null;
+                    return;
                 }
                 var totalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
                 //var numberParticipant = divideMoneyInfor.Count;
@@ -989,7 +1061,7 @@ namespace pbms_be.DataAccess
                 var dividingmoney = new CF_DividingMoney();
                 var dividingmoneydetail = new List<CF_DividingMoneyDetail>();
                 var divideMoneyInfor = new List<DivideMoneyInfoWithAccount>();
-                GetDivideMoneyInfo(collabAccountDTO.CollabFundID, collabAccountDTO.AccountID, out dividingmoney, out dividingmoneydetail, out divideMoneyInfor);
+                GetDivideMoneyInfo(collabAccountDTO.CollabFundID, out dividingmoney, out dividingmoneydetail, out divideMoneyInfor);
                 // return if one of 3 variable is null
                 if (dividingmoney is null || dividingmoneydetail is null || divideMoneyInfor is null)
                 {
@@ -1641,5 +1713,42 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+
+        internal object GetCollabFundWithTotalAmountsByAccountID(string accountID)
+        {
+            try
+            {
+                var collabFund = _context.AccountCollab
+                    .Where(ca => ca.AccountID == accountID
+                                       && ca.ActiveStateID == ActiveStateConst.ACTIVE)
+                    .Select(ca => ca.CollabFundID)
+                    .ToList();
+                var listCollabFund = new List<CollabFundWithTotalAmount>();
+                foreach (var item in collabFund)
+                {
+                    var divideMoneyInfor = GetDivideMoneyCollabFund(item);
+                    var totalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                    var collabFundEntity = new CollabFundWithTotalAmount
+                    {
+                        CollabFundID = item,
+                        TotalAmount = totalAmount,
+                        TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount)
+                    };
+                    listCollabFund.Add(collabFundEntity);
+                }
+                return listCollabFund;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+    }
+
+    internal class CollabFundWithTotalAmount
+    {
+        public int CollabFundID { get; set; }
+        public long TotalAmount { get; set; }
+        public string TotalAmountStr { get; set; }
     }
 }

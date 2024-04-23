@@ -10,6 +10,7 @@ using pbms_be.Data.WalletF;
 using pbms_be.DataAccess;
 using pbms_be.DTOs;
 using pbms_be.Data.Custom;
+using pbms_be.Library;
 
 namespace pbms_be.Controllers
 {
@@ -33,15 +34,44 @@ namespace pbms_be.Controllers
         #region Get Methods
         // get all collab fund by account id
         [HttpGet("get/all/{accountID}")]
-        public IActionResult GetCollabFunds(string accountID)
+        public async Task<IActionResult> GetCollabFunds(string accountID)
         {
             try
             {
                 if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
                 var result = _collabFundDA.GetCollabFunds(accountID, _mapper);
-                // log the result to console
-                Console.WriteLine("get all collab fund by account id");
-                Console.WriteLine(result.ToString());
+                //// a new array store collabFundID
+                //var collabFundIDs = result.Select(p => p.CollabFundID).ToList();
+
+                //foreach (var item in collabFundIDs)
+                //{
+                //    //if (item == 89)
+                //    //{
+                //    //    var divideMoneyInfor = _collabFundDA.GetDivideMoneyCollabFund(item);
+                //    //    item.TotalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                //    //    item.TotalAmountStr = LConvertVariable.ConvertToMoneyFormat(item);
+                //    //}
+                //    //var divideMoneyInfor = _collabFundDA.GetDivideMoneyCollabFund(item);
+                //    //var totalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                //    //var totalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount);
+                //    //var collabFund = result.FirstOrDefault(p => p.CollabFundID == item);
+                //    //if (collabFund != null)
+                //    //{
+                //    //    collabFund.TotalAmount = totalAmount;
+                //    //    collabFund.TotalAmountStr = totalAmountStr;
+                //    //}
+                //    Task<List<DivideMoneyInfo>> task = Task.Run(() => _collabFundDA.GetDivideMoneyCollabFund(item));
+                //    await task;
+
+                //    var totalAmount = task.Result.Sum(p => p.TotalAmount);
+                //    var totalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount);
+                //    var collabFund = result.FirstOrDefault(p => p.CollabFundID == item);
+                //    if (collabFund != null)
+                //    {
+                //        collabFund.TotalAmount = totalAmount;
+                //        collabFund.TotalAmountStr = totalAmountStr;
+                //    }
+                //}
                 return Ok(result);
             }
             catch (System.Exception e)
@@ -49,6 +79,40 @@ namespace pbms_be.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet("get/totalAmount/{collabFundID}")]
+        public IActionResult GetTotalAmountCollabFund(int collabFundID)
+        {
+            try
+            {
+                if (collabFundID <= ConstantConfig.DEFAULT_ZERO_VALUE) return BadRequest(Message.COLLAB_FUND_ID_REQUIRED);
+                var divideMoneyInfor = _collabFundDA.GetDivideMoneyCollabFund(collabFundID);
+                var totalAmount = divideMoneyInfor.Sum(p => p.TotalAmount);
+                var totalAmountStr = LConvertVariable.ConvertToMoneyFormat(totalAmount);
+                // return both totalAmount and totalAmountStr
+                return Ok(new { totalAmount, totalAmountStr });
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        //[HttpGet("get/totalAmount/accountID/{accountID}")]
+        //public IActionResult GetTotalAmountCollabFundByAccountID(string accountID)
+        //{
+        //    try
+        //    {
+        //        if (string.IsNullOrEmpty(accountID)) return BadRequest(Message.ACCOUNT_ID_REQUIRED);
+        //        var collabFundWithTotalAmount = _collabFundDA.GetCollabFundWithTotalAmountsByAccountID(accountID);
+        //        return Ok(collabFundWithTotalAmount);
+
+        //    }
+        //    catch (System.Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
         // get detail collab fund by collab fund id and account id
         [HttpGet("get/detail/{collabFundID}/{accountID}")]
@@ -217,7 +281,7 @@ namespace pbms_be.Controllers
                 var cfdividingmoney_resultEntity = new CF_DividingMoney();
                 var cfdm_detail_resultEntity = new List<CF_DividingMoneyDetail>();
                 var listDVMI = new List<DivideMoneyInfoWithAccount>();
-                _collabFundDA.GetDivideMoneyInfo(collabFundID, accountID, out cfdividingmoney_resultEntity, out cfdm_detail_resultEntity, out listDVMI);
+                _collabFundDA.GetDivideMoneyInfo(collabFundID, out cfdividingmoney_resultEntity, out cfdm_detail_resultEntity, out listDVMI);
 
                 if (cfdividingmoney_resultEntity is null || cfdm_detail_resultEntity is null) return Ok(Message.COLLAB_FUND_NOTFOUND_DATA);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
@@ -299,7 +363,7 @@ namespace pbms_be.Controllers
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 if (_mapper is null) return BadRequest(Message.MAPPER_IS_NULL);
                 var collabFundActivityEntity = _mapper.Map<CollabFundActivity>(collabFundActivityDTO);
-                collabFundActivityEntity.CreateTime= DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
+                collabFundActivityEntity.CreateTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
                 collabFundActivityEntity.TransactionID = ConstantConfig.DEFAULT_NULL_TRANSACTION_ID;
                 collabFundActivityEntity.ActiveStateID = ActiveStateConst.ACTIVE;
                 var result = _collabFundDA.CreateCollabFundActivity(collabFundActivityEntity);
