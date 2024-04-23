@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Google.Cloud.AIPlatform.V1;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using pbms_be.Configurations;
 using pbms_be.Data;
@@ -1797,12 +1798,69 @@ namespace pbms_be.DataAccess
                 throw new Exception(e.Message);
             }
         }
+
+
+        internal object InviteMemberCollabFundV2(MemberCollabFundDTO_V2 addMemberCollabFundDTO)
+        {
+            try
+            {
+                // 1. check if collab fund is exist
+                var collabFund = GetCollabFund(addMemberCollabFundDTO.CollabFundID) ?? throw new Exception(Message.COLLAB_FUND_NOT_EXIST);
+
+                foreach ( var member in addMemberCollabFundDTO.AccountMemberIDs)
+                {
+                    // 2. check if account is exist
+                    var accountIsExist = _context.Account.Any(a => a.AccountID == member);
+                    if (!accountIsExist) continue;
+
+                    // 3. check if account is already invited
+                    var isInvited = IsAlreadyInvitedCollabFund(addMemberCollabFundDTO.CollabFundID, member);
+                    if (isInvited) continue;
+
+                    // 4. check if account is already a member
+                    var isExist = IsAlreadyMemberCollabFund(addMemberCollabFundDTO.CollabFundID, member);
+                    if (isExist) continue;
+
+                    // 5. check if account is already in collab fund as an inactive member
+                    var isInactive = IsAlreadyInactiveMemberCollabFund(addMemberCollabFundDTO.CollabFundID, member);
+                    if (isInactive)
+                    {
+                        // change to pending
+                        var accountCollabInactive = _context.AccountCollab
+                            .Where(ca => ca.CollabFundID == addMemberCollabFundDTO.CollabFundID
+                                                                               && ca.AccountID == member)
+                            .FirstOrDefault() ?? throw new Exception(Message.ACCOUNT_NOT_FOUND);
+                        accountCollabInactive.ActiveStateID = ActiveStateConst.PENDING;
+                        accountCollabInactive.LastTime = DateTime.UtcNow.AddHours(ConstantConfig.VN_TIMEZONE_UTC).ToUniversalTime();
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        // 6. add account as member
+                        var accountCollab = new AccountCollab
+                        {
+                            AccountID = member,
+                            CollabFundID = addMemberCollabFundDTO.CollabFundID,
+                            IsFundholder = false,
+                            ActiveStateID = ActiveStateConst.PENDING
+                        };
+                        _context.AccountCollab.Add(accountCollab);
+                        _context.SaveChanges();
+                    }
+                }
+                return GetAllMemberWithDetailCollabFundTypeByType(addMemberCollabFundDTO.CollabFundID, addMemberCollabFundDTO.AccountID);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
     }
 
     internal class CollabFundWithTotalAmount
     {
         public int CollabFundID { get; set; }
         public long TotalAmount { get; set; }
-        public string TotalAmountStr { get; set; }
+        public string TotalAmountStr { get; set; } = String.Empty;
     }
 }

@@ -490,6 +490,22 @@ namespace pbms_be.Controllers
             }
         }
 
+        // invite member to collab fund by collab fund id and account id, no need to be fundholder
+        [HttpPost("invite/v2")]
+        public IActionResult InviteMemberCollabFundV2([FromBody] MemberCollabFundDTO_V2 addMemberCollabFundDTO)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = _collabFundDA.InviteMemberCollabFundV2(addMemberCollabFundDTO);
+                return Ok(result);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         // divide money of collab fund by collab fund id and account id, only fundholder can divide money
         [HttpPost("divide-money")]
         public IActionResult DivideMoneyCollabFund([FromBody] CollabAccountDTO collabAccountDTO)
