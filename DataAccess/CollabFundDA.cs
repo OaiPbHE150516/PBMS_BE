@@ -432,7 +432,7 @@ namespace pbms_be.DataAccess
                     .Any(cfa => cfa.CollabFundID == collabFundID
                          && cfa.TransactionID == transactionID
                          && cfa.ActiveStateID == ActiveStateConst.ACTIVE
-                         && cfa.TransactionID != ConstantConfig.DEFAULT_NULL_TRANSACTION_ID);
+                         && transactionID != ConstantConfig.DEFAULT_NULL_TRANSACTION_ID);
                 return isExist;
             }
             catch (Exception e)
