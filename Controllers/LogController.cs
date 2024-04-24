@@ -34,6 +34,19 @@ namespace pbms_be.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        } 
+        [HttpGet("scanLog/all/bydate/{date}")]
+        public IActionResult GetScanLogsAllByDate(string date)
+        {
+            try
+            {
+                var result = _handleScanLog.GetScanLogsAllByDate(date);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // get total log and log by accountID

@@ -84,7 +84,7 @@ namespace pbms_be.ThirdParty
                 DateTime dateTime = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture).ToUniversalTime();
 
                 var scanLogs = _context.ScanLogs
-                    .Where(s => s.ScanTime.Date == dateTime.Date)
+                    .Where(s => s.ScanTime.Date.Date == dateTime.Date.Date)
                     .Include(s => s.Account)
                     .ToList();
 
@@ -140,6 +140,45 @@ namespace pbms_be.ThirdParty
                     .ToDictionary(s => s.Key, s => s.Value);
 
                 return new { totalLog, List = scanLogByAccountID.Values.ToList() };
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        internal object GetScanLogsAllByDate(string date)
+        {
+            try
+            {
+                DateTime dateTime = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture).ToUniversalTime();
+
+                var scanLogs = _context.ScanLogs
+                    .Where(s => s.ScanTime.Date.Date == dateTime.Date.Date)
+                    .Include(s => s.Account)
+                    .ToList();
+
+                var totalLog = scanLogs.Count;
+                //var countID = 0;
+                //var scanLogByAccountID = scanLogs
+                //    .GroupBy(s => s.AccountID)
+                //    .ToDictionary(g => g.Key, g => new LogWithDetailAccount
+                //    {
+                //        AccountID = g.Key,
+                //        Account = _context.Account.FirstOrDefault(a => a.AccountID == g.Key),
+                //        ID = countID++,
+                //        NumberOfLogs = g.Count(),
+                //        ScanLogs = [.. g]
+                //    });
+                //// sort by NumberOfLogs
+                //scanLogByAccountID = scanLogByAccountID
+                //    .OrderByDescending(s => s.Value.NumberOfLogs)
+                //    .ToDictionary(s => s.Key, s => s.Value);
+
+                return new { 
+                    totalLog,
+                    //List = scanLogByAccountID.Values.ToList() 
+                };
             }
             catch (Exception e)
             {
